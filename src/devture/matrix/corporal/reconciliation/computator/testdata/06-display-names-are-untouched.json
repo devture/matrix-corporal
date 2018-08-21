@@ -1,0 +1,37 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "A",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": true,
+			"allowCustomUserAvatars": true
+		},
+
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "User A likes it custom",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+		]
+	}
+}

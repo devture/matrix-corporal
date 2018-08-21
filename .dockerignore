@@ -1,0 +1,6 @@
+/var
+/vendor/src
+/vendor/pkg
+/pkg
+/bin
+/etc/docker/Dockerfile

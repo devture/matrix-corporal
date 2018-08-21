@@ -1,0 +1,35 @@
+version: '2.1'
+
+services:
+  postgres:
+    image: postgres:10.5-alpine
+    environment:
+     POSTGRES_USER: synapse
+     POSTGRES_PASSWORD: synapse-password
+     POSTGRES_DB: homeserver
+    volumes:
+    - ../../var/matrix-synapse-postgres:/var/lib/postgresql/data
+
+  synapse:
+    image: matrixdotorg/synapse:v0.33.2
+    restart: on-failure
+    ports:
+    # This server does not federate, so we don't expose any more ports.
+    - "41408:8008"
+    environment:
+     SYNAPSE_SERVER_NAME: matrix-corporal.127.0.0.1.xip.io
+     SYNAPSE_REPORT_STATS: "no"
+     SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+    links:
+    - postgres:postgres
+    volumes:
+    - ./matrix-synapse:/data
+    - ./shared_secret_authenticator.py:/usr/local/lib/python2.7/site-packages/shared_secret_authenticator.py:ro
+    - ../../var/matrix-synapse-media-store:/media_store
+
+  riot-web:
+    image: avhost/docker-matrix-riot:v0.16.0
+    ports:
+    - "41465:8765"
+    volumes:
+    - ./matrix-riot-web:/data

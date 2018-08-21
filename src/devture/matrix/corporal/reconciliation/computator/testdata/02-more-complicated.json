@@ -1,0 +1,128 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"joinedCommunityIds": ["+a:host", "+b:host"],
+				"joinedRoomIds": ["!a:host", "!b:host", "!c:host"]
+			},
+			{
+				"id": "@b:host",
+				"active": true,
+				"joinedCommunityIds": ["+a:host", "+b:host"],
+				"joinedRoomIds": ["!b:host"]
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": true,
+			"allowCustomUserAvatars": true
+		},
+
+		"managedRoomIds": [
+			"!a:host",
+			"!b:host"
+		],
+
+		"managedCommunityIds": [
+			"+a:host",
+			"+b:host"
+		],
+
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"joinedCommunityIds": ["+a:host"],
+				"joinedRoomIds": ["!a:host"]
+			},
+			{
+				"id": "@b:host",
+				"active": true,
+				"joinedCommunityIds": ["+a:host", "+b:host"],
+				"joinedRoomIds": ["!a:host", "!b:host"]
+			},
+			{
+				"id": "@c:host",
+				"active": true,
+				"joinedCommunityIds": ["+a:host", "+b:host"],
+				"joinedRoomIds": ["!a:host", "!b:host"]
+			},
+			{
+				"id": "@d:host",
+				"active": false,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+			{
+				"type": "community.leave",
+				"payload": {
+					"userId": "@a:host",
+					"communityId": "+b:host"
+				}
+			},
+			{
+				"type": "room.leave",
+				"payload": {
+					"userId": "@a:host",
+					"roomId": "!b:host"
+				}
+			},
+
+
+			{
+				"type": "room.join",
+				"payload": {
+					"userId": "@b:host",
+					"roomId": "!a:host"
+				}
+			},
+
+
+			{
+				"type": "user.create",
+				"payload": {
+					"userId": "@c:host"
+				}
+			},
+			{
+				"type": "community.join",
+				"payload": {
+					"userId": "@c:host",
+					"communityId": "+a:host"
+				}
+			},
+			{
+				"type": "community.join",
+				"payload": {
+					"userId": "@c:host",
+					"communityId": "+b:host"
+				}
+			},
+			{
+				"type": "room.join",
+				"payload": {
+					"userId": "@c:host",
+					"communityId": "!a:host"
+				}
+			},
+			{
+				"type": "room.join",
+				"payload": {
+					"userId": "@c:host",
+					"communityId": "!b:host"
+				}
+			}
+		]
+	}
+}

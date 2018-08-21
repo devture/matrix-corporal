@@ -1,0 +1,47 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"displayName": "",
+				"avatarMxcUri": "",
+				"avatarSourceUriHash": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": true,
+			"allowCustomUserAvatars": false
+		},
+
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"displayName": "",
+				"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+			{
+				"type": "user.set_avatar",
+				"payload": {
+					"userId": "@a:host",
+					"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+				}
+			}
+		]
+	}
+}

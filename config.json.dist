@@ -1,0 +1,33 @@
+{
+	"Matrix": {
+		"HomeserverDomainName": "matrix-corporal.127.0.0.1.xip.io",
+		"HomeserverApiEndpoint": "http://matrix-corporal.127.0.0.1.xip.io:41408",
+		"AuthSharedSecret": "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF",
+		"RegistrationSharedSecret": "y4aTYam;zxKZ#MnaHRrGDPs4&dS*3VEv_&Ck_;pe1=CrtM8*=7",
+		"TimeoutMilliseconds": 30000
+	},
+
+	"Reconciliation": {
+		"UserId": "@matrix-corporal:matrix-corporal.127.0.0.1.xip.io",
+		"RetryIntervalMilliseconds": 30000
+	},
+
+	"HttpGateway": {
+		"ListenAddress": "127.0.0.1:41080"
+	},
+
+	"HttpApi": {
+		"Enabled": true,
+		"ListenAddress": "127.0.0.1:41081",
+		"AuthorizationBearerToken": "UB42Gd0qUH6rkR4yxWbtTX85XCC9B0X1G7tFp64q9UlBjVdjZrtqaBIxFzj4dQvSiRYmxfF4hMAel6bw3xO7jnRgCGQBwBnjpPEfW1lrVAZFP3p55KxBra3mQDGrntE0"
+	},
+
+	"PolicyProvider": {
+		"Type": "static_file",
+		"Path": "policy.json"
+	},
+
+	"Misc": {
+		"Debug": true
+	}
+}

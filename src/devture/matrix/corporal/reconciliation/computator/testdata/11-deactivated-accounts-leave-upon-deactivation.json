@@ -1,0 +1,67 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "A",
+				"active": true,
+				"joinedCommunityIds": ["+a:host", "+another:host"],
+				"joinedRoomIds": ["!a:host", "!another:host"]
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": false,
+			"allowCustomUserAvatars": true
+		},
+
+		"managedRoomIds": [
+			"!a:host",
+			"!b:host"
+		],
+
+		"managedCommunityIds": [
+			"+a:host",
+			"+b:host"
+		],
+
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "User A",
+				"active": false,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+			{
+				"type": "community.leave",
+				"payload": {
+					"userId": "@a:host",
+					"communityId": "+a:host"
+				}
+			},
+			{
+				"type": "room.leave",
+				"payload": {
+					"userId": "@a:host",
+					"roomId": "!a:host"
+				}
+			},
+			{
+				"type": "user.deactivate",
+				"payload": {
+					"userId": "@a:host"
+				}
+			}
+		]
+	}
+}

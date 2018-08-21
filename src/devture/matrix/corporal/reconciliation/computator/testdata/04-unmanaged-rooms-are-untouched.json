@@ -1,0 +1,49 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": ["!d:host"]
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": true,
+			"allowCustomUserAvatars": true
+		},
+
+		"managedRoomIds": [
+			"!b:host"
+		],
+
+		"managedCommunityIds": [
+		],
+
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": ["!a:host", "!b:host", "!c:host"]
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+			{
+				"type": "room.join",
+				"payload": {
+					"userId": "@a:host",
+					"roomId": "!b:host"
+				}
+			}
+		]
+	}
+}

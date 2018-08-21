@@ -1,0 +1,79 @@
+{
+	"policy": {
+		"managedRoomIds": [
+			"!a:host",
+			"!b:host"
+		],
+
+		"managedCommunityIds": [
+			"+a:host",
+			"+b:host"
+		],
+
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"joinedCommunityIds": ["+a:host"],
+				"joinedRoomIds": ["!a:host"]
+			}
+		]
+	},
+
+	"permissionAssertments": [
+		{
+			"type": "leaveRoom",
+			"payload": {
+				"userId": "@a:host",
+				"roomId": "!a:host"
+			},
+			"allowed": false,
+			"expectationComment": "NOT allowed to leave a force-joined room"
+		},
+		{
+			"type": "leaveRoom",
+			"payload": {
+				"userId": "@a:host",
+				"roomId": "!b:host"
+			},
+			"allowed": true,
+			"expectationComment": "Allowed to leave non-force-joined rooms (even if managed)"
+		},
+		{
+			"type": "leaveRoom",
+			"payload": {
+				"userId": "@a:host",
+				"roomId": "!c:host"
+			},
+			"allowed": true,
+			"expectationComment": "Allowed to leave any unmanaged room"
+		},
+		{
+			"type": "leaveCommunity",
+			"payload": {
+				"userId": "@a:host",
+				"communityId": "+a:host"
+			},
+			"allowed": false,
+			"expectationComment": "NOT allowed to leave a force-joined community"
+		},
+		{
+			"type": "leaveCommunity",
+			"payload": {
+				"userId": "@a:host",
+				"communityId": "+b:host"
+			},
+			"allowed": true,
+			"expectationComment": "Allowed to leave non-force-joined communities (even if managed)"
+		},
+		{
+			"type": "leaveCommunity",
+			"payload": {
+				"userId": "@a:host",
+				"communityId": "+c:host"
+			},
+			"allowed": true,
+			"expectationComment": "Allowed to leave any unmanaged community"
+		}
+	]
+}

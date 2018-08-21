@@ -1,0 +1,76 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			},
+			{
+				"id": "@b:host",
+				"displayName": "B",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			},
+			{
+				"id": "@c:host",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": false,
+			"allowCustomUserAvatars": true
+		},
+
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "User A",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			},
+			{
+				"id": "@b:host",
+				"displayName": "User B",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			},
+			{
+				"id": "@c:host",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+			{
+				"type": "user.set_display_name",
+				"payload": {
+					"userId": "@a:host",
+					"displayName": "User A"
+				}
+			},
+			{
+				"type": "user.set_display_name",
+				"payload": {
+					"userId": "@b:host",
+					"displayName": "User B"
+				}
+			}
+		]
+	}
+}

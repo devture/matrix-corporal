@@ -1,0 +1,55 @@
+{
+	"policy": {
+		"managedRoomIds": [
+			"!a:host",
+			"!b:host"
+		],
+
+		"managedCommunityIds": [
+			"+a:host",
+			"+b:host"
+		],
+
+		"users": [
+		]
+	},
+
+	"permissionAssertments": [
+		{
+			"type": "leaveRoom",
+			"payload": {
+				"userId": "@a:host",
+				"roomId": "!a:host"
+			},
+			"allowed": true,
+			"expectationComment": "Non-managed users allowed to leave managed rooms"
+		},
+		{
+			"type": "leaveRoom",
+			"payload": {
+				"userId": "@a:host",
+				"roomId": "!c:host"
+			},
+			"allowed": true,
+			"expectationComment": "Non-managed users allowed to leave non-managed rooms"
+		},
+		{
+			"type": "leaveCommunity",
+			"payload": {
+				"userId": "@a:host",
+				"communityId": "+a:host"
+			},
+			"allowed": true,
+			"expectationComment": "Non-managed users allowed to leave managed communities"
+		},
+		{
+			"type": "leaveCommunity",
+			"payload": {
+				"userId": "@a:host",
+				"communityId": "+c:host"
+			},
+			"allowed": true,
+			"expectationComment": "Non-managed users allowed to leave non-managed communities"
+		}
+	]
+}

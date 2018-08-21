@@ -1,0 +1,24 @@
+{
+	"currentState": {
+		"users": [
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"users": [
+			{
+				"id": "@a:host",
+				"active": false,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+		]
+	}
+}

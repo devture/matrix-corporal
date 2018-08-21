@@ -1,0 +1,44 @@
+{
+	"currentState": {
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"policy": {
+		"schemaVersion": 1,
+
+		"flags": {
+			"allowCustomUserDisplayNames": true,
+			"allowCustomUserAvatars": true
+		},
+
+		"users": [
+			{
+				"id": "@a:host",
+				"displayName": "User A",
+				"active": true,
+				"joinedCommunityIds": [],
+				"joinedRoomIds": []
+			}
+		]
+	},
+
+	"reconciliationState": {
+		"actions": [
+			{
+				"type": "user.set_display_name",
+				"payload": {
+					"userId": "@a:host",
+					"displayName": "User A"
+				}
+			}
+		]
+	}
+}

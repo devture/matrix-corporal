@@ -1,0 +1,7 @@
+/bin
+/pkg
+/var
+/vendor/src
+/vendor/pkg
+/config.json
+/policy.json

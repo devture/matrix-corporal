@@ -1,0 +1,42 @@
+{
+	"flags": {
+		"allowCustomUserDisplayNames": false
+	},
+
+	"managedCommunityIds": [
+	],
+
+	"managedRoomIds": [
+	],
+
+	"users": [
+		{
+			"id": "@a:matrix-corporal.127.0.0.1.xip.io",
+			"active": true,
+			"authType": "plain",
+			"authCredential": "test",
+			"displayName": "User A",
+			"joinedCommunityIds": [],
+			"joinedRoomIds": []
+		},
+		{
+			"id": "@b:matrix-corporal.127.0.0.1.xip.io",
+			"active": true,
+			"authType": "sha1",
+			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
+			"displayName": "User B",
+			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+			"joinedCommunityIds": [],
+			"joinedRoomIds": []
+		},
+		{
+			"id": "@c:matrix-corporal.127.0.0.1.xip.io",
+			"active": true,
+			"authType": "rest",
+			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
+			"displayName": "User C",
+			"joinedCommunityIds": [],
+			"joinedRoomIds": []
+		}
+	]
+}
