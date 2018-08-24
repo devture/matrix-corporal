@@ -71,6 +71,8 @@ func (me *Server) createRouter() http.Handler {
 
 	r.Use(me.denyUnauthorizedAccessMiddleware)
 
+	r.Use(me.loggingMiddleware)
+
 	for _, registrator := range me.handlerRegistrators {
 		registrator.RegisterRoutesWithRouter(r)
 	}
@@ -85,7 +87,7 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 
 		accessToken := httphelp.GetAccessTokenFromRequest(r)
 		if accessToken == "" {
-			logger.Debugf("Rejecting (missing access token)")
+			logger.Infof("HTTP API: rejecting (missing access token)")
 
 			handler.Respond(
 				w,
@@ -99,6 +101,8 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 		}
 
 		if subtle.ConstantTimeCompare([]byte(accessToken), []byte(me.configuration.AuthorizationBearerToken)) != 1 {
+			logger.Infof("HTTP API: rejecting (bad access token)")
+
 			handler.Respond(
 				w,
 				http.StatusUnauthorized,
@@ -109,6 +113,17 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 			)
 			return
 		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (me *Server) loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := me.logger.WithField("method", r.Method)
+		logger = logger.WithField("uri", r.RequestURI)
+
+		logger.Infoln("HTTP API: handling request")
 
 		next.ServeHTTP(w, r)
 	})
