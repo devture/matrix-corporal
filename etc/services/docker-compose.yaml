@@ -11,7 +11,7 @@ services:
     - ../../var/matrix-synapse-postgres:/var/lib/postgresql/data
 
   synapse:
-    image: matrixdotorg/synapse:v0.33.2
+    image: matrixdotorg/synapse:v0.33.3
     restart: on-failure
     ports:
     # This server does not federate, so we don't expose any more ports.
@@ -28,7 +28,7 @@ services:
     - ../../var/matrix-synapse-media-store:/media_store
 
   riot-web:
-    image: avhost/docker-matrix-riot:v0.16.0
+    image: avhost/docker-matrix-riot:v0.16.1
     ports:
     - "41465:8765"
     volumes:
