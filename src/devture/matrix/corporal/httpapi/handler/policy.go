@@ -26,36 +26,28 @@ func NewPolicyApiHandlerRegistrator(
 }
 
 func (me *PolicyApiHandlerRegistrator) RegisterRoutesWithRouter(router *mux.Router) {
-	router.HandleFunc("/_matrix/corporal/policy", me.actionPutPolicy).Methods("PUT")
-	router.HandleFunc("/_matrix/corporal/policy/provider/reload", me.actionPostPolicyProviderReload).Methods("POST")
+	router.HandleFunc("/_matrix/corporal/policy", me.actionPolicyPut).Methods("PUT")
+	router.HandleFunc("/_matrix/corporal/policy/provider/reload", me.actionPolicyProviderReload).Methods("POST")
 }
 
-func (me *PolicyApiHandlerRegistrator) actionPutPolicy(w http.ResponseWriter, r *http.Request) {
+func (me *PolicyApiHandlerRegistrator) actionPolicyPut(w http.ResponseWriter, r *http.Request) {
 	var policy policy.Policy
 
 	err := httphelp.GetJsonFromRequestBody(r, &policy)
 	if err != nil {
-		Respond(
-			w,
-			http.StatusBadRequest,
-			ApiResponse{
-				Ok:    false,
-				Error: "Bad body payload",
-			},
-		)
+		Respond(w, http.StatusBadRequest, ApiResponse{
+			Ok:    false,
+			Error: "Bad body payload",
+		})
 		return
 	}
 
 	err = me.policyStore.Set(&policy)
 	if err != nil {
-		Respond(
-			w,
-			http.StatusBadRequest,
-			ApiResponse{
-				Ok:    false,
-				Error: fmt.Sprintf("Failed to set policy: %s", err),
-			},
-		)
+		Respond(w, http.StatusBadRequest, ApiResponse{
+			Ok:    false,
+			Error: fmt.Sprintf("Failed to set policy: %s", err),
+		})
 		return
 	}
 
@@ -64,7 +56,7 @@ func (me *PolicyApiHandlerRegistrator) actionPutPolicy(w http.ResponseWriter, r 
 	})
 }
 
-func (me *PolicyApiHandlerRegistrator) actionPostPolicyProviderReload(w http.ResponseWriter, r *http.Request) {
+func (me *PolicyApiHandlerRegistrator) actionPolicyProviderReload(w http.ResponseWriter, r *http.Request) {
 	go me.policyProvider.Reload()
 
 	Respond(w, http.StatusOK, ApiResponse{
