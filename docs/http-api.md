@@ -22,6 +22,10 @@ API endpoints:
 
 - [Policy-provider reload endpoint](#policy-provider-reload-endpoint) - `POST /_matrix/corporal/policy/provider/reload`
 
+- [User access-token retrieval endpoint](#user-access-token-retrieval-endpoint) - `POST /_matrix/corporal/user/{userId}/access-token/new`
+
+- [User access-token release endpoint](#user-access-token-release-endpoint) - `DELETE /_matrix/corporal/user/{userId}/access-token`
+
 
 ## Policy submission endpoint
 
@@ -57,4 +61,55 @@ curl \
 -XPOST \
 -H 'Authorization: Bearer HTTP_API_TOKEN' \
 http://matrix.example.com/_matrix/corporal/policy/provider/reload
+```
+
+
+## User access-token retrieval endpoint
+
+**Endpoint**: `POST /_matrix/corporal/user/{userId}/access-token/new`
+
+This API endpoint lets you obtain an access token for a specific user.
+
+You can use this access token to access the Matrix API however you see fit.
+When done, you can dispose of the access token by calling the [user access-token release API endpoint](#user-access-token-release-endpoint).
+
+You are required to submit a device id in the body payload:
+
+```json
+{"deviceId": "device id goes here"}
+```
+
+Example (using [curl](https://curl.haxx.se/)):
+
+```bash
+curl \
+-XPOST \
+-H 'Authorization: Bearer HTTP_API_TOKEN' \
+-H 'Content-Type: application/json' \
+--data '{"deviceId": "device id goes here"}' \
+http://matrix.example.com/_matrix/corporal/user/@user:example.com/access-token/new
+```
+
+
+## User access-token release endpoint
+
+**Endpoint**: `DELETE /_matrix/corporal/user/{userId}/access-token`
+
+To obtain an access token for a user, submit a `DELETE` request to the following endpoint.
+
+You are required to submit the access token to delete (release) in the body payload:
+
+```json
+{"accessToken": "token goes here"}
+```
+
+Example (using [curl](https://curl.haxx.se/)):
+
+```bash
+curl \
+-XDELETE \
+-H 'Authorization: Bearer HTTP_API_TOKEN' \
+-H 'Content-Type: application/json' \
+--data '{"accessToken": "token goes here"}' \
+http://matrix.example.com/_matrix/corporal/user/@user:example.com/access-token
 ```

@@ -17,7 +17,7 @@ type ApiResponse struct {
 	Error string `json:"error"`
 }
 
-func Respond(w http.ResponseWriter, httpStatusCode int, resp ApiResponse) {
+func Respond(w http.ResponseWriter, httpStatusCode int, resp interface{}) {
 	w.WriteHeader(httpStatusCode)
 
 	respBytes, err := json.Marshal(resp)

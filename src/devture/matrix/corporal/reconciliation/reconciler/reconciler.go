@@ -12,6 +12,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	deviceIdReconciler = "Matrix-Corporal-Reconciler"
+)
+
 type ReconciliationHandlerFunc func(*connector.AccessTokenContext, *reconciliation.StateAction) error
 
 type Reconciler struct {
@@ -57,7 +61,7 @@ func New(
 }
 
 func (me *Reconciler) Reconcile(policy *policy.Policy) error {
-	ctx := me.connector.CreateAccessTokenContext()
+	ctx := me.connector.CreateAccessTokenContext(deviceIdReconciler)
 	defer ctx.Release()
 
 	currentState, err := me.connector.DetermineCurrentState(ctx, policy.GetManagedUserIds(), me.reconciliatorUserId)

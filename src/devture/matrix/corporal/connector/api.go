@@ -15,8 +15,6 @@ import (
 )
 
 const (
-	impersonatorDeviceId = "Matrix-Corporal-Impersonator"
-
 	accountDataTypeAvatarSourceUriHashes = "com.devture.matrix.corporal.avatar_source_uri_hashes"
 )
 
@@ -52,27 +50,22 @@ func NewApiConnector(
 	}
 }
 
-func (me *ApiConnector) CreateAccessTokenContext() *AccessTokenContext {
-	return NewAccessTokenContext(me)
+func (me *ApiConnector) CreateAccessTokenContext(deviceId string) *AccessTokenContext {
+	return NewAccessTokenContext(me, deviceId)
 }
 
-func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId string) (string, error) {
-	userIdLocalPart, err := gomatrix.ExtractUserLocalpart(userId)
-	if err != nil {
-		return "", err
-	}
-
+func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error) {
 	client, _ := gomatrix.NewClient(me.homeserverApiEndpoint, "", "")
 	me.prepareMatrixClient(client)
 
 	var resp *gomatrix.RespLogin
-	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.obtain_access_token", func() error {
+	err := matrix.ExecuteWithRateLimitRetries(me.logger, "user.obtain_access_token", func() error {
 		var innerErr error
 		resp, innerErr = client.Login(&gomatrix.ReqLogin{
 			Type:     matrix.LoginTypePassword,
 			User:     userId,
 			Password: me.sharedSecretAuthPasswordGenerator.GenerateForUserId(userId),
-			DeviceID: fmt.Sprintf("%s-%s", impersonatorDeviceId, userIdLocalPart),
+			DeviceID: deviceId,
 		})
 		return innerErr
 	})
@@ -87,6 +80,12 @@ func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId string) (string, er
 func (me *ApiConnector) DestroyAccessToken(userId, accessToken string) error {
 	client, _ := gomatrix.NewClient(me.homeserverApiEndpoint, userId, accessToken)
 	_, err := client.Logout()
+
+	if matrix.IsErrorWithCode(err, matrix.ErrorUnknownToken) {
+		//Suppress errors for access tokens that appear to be non-working already.
+		return nil
+	}
+
 	return err
 }
 

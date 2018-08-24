@@ -6,7 +6,11 @@ import (
 )
 
 type MatrixConnector interface {
-	CreateAccessTokenContext() *AccessTokenContext
+	CreateAccessTokenContext(deviceId string) *AccessTokenContext
+
+	ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error)
+	DestroyAccessToken(userId, accessToken string) error
+	LogoutAllAccessTokensForUser(ctx *AccessTokenContext, userId string) error
 
 	DetermineCurrentState(ctx *AccessTokenContext, managedUserIds []string, adminUserId string) (*CurrentState, error)
 
@@ -23,6 +27,4 @@ type MatrixConnector interface {
 	InviteUserToRoom(ctx *AccessTokenContext, inviterId string, inviteeId string, roomId string) error
 	JoinRoom(ctx *AccessTokenContext, userId string, roomId string) error
 	LeaveRoom(ctx *AccessTokenContext, userId string, roomId string) error
-
-	LogoutAllAccessTokensForUser(ctx *AccessTokenContext, userId string) error
 }

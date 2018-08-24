@@ -6,13 +6,16 @@ import (
 
 type AccessTokenContext struct {
 	connector *ApiConnector
+	deviceId  string
 
 	userIdToAccessTokenMap *sync.Map
 }
 
-func NewAccessTokenContext(connector *ApiConnector) *AccessTokenContext {
+func NewAccessTokenContext(connector *ApiConnector, deviceId string) *AccessTokenContext {
 	return &AccessTokenContext{
-		connector:              connector,
+		connector: connector,
+		deviceId:  deviceId,
+
 		userIdToAccessTokenMap: &sync.Map{},
 	}
 }
@@ -23,7 +26,7 @@ func (me *AccessTokenContext) GetAccessTokenForUserId(userId string) (string, er
 		return accessTokenInterface.(string), nil
 	}
 
-	accessToken, err := me.connector.ObtainNewAccessTokenForUserId(userId)
+	accessToken, err := me.connector.ObtainNewAccessTokenForUserId(userId, me.deviceId)
 	if err != nil {
 		return "", err
 	}
