@@ -274,6 +274,9 @@ func (me *ApiConnector) GetUserAccountDataContentByType(
 	}
 
 	queryParams := map[string]string{
+		// Make sure we don't mark the user as online as part of the /sync request
+		"set_presence": "offline",
+
 		"filter": string(filterAsBytes),
 	}
 
