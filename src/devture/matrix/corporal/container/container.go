@@ -5,6 +5,7 @@ import (
 	"devture/matrix/corporal/configuration"
 	"devture/matrix/corporal/connector"
 	"devture/matrix/corporal/httpapi"
+	"devture/matrix/corporal/httpapi/handler"
 	"devture/matrix/corporal/httpgateway"
 	"devture/matrix/corporal/matrix"
 	"devture/matrix/corporal/policy"
@@ -107,8 +108,7 @@ func BuildContainer(
 		instance := httpapi.NewServer(
 			logger,
 			configuration.HttpApi,
-			container.Get("policy.provider").(provider.Provider),
-			container.Get("policy.store").(*policy.Store),
+			container.Get("httpapi.server.handler_registrators").([]handler.HandlerRegistrator),
 		)
 
 		shutdownHandler.Add(func() {
@@ -116,6 +116,19 @@ func BuildContainer(
 		})
 
 		return instance
+	})
+
+	container.Set("httpapi.server.handler_registrators", func(c *service.Container) interface{} {
+		return []handler.HandlerRegistrator{
+			container.Get("httpapi.server.handler_registrator.policy").(handler.HandlerRegistrator),
+		}
+	})
+
+	container.Set("httpapi.server.handler_registrator.policy", func(c *service.Container) interface{} {
+		return handler.NewPolicyApiHandlerRegistrator(
+			container.Get("policy.store").(*policy.Store),
+			container.Get("policy.provider").(provider.Provider),
+		)
 	})
 
 	container.Set("policy.store", func(c *service.Container) interface{} {

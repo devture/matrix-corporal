@@ -4,11 +4,8 @@ import (
 	"context"
 	"crypto/subtle"
 	"devture/matrix/corporal/configuration"
+	"devture/matrix/corporal/httpapi/handler"
 	"devture/matrix/corporal/httphelp"
-	"devture/matrix/corporal/policy"
-	"devture/matrix/corporal/policy/provider"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -16,16 +13,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type apiResponse struct {
-	Ok    bool   `json:"ok"`
-	Error string `json:"error"`
-}
-
 type Server struct {
-	logger         *logrus.Logger
-	configuration  configuration.HttpApi
-	policyProvider provider.Provider
-	policyStore    *policy.Store
+	logger              *logrus.Logger
+	configuration       configuration.HttpApi
+	handlerRegistrators []handler.HandlerRegistrator
 
 	server *http.Server
 }
@@ -33,14 +24,12 @@ type Server struct {
 func NewServer(
 	logger *logrus.Logger,
 	configuration configuration.HttpApi,
-	policyProvider provider.Provider,
-	policyStore *policy.Store,
+	handlerRegistrators []handler.HandlerRegistrator,
 ) *Server {
 	return &Server{
-		logger:         logger,
-		configuration:  configuration,
-		policyProvider: policyProvider,
-		policyStore:    policyStore,
+		logger:              logger,
+		configuration:       configuration,
+		handlerRegistrators: handlerRegistrators,
 
 		server: nil,
 	}
@@ -82,53 +71,9 @@ func (me *Server) createRouter() http.Handler {
 
 	r.Use(me.denyUnauthorizedAccessMiddleware)
 
-	r.HandleFunc(
-		"/_matrix/corporal/policy",
-		func(w http.ResponseWriter, r *http.Request) {
-			var policy policy.Policy
-
-			err := httphelp.GetJsonFromRequestBody(r, &policy)
-			if err != nil {
-				respond(
-					w,
-					http.StatusBadRequest,
-					apiResponse{
-						Ok:    false,
-						Error: "Bad body payload",
-					},
-				)
-				return
-			}
-
-			err = me.policyStore.Set(&policy)
-			if err != nil {
-				respond(
-					w,
-					http.StatusBadRequest,
-					apiResponse{
-						Ok:    false,
-						Error: fmt.Sprintf("Failed to set policy: %s", err),
-					},
-				)
-				return
-			}
-
-			respond(w, http.StatusOK, apiResponse{
-				Ok: true,
-			})
-		},
-	).Methods("PUT")
-
-	r.HandleFunc(
-		"/_matrix/corporal/policy/provider/reload",
-		func(w http.ResponseWriter, r *http.Request) {
-			go me.policyProvider.Reload()
-
-			respond(w, http.StatusOK, apiResponse{
-				Ok: true,
-			})
-		},
-	).Methods("POST")
+	for _, registrator := range me.handlerRegistrators {
+		registrator.RegisterRoutesWithRouter(r)
+	}
 
 	return r
 }
@@ -142,10 +87,10 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 		if accessToken == "" {
 			logger.Debugf("Rejecting (missing access token)")
 
-			respond(
+			handler.Respond(
 				w,
 				http.StatusUnauthorized,
-				apiResponse{
+				handler.ApiResponse{
 					Ok:    false,
 					Error: "Missing access token",
 				},
@@ -154,10 +99,10 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 		}
 
 		if subtle.ConstantTimeCompare([]byte(accessToken), []byte(me.configuration.AuthorizationBearerToken)) != 1 {
-			respond(
+			handler.Respond(
 				w,
 				http.StatusUnauthorized,
-				apiResponse{
+				handler.ApiResponse{
 					Ok:    false,
 					Error: "Bad access token",
 				},
@@ -167,15 +112,4 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func respond(w http.ResponseWriter, httpStatusCode int, resp apiResponse) {
-	w.WriteHeader(httpStatusCode)
-
-	respBytes, err := json.Marshal(resp)
-	if err != nil {
-		panic(fmt.Errorf("Could not create JSON response for: %s", resp))
-	}
-
-	w.Write(respBytes)
 }
