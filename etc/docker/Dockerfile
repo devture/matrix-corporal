@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine
+FROM golang:1.11-alpine
 WORKDIR /build
 RUN apk --no-cache add git
 RUN go get github.com/constabulary/gb/...

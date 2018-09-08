@@ -1,3 +1,10 @@
+# Version 1.1.1
+
+- Reconciliation: speeding up account-data fetching by optimizing the /sync call
+
+- Upgrading Go compiler (1.10 -> 1.11)
+
+
 # Version 1.1
 
 - HTTP API: improved logging support
