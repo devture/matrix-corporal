@@ -44,7 +44,7 @@ func NewApiConnector(
 	return &ApiConnector{
 		homeserverApiEndpoint:             homeserverApiEndpoint,
 		sharedSecretAuthPasswordGenerator: sharedSecretAuthPasswordGenerator,
-		logger: logger,
+		logger:                            logger,
 
 		httpClient: httpClient,
 	}
@@ -259,10 +259,20 @@ func (me *ApiConnector) GetUserAccountDataContentByType(
 			"rooms": []string{
 				"!whatever:whatever",
 			},
-			"account_data": map[string]interface{}{
-				"types": []string{
-					"whatever",
+			"state": map[string]interface{}{
+				"senders": []string{
+					"@whatever:whatever",
 				},
+			},
+			"account_data": map[string]interface{}{
+				"senders": []string{
+					"@whatever:whatever",
+				},
+			},
+		},
+		"account_data": map[string]interface{}{
+			"types": []string{
+				accountDataType,
 			},
 		},
 	}
