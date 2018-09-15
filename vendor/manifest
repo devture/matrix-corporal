@@ -16,19 +16,19 @@
 		{
 			"importpath": "github.com/fsnotify/fsnotify",
 			"repository": "https://github.com/fsnotify/fsnotify",
-			"revision": "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9",
+			"revision": "ccc981bf80385c528a65fbfdd49bf2d8da22aa23",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/gorilla/mux",
 			"repository": "https://github.com/gorilla/mux",
-			"revision": "e48e440e4c92e3251d812f8ce7858944dfa3331c",
+			"revision": "9e1f5955c0d22b55d9e20d6faa28589f83b2faca",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/hashicorp/golang-lru",
 			"repository": "https://github.com/hashicorp/golang-lru",
-			"revision": "0fb14efe8c47ae851c0034ed7a448854d3d34cf3",
+			"revision": "20f1fb78b0740ba8c3cb143a61e86ba5c8669768",
 			"branch": "master"
 		},
 		{
@@ -40,34 +40,34 @@
 		{
 			"importpath": "github.com/sirupsen/logrus",
 			"repository": "https://github.com/sirupsen/logrus",
-			"revision": "e4b0c6d7829bcf64435536c4a88f4088a3c76203",
+			"revision": "f3df9aeffda7c12bd9f5a03f9251d75d35993165",
 			"branch": "master"
 		},
 		{
 			"importpath": "golang.org/x/crypto/bcrypt",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "c126467f60eb25f8f27e5a981f32a87e3965053f",
+			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
 			"branch": "master",
 			"path": "/bcrypt"
 		},
 		{
 			"importpath": "golang.org/x/crypto/blowfish",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "a49355c7e3f8fe157a85be2f77e6e269a0f89602",
+			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
 			"branch": "master",
 			"path": "/blowfish"
 		},
 		{
 			"importpath": "golang.org/x/crypto/ssh/terminal",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "a49355c7e3f8fe157a85be2f77e6e269a0f89602",
+			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
 			"branch": "master",
 			"path": "/ssh/terminal"
 		},
 		{
 			"importpath": "golang.org/x/sys",
 			"repository": "https://go.googlesource.com/sys",
-			"revision": "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e",
+			"revision": "d0be0721c37eeb5299f245a996a483160fc36940",
 			"branch": "master"
 		}
 	]

@@ -2,6 +2,8 @@
 
 - HTTP API: returning [standard Matrix error responses](https://matrix.org/docs/spec/client_server/r0.4.0.html#api-standards) when errors occur, instead of the custom `{"ok": false, "error": "Message"}` responses we had until now
 
+- upgraded dependency libraries
+
 
 # Version 1.1.1
 
