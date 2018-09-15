@@ -16,6 +16,9 @@ You can then send HTTP API requests to the `/_matrix/corporal/<whatever>` endpoi
 
 Each request needs to be authenticated by being sent with a `Authorization: Bearer HTTP_API_TOKEN` header.
 
+For each API endpoint, when an error occurs, a [standard Matrix error response](https://matrix.org/docs/spec/client_server/r0.4.0.html#api-standards) will be returned.
+
+
 API endpoints:
 
 - [Policy submission endpoint](#policy-submission-endpoint) - `PUT /_matrix/corporal/policy`

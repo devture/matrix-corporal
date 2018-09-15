@@ -89,9 +89,9 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 		if accessToken == "" {
 			logger.Infof("HTTP API: rejecting (missing access token)")
 
-			handler.Respond(w, http.StatusUnauthorized, handler.ApiResponse{
-				Ok:    false,
-				Error: "Missing access token",
+			handler.Respond(w, http.StatusUnauthorized, handler.ApiResponseError{
+				ErrorCode:    handler.ErrorCodeMissingToken,
+				ErrorMessage: "Missing access token",
 			})
 			return
 		}
@@ -99,9 +99,9 @@ func (me *Server) denyUnauthorizedAccessMiddleware(next http.Handler) http.Handl
 		if subtle.ConstantTimeCompare([]byte(accessToken), []byte(me.configuration.AuthorizationBearerToken)) != 1 {
 			logger.Infof("HTTP API: rejecting (bad access token)")
 
-			handler.Respond(w, http.StatusUnauthorized, handler.ApiResponse{
-				Ok:    false,
-				Error: "Bad access token",
+			handler.Respond(w, http.StatusUnauthorized, handler.ApiResponseError{
+				ErrorCode:    handler.ErrorCodeUnknownToken,
+				ErrorMessage: "Bad access token",
 			})
 			return
 		}

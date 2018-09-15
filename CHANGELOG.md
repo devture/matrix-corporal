@@ -1,3 +1,8 @@
+# Version 1.2
+
+- HTTP API: returning [standard Matrix error responses](https://matrix.org/docs/spec/client_server/r0.4.0.html#api-standards) when errors occur, instead of the custom `{"ok": false, "error": "Message"}` responses we had until now
+
+
 # Version 1.1.1
 
 - Reconciliation: speeding up account-data fetching by optimizing the /sync call

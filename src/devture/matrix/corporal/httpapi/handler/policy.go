@@ -35,31 +35,27 @@ func (me *PolicyApiHandlerRegistrator) actionPolicyPut(w http.ResponseWriter, r 
 
 	err := httphelp.GetJsonFromRequestBody(r, &policy)
 	if err != nil {
-		Respond(w, http.StatusBadRequest, ApiResponse{
-			Ok:    false,
-			Error: "Bad body payload",
+		Respond(w, http.StatusBadRequest, ApiResponseError{
+			ErrorCode:    ErrorCodeBadJson,
+			ErrorMessage: "Bad body payload",
 		})
 		return
 	}
 
 	err = me.policyStore.Set(&policy)
 	if err != nil {
-		Respond(w, http.StatusBadRequest, ApiResponse{
-			Ok:    false,
-			Error: fmt.Sprintf("Failed to set policy: %s", err),
+		Respond(w, http.StatusOK, ApiResponseError{
+			ErrorCode:    ErrorCodeUnknown,
+			ErrorMessage: fmt.Sprintf("Failed to set policy: %s", err),
 		})
 		return
 	}
 
-	Respond(w, http.StatusOK, ApiResponse{
-		Ok: true,
-	})
+	Respond(w, http.StatusOK, map[string]interface{}{})
 }
 
 func (me *PolicyApiHandlerRegistrator) actionPolicyProviderReload(w http.ResponseWriter, r *http.Request) {
 	go me.policyProvider.Reload()
 
-	Respond(w, http.StatusOK, ApiResponse{
-		Ok: true,
-	})
+	Respond(w, http.StatusOK, map[string]interface{}{})
 }
