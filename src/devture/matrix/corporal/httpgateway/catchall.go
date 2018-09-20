@@ -28,7 +28,7 @@ func (me *CatchAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// ( see https://matrix.org/speculator/spec/HEAD/client_server/unstable.html#web-browser-clients ) ,
 		// so we might as well do it here and bypass the proxying work.
 
-		logger.Debugf("Replying to OPTIONS")
+		logger.Debugf("HTTP gateway: replying to OPTIONS")
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -37,6 +37,6 @@ func (me *CatchAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Debugf("Proxying catch-all")
+	logger.Debugf("HTTP gateway: proxying catch-all")
 	me.reverseProxy.ServeHTTP(w, r)
 }

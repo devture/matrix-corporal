@@ -145,7 +145,7 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		accessToken := httphelp.GetAccessTokenFromRequest(r)
 		if accessToken == "" {
-			logger.Debugf("Rejecting (missing access token)")
+			logger.Debugf("HTTP gateway: rejecting (missing access token)")
 
 			respondWithMatrixError(
 				w,
@@ -158,7 +158,7 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		userId, err := me.userMappingResolver.ResolveByAccessToken(accessToken)
 		if err != nil {
-			logger.Debugf("Rejecting (failed to map access token)")
+			logger.Debugf("HTTP gateway: rejecting (failed to map access token)")
 
 			respondWithMatrixError(
 				w,
@@ -175,7 +175,7 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		policy := me.policyStore.Get()
 		if policy == nil {
-			logger.Infof("Denying (missing policy)")
+			logger.Infof("HTTP gateway: denying (missing policy)")
 
 			respondWithMatrixError(
 				w,
@@ -190,7 +190,7 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		if !policyResponse.Allow {
 			logger.Infof(
-				"Denying (%s: %s)",
+				"HTTP gateway: denying (%s: %s)",
 				policyResponse.ErrorCode,
 				policyResponse.ErrorMessage,
 			)
@@ -204,7 +204,7 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 			return
 		}
 
-		logger.Infof("Proxying")
+		logger.Infof("HTTP gateway: proxying")
 		me.reverseProxy.ServeHTTP(w, r)
 	}
 }
@@ -219,7 +219,7 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 		logger = logger.WithFields(interceptorResult.LoggingContextFields)
 
 		if interceptorResult.Result == InterceptorResultProxy {
-			logger.Infof("Proxying")
+			logger.Infof("HTTP gateway: proxying")
 
 			me.reverseProxy.ServeHTTP(w, r)
 
@@ -228,7 +228,7 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 
 		if interceptorResult.Result == InterceptorResultDeny {
 			logger.Infof(
-				"Denying (%s: %s)",
+				"HTTP gateway: denying (%s: %s)",
 				interceptorResult.ErrorCode,
 				interceptorResult.ErrorMessage,
 			)
@@ -243,6 +243,6 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 			return
 		}
 
-		logger.Fatalf("Unexpected interceptor result: %#v", interceptorResult)
+		logger.Fatalf("HTTP gateway: unexpected interceptor result: %#v", interceptorResult)
 	}
 }
