@@ -1,3 +1,10 @@
+# Version 1.2.1 (2018-09-20)
+
+- HTTP gateway: unified log message format (all messages are prefixed by `HTTP gateway:` now)
+
+- HTTP gateway: added `/_matrix/client/corporal` route to allow for detection/monitoring
+
+
 # Version 1.2 (2018-09-15)
 
 - HTTP API: returning [standard Matrix error responses](https://matrix.org/docs/spec/client_server/r0.4.0.html#api-standards) when errors occur, instead of the custom `{"ok": false, "error": "Message"}` responses we had until now

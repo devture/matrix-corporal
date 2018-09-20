@@ -85,6 +85,19 @@ func (me *Server) createRouter() http.Handler {
 
 	r.Use(denyUnsupportedApiVersionsMiddleware)
 
+	// To make it easy to detect if Matrix Corporal is properly fronting the Matrix Client-Server API,
+	// we add this custom non-standard route.
+	r.HandleFunc(
+		"/_matrix/client/corporal",
+		func(w http.ResponseWriter, r *http.Request) {
+			logger := me.logger.WithField("method", r.Method)
+			logger = logger.WithField("uri", r.RequestURI)
+			logger.Debugf("HTTP gateway: serving Matrix Corporal info page")
+
+			w.Write([]byte("Matrix Client-Server API protected by Matrix Corporal"))
+		},
+	).Methods("GET")
+
 	r.HandleFunc(
 		"/_matrix/client/r0/groups/{communityId}/self/leave",
 		me.createPolicyCheckingHandler("community.self.leave", policycheck.CheckCommunitySelfLeave),
