@@ -4,13 +4,13 @@
 		{
 			"importpath": "github.com/Jeffail/gabs",
 			"repository": "https://github.com/Jeffail/gabs",
-			"revision": "7a0fed31069aba77993a518cc2f37b28ee7aa883",
+			"revision": "7be49c3f43696c7ca8c9a76d6836703d83aea404",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/euskadi31/go-service",
 			"repository": "https://github.com/euskadi31/go-service",
-			"revision": "a5fa5feaf5ad54fa1f35e09aba36b9592262d43e",
+			"revision": "cdb30e0ed4035c2db4e9f5111f7d5fe5c512845a",
 			"branch": "master"
 		},
 		{
@@ -22,7 +22,7 @@
 		{
 			"importpath": "github.com/gorilla/mux",
 			"repository": "https://github.com/gorilla/mux",
-			"revision": "9e1f5955c0d22b55d9e20d6faa28589f83b2faca",
+			"revision": "6137e193cdcba2725f16de84eaf0db2b769d9668",
 			"branch": "master"
 		},
 		{
@@ -40,34 +40,34 @@
 		{
 			"importpath": "github.com/sirupsen/logrus",
 			"repository": "https://github.com/sirupsen/logrus",
-			"revision": "f3df9aeffda7c12bd9f5a03f9251d75d35993165",
+			"revision": "2067ea4241cec716fbd0ac90f42f339f963bff92",
 			"branch": "master"
 		},
 		{
 			"importpath": "golang.org/x/crypto/bcrypt",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
+			"revision": "505ab145d0a99da450461ae2c1a9f6cd10d1f447",
 			"branch": "master",
 			"path": "/bcrypt"
 		},
 		{
 			"importpath": "golang.org/x/crypto/blowfish",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
+			"revision": "505ab145d0a99da450461ae2c1a9f6cd10d1f447",
 			"branch": "master",
 			"path": "/blowfish"
 		},
 		{
 			"importpath": "golang.org/x/crypto/ssh/terminal",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
+			"revision": "505ab145d0a99da450461ae2c1a9f6cd10d1f447",
 			"branch": "master",
 			"path": "/ssh/terminal"
 		},
 		{
 			"importpath": "golang.org/x/sys",
 			"repository": "https://go.googlesource.com/sys",
-			"revision": "d0be0721c37eeb5299f245a996a483160fc36940",
+			"revision": "8ff4e546d48be377a38a3ab13ef2dd4dd8dce06a",
 			"branch": "master"
 		}
 	]

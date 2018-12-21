@@ -40,7 +40,7 @@ func (me *ContainerShutdownHandler) Shutdown() {
 
 func BuildContainer(
 	configuration configuration.Configuration,
-) (*service.Container, *ContainerShutdownHandler) {
+) (service.Container, *ContainerShutdownHandler) {
 	container := service.New()
 	shutdownHandler := &ContainerShutdownHandler{}
 
@@ -50,11 +50,11 @@ func BuildContainer(
 		logger.Level = logrus.DebugLevel
 	}
 
-	container.Set("logger", func(c *service.Container) interface{} {
+	container.Set("logger", func(c service.Container) interface{} {
 		return logger
 	})
 
-	container.Set("matrix.user_mapping_resolver.cache", func(c *service.Container) interface{} {
+	container.Set("matrix.user_mapping_resolver.cache", func(c service.Container) interface{} {
 		cache, err := lru.New2Q(1000)
 		if err != nil {
 			panic(err)
@@ -62,7 +62,7 @@ func BuildContainer(
 		return cache
 	})
 
-	container.Set("matrix.user_mapping_resolver", func(c *service.Container) interface{} {
+	container.Set("matrix.user_mapping_resolver", func(c service.Container) interface{} {
 		return matrix.NewUserMappingResolver(
 			logger,
 			container.Get("matrix.user_mapping_resolver.cache").(*lru.TwoQueueCache),
@@ -70,7 +70,7 @@ func BuildContainer(
 		)
 	})
 
-	container.Set("matrix.http_reverse_proxy", func(c *service.Container) interface{} {
+	container.Set("matrix.http_reverse_proxy", func(c service.Container) interface{} {
 		u, _ := url.Parse(configuration.Matrix.HomeserverApiEndpoint)
 		reverseProxy := httputil.NewSingleHostReverseProxy(u)
 
@@ -94,11 +94,11 @@ func BuildContainer(
 		return reverseProxy
 	})
 
-	container.Set("matrix.shared_secret_auth.password_generator", func(c *service.Container) interface{} {
+	container.Set("matrix.shared_secret_auth.password_generator", func(c service.Container) interface{} {
 		return matrix.NewSharedSecretAuthPasswordGenerator(configuration.Matrix.AuthSharedSecret)
 	})
 
-	container.Set("httpgateway.interceptor.login", func(c *service.Container) interface{} {
+	container.Set("httpgateway.interceptor.login", func(c service.Container) interface{} {
 		return httpgateway.NewLoginInterceptor(
 			container.Get("policy.store").(*policy.Store),
 			configuration.Matrix.HomeserverDomainName,
@@ -107,7 +107,7 @@ func BuildContainer(
 		)
 	})
 
-	container.Set("httpgateway.server", func(c *service.Container) interface{} {
+	container.Set("httpgateway.server", func(c service.Container) interface{} {
 		instance := httpgateway.NewServer(
 			logger,
 			configuration.HttpGateway,
@@ -125,7 +125,7 @@ func BuildContainer(
 		return instance
 	})
 
-	container.Set("httpapi.server", func(c *service.Container) interface{} {
+	container.Set("httpapi.server", func(c service.Container) interface{} {
 		instance := httpapi.NewServer(
 			logger,
 			configuration.HttpApi,
@@ -139,45 +139,45 @@ func BuildContainer(
 		return instance
 	})
 
-	container.Set("httpapi.server.handler_registrators", func(c *service.Container) interface{} {
+	container.Set("httpapi.server.handler_registrators", func(c service.Container) interface{} {
 		return []handler.HandlerRegistrator{
 			container.Get("httpapi.server.handler_registrator.policy").(handler.HandlerRegistrator),
 			container.Get("httpapi.server.handler_registrator.user").(handler.HandlerRegistrator),
 		}
 	})
 
-	container.Set("httpapi.server.handler_registrator.policy", func(c *service.Container) interface{} {
+	container.Set("httpapi.server.handler_registrator.policy", func(c service.Container) interface{} {
 		return handler.NewPolicyApiHandlerRegistrator(
 			container.Get("policy.store").(*policy.Store),
 			container.Get("policy.provider").(provider.Provider),
 		)
 	})
 
-	container.Set("httpapi.server.handler_registrator.user", func(c *service.Container) interface{} {
+	container.Set("httpapi.server.handler_registrator.user", func(c service.Container) interface{} {
 		return handler.NewUserApiHandlerRegistrator(
 			configuration.Matrix.HomeserverDomainName,
 			container.Get("connector.synapse").(*connector.SynapseConnector),
 		)
 	})
 
-	container.Set("policy.store", func(c *service.Container) interface{} {
+	container.Set("policy.store", func(c service.Container) interface{} {
 		return policy.NewStore(
 			logger,
 			container.Get("policy.validator").(*policy.Validator),
 		)
 	})
 
-	container.Set("policy.checker", func(c *service.Container) interface{} {
+	container.Set("policy.checker", func(c service.Container) interface{} {
 		return policy.NewChecker()
 	})
 
-	container.Set("policy.validator", func(c *service.Container) interface{} {
+	container.Set("policy.validator", func(c service.Container) interface{} {
 		return policy.NewValidator(
 			configuration.Matrix.HomeserverDomainName,
 		)
 	})
 
-	container.Set("matrix.userauth.rest_cache", func(c *service.Container) interface{} {
+	container.Set("matrix.userauth.rest_cache", func(c service.Container) interface{} {
 		cache, err := lru.New(1000)
 		if err != nil {
 			panic(err)
@@ -185,7 +185,7 @@ func BuildContainer(
 		return cache
 	})
 
-	container.Set("policy.userauth.checker", func(c *service.Container) interface{} {
+	container.Set("policy.userauth.checker", func(c service.Container) interface{} {
 		instance := userauth.NewChecker()
 
 		instance.RegisterAuthenticator(userauth.NewPlainAuthenticator())
@@ -207,7 +207,7 @@ func BuildContainer(
 		return instance
 	})
 
-	container.Set("policy.provider", func(c *service.Container) interface{} {
+	container.Set("policy.provider", func(c service.Container) interface{} {
 		instance, err := provider.CreateProviderByConfig(
 			configuration.PolicyProvider,
 			container.Get("policy.store").(*policy.Store),
@@ -225,17 +225,17 @@ func BuildContainer(
 		return instance
 	})
 
-	container.Set("avatar.avatar_reader", func(c *service.Container) interface{} {
+	container.Set("avatar.avatar_reader", func(c service.Container) interface{} {
 		return avatar.NewAvatarReader()
 	})
 
-	container.Set("reconciliation.computator", func(c *service.Container) interface{} {
+	container.Set("reconciliation.computator", func(c service.Container) interface{} {
 		return computator.NewReconciliationStateComputator(
 			logger,
 		)
 	})
 
-	container.Set("reconciliation.reconciler", func(c *service.Container) interface{} {
+	container.Set("reconciliation.reconciler", func(c service.Container) interface{} {
 		return reconciler.New(
 			logger,
 			container.Get("connector.synapse").(*connector.SynapseConnector),
@@ -245,7 +245,7 @@ func BuildContainer(
 		)
 	})
 
-	container.Set("reconciliation.store_driven_reconciler", func(c *service.Container) interface{} {
+	container.Set("reconciliation.store_driven_reconciler", func(c service.Container) interface{} {
 		instance := reconciler.NewStoreDrivenReconciler(
 			logger,
 			container.Get("policy.store").(*policy.Store),
@@ -260,7 +260,7 @@ func BuildContainer(
 		return instance
 	})
 
-	container.Set("connector.api", func(c *service.Container) interface{} {
+	container.Set("connector.api", func(c service.Container) interface{} {
 		return connector.NewApiConnector(
 			configuration.Matrix.HomeserverApiEndpoint,
 			container.Get("matrix.shared_secret_auth.password_generator").(*matrix.SharedSecretAuthPasswordGenerator),
@@ -269,7 +269,7 @@ func BuildContainer(
 		)
 	})
 
-	container.Set("connector.synapse", func(c *service.Container) interface{} {
+	container.Set("connector.synapse", func(c service.Container) interface{} {
 		return connector.NewSynapseConnector(
 			container.Get("connector.api").(*connector.ApiConnector),
 			configuration.Matrix.RegistrationSharedSecret,
