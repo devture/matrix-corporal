@@ -89,6 +89,7 @@ func BuildContainer(
 
 		reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
 			logger.Errorf("HTTP Reverse Proxy: failed proxying [%s] %s: %s", r.Method, r.URL, err)
+			w.WriteHeader(http.StatusBadGateway)
 		}
 
 		return reverseProxy
