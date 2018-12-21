@@ -36,11 +36,12 @@ class SharedSecretAuthenticator(object):
     def check_password(self, user_id, password):
         # The password is supposed to be an HMAC of the user id, keyed with the shared secret.
         # It's not really a password in this case.
-        given_hmac = password
+        given_hmac = password.encode('utf-8')
 
         logger.info('Authenticating user: %s', user_id)
 
-        computed_hmac = hmac.new(self.sharedSecret, user_id, hashlib.sha512).hexdigest().decode('utf-8')
+        h = hmac.new(self.sharedSecret.encode('utf-8'), user_id.encode('utf-8'), hashlib.sha512)
+        computed_hmac = h.hexdigest().encode('utf-8')
 
         try:
             is_identical = hmac.compare_digest(computed_hmac, given_hmac)
