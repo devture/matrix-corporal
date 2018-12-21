@@ -13,8 +13,10 @@ import (
 	"devture/matrix/corporal/reconciliation/computator"
 	"devture/matrix/corporal/reconciliation/reconciler"
 	"devture/matrix/corporal/userauth"
+	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 
 	lru "github.com/hashicorp/golang-lru"
 
@@ -70,7 +72,26 @@ func BuildContainer(
 
 	container.Set("matrix.http_reverse_proxy", func(c *service.Container) interface{} {
 		u, _ := url.Parse(configuration.Matrix.HomeserverApiEndpoint)
-		return httputil.NewSingleHostReverseProxy(u)
+		reverseProxy := httputil.NewSingleHostReverseProxy(u)
+
+		// To control the timeout, we need to use our own transport.
+		reverseProxy.Transport = &http.Transport{
+			ResponseHeaderTimeout: time.Duration(configuration.Matrix.TimeoutMilliseconds) * time.Millisecond,
+
+			// For other options, we stick to the defaults
+			Proxy:                 http.DefaultTransport.(*http.Transport).Proxy,
+			DialContext:           http.DefaultTransport.(*http.Transport).DialContext,
+			MaxIdleConns:          http.DefaultTransport.(*http.Transport).MaxIdleConns,
+			IdleConnTimeout:       http.DefaultTransport.(*http.Transport).IdleConnTimeout,
+			TLSHandshakeTimeout:   http.DefaultTransport.(*http.Transport).TLSHandshakeTimeout,
+			ExpectContinueTimeout: http.DefaultTransport.(*http.Transport).ExpectContinueTimeout,
+		}
+
+		reverseProxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+			logger.Errorf("HTTP Reverse Proxy: failed proxying [%s] %s: %s", r.Method, r.URL, err)
+		}
+
+		return reverseProxy
 	})
 
 	container.Set("matrix.shared_secret_auth.password_generator", func(c *service.Container) interface{} {
