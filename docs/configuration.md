@@ -9,7 +9,7 @@ The `matrix-corporal` configuration is a JSON document that looks like this:
 		"HomeserverApiEndpoint": "http://matrix-corporal.127.0.0.1.xip.io:41408",
 		"AuthSharedSecret": "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF",
 		"RegistrationSharedSecret": "y4aTYam;zxKZ#MnaHRrGDPs4&dS*3VEv_&Ck_;pe1=CrtM8*=7",
-		"TimeoutMilliseconds": 30000
+		"TimeoutMilliseconds": 45000
 	},
 
 	"Reconciliation": {
@@ -52,7 +52,7 @@ The configuration contains the following fields:
 
 	- `RegistrationSharedSecret` - the secret for Matrix Synapse's `/admin/register` API. Can be found in Matrix Synapse's `homeserver.yaml` file under the configuration key: `registration_shared_secret`
 
-	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out
+	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out. Since clients often use long-polling (usually with a 30-second limit), setting this to a value of more than `30000` is recommended.
 
 
 - `Reconciliation` - reconciliation-related configuration
