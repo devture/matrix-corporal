@@ -1,3 +1,8 @@
+# Version 1.2.2 (2018-12-21)
+
+- HTTP gateway: reverse-proxying requests to Synapse now respects the timeout configuration (`Matrix.TimeoutMilliseconds`) and logs errors in a better way
+
+
 # Version 1.2.1 (2018-09-20)
 
 - HTTP gateway: unified log message format (all messages are prefixed by `HTTP gateway:` now)
