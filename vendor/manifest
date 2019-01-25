@@ -10,7 +10,7 @@
 		{
 			"importpath": "github.com/euskadi31/go-service",
 			"repository": "https://github.com/euskadi31/go-service",
-			"revision": "cdb30e0ed4035c2db4e9f5111f7d5fe5c512845a",
+			"revision": "aff0285945215f208005752ee38fd208de619dba",
 			"branch": "master"
 		},
 		{
@@ -22,7 +22,7 @@
 		{
 			"importpath": "github.com/gorilla/mux",
 			"repository": "https://github.com/gorilla/mux",
-			"revision": "6137e193cdcba2725f16de84eaf0db2b769d9668",
+			"revision": "797e653da60e4619dcb0ae703714147b5a7454c6",
 			"branch": "master"
 		},
 		{
@@ -40,34 +40,34 @@
 		{
 			"importpath": "github.com/sirupsen/logrus",
 			"repository": "https://github.com/sirupsen/logrus",
-			"revision": "2067ea4241cec716fbd0ac90f42f339f963bff92",
+			"revision": "7d8d63893b994a654b3bc8d16ffd7fb6b9f884a4",
 			"branch": "master"
 		},
 		{
 			"importpath": "golang.org/x/crypto/bcrypt",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "505ab145d0a99da450461ae2c1a9f6cd10d1f447",
+			"revision": "057139ce5d2bdbe6fe73c53679e24e9cf007f637",
 			"branch": "master",
 			"path": "/bcrypt"
 		},
 		{
 			"importpath": "golang.org/x/crypto/blowfish",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "505ab145d0a99da450461ae2c1a9f6cd10d1f447",
+			"revision": "057139ce5d2bdbe6fe73c53679e24e9cf007f637",
 			"branch": "master",
 			"path": "/blowfish"
 		},
 		{
 			"importpath": "golang.org/x/crypto/ssh/terminal",
 			"repository": "https://go.googlesource.com/crypto",
-			"revision": "505ab145d0a99da450461ae2c1a9f6cd10d1f447",
+			"revision": "057139ce5d2bdbe6fe73c53679e24e9cf007f637",
 			"branch": "master",
 			"path": "/ssh/terminal"
 		},
 		{
 			"importpath": "golang.org/x/sys",
 			"repository": "https://go.googlesource.com/sys",
-			"revision": "8ff4e546d48be377a38a3ab13ef2dd4dd8dce06a",
+			"revision": "b90733256f2e882e81d52f9126de08df5615afd9",
 			"branch": "master"
 		}
 	]
