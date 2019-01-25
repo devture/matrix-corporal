@@ -11,7 +11,7 @@ services:
     - ../../var/matrix-synapse-postgres:/var/lib/postgresql/data
 
   synapse:
-    image: matrixdotorg/synapse:v0.34.0-py3
+    image: matrixdotorg/synapse:v0.34.1.1-py3
     restart: on-failure
     ports:
     # This server does not federate, so we don't expose any more ports.
@@ -24,12 +24,12 @@ services:
     - postgres:postgres
     volumes:
     - ./matrix-synapse:/data
-    - ./shared_secret_authenticator.py:/usr/local/lib/python2.7/site-packages/shared_secret_authenticator.py:ro
+    - ./shared_secret_authenticator.py:/usr/local/lib/python3.6/site-packages/shared_secret_authenticator.py:ro
     - ../../var/matrix-synapse-media-store:/media_store
 
   riot-web:
-    image: avhost/docker-matrix-riot:v0.17.8
+    image: bubuntux/riot-web:v0.17.9
     ports:
-    - "41465:8765"
+    - "41465:80"
     volumes:
-    - ./matrix-riot-web:/data
+    - ./matrix-riot-web/config.json:/etc/riot-web/config.json:ro
