@@ -1,3 +1,11 @@
+# Version 1.3.0 (2019-01-25)
+
+Reconciliation is now much faster, due to the way we retrieve account data from the Matrix server (no longer doing `/sync`).
+
+From now on, the minimum requirement for running matrix-corporal is Synapse v0.34.1,
+as it's the first Synapse release which contains the new API we require (`GET /user/{user_id}/account_data/{account_dataType}`).
+
+
 # Version 1.2.2 (2018-12-21)
 
 - HTTP gateway: reverse-proxying requests to Synapse now respects the timeout configuration (`Matrix.TimeoutMilliseconds`) and logs errors in a better way
