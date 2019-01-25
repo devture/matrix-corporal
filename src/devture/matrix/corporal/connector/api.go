@@ -3,7 +3,6 @@ package connector
 import (
 	"devture/matrix/corporal/avatar"
 	"devture/matrix/corporal/matrix"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -223,7 +222,12 @@ func (me *ApiConnector) determineAvatarSourceUriHashByUserAndMxcUri(
 		return "", nil
 	}
 
-	return value.(string), nil
+	valueAsString, ok := value.(string)
+	if !ok {
+		return "", nil
+	}
+
+	return valueAsString, nil
 }
 
 func (me *ApiConnector) GetUserAccountDataContentByType(
@@ -236,78 +240,25 @@ func (me *ApiConnector) GetUserAccountDataContentByType(
 		return nil, err
 	}
 
-	// Until there's a way to retrieve user account data
-	// ( see https://github.com/matrix-org/matrix-doc/issues/1339 ),
-	// we're forced to do it via a `/sync` request.
-	//
-	// This is suboptimal and potentially quite slow,
-	// as we're fetching a lot of unnecessary data with it.
-	//
-	// Below is a `/sync` filter, which asks the server to skip
-	// some events (presence, room information, etc.).
-	//
-	// Still, even with that filter, `/sync` would do too much
-	// and be potentially slow. The `rooms.join` part of the response
-	// still contains rooms we've asked to be skipped..
-	filter := map[string]interface{}{
-		"presence": map[string]interface{}{
-			"senders": []string{
-				"@whatever:whatever",
-			},
-		},
-		"room": map[string]interface{}{
-			"rooms": []string{
-				"!whatever:whatever",
-			},
-			"state": map[string]interface{}{
-				"senders": []string{
-					"@whatever:whatever",
-				},
-			},
-			"account_data": map[string]interface{}{
-				"senders": []string{
-					"@whatever:whatever",
-				},
-			},
-		},
-		"account_data": map[string]interface{}{
-			"types": []string{
-				accountDataType,
-			},
-		},
-	}
-
-	filterAsBytes, err := json.Marshal(filter)
-	if err != nil {
-		return nil, fmt.Errorf("Cannot JSON serialize the filter: %s", err)
-	}
-
-	queryParams := map[string]string{
-		// Make sure we don't mark the user as online as part of the /sync request
-		"set_presence": "offline",
-
-		"filter": string(filterAsBytes),
-	}
-
-	var resp gomatrix.RespSync
-
+	var accountData map[string]interface{}
 	_, err = client.MakeRequest(
 		"GET",
-		client.BuildURLWithQuery([]string{"/sync"}, queryParams),
+		client.BuildURL(
+			fmt.Sprintf("/user/%s/account_data/%s", userId, accountDataType),
+		),
 		nil,
-		&resp,
+		&accountData,
 	)
+
 	if err != nil {
+		if matrix.IsErrorWithCode(err, matrix.ErrorNotFound) {
+			// No such account data
+			return map[string]interface{}{}, nil
+		}
 		return nil, err
 	}
 
-	for _, event := range resp.AccountData.Events {
-		if event.Type == accountDataType {
-			return event.Content, nil
-		}
-	}
-
-	return map[string]interface{}{}, nil
+	return accountData, nil
 }
 
 func (me *ApiConnector) getJoinedCommunityIdsByUserId(
