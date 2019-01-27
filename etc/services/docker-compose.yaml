@@ -3,33 +3,37 @@ version: '2.1'
 services:
   postgres:
     image: postgres:11.1-alpine
+    user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     environment:
      POSTGRES_USER: synapse
      POSTGRES_PASSWORD: synapse-password
      POSTGRES_DB: homeserver
     volumes:
-    - ../../var/matrix-synapse-postgres:/var/lib/postgresql/data
+    - ./matrix-synapse-postgres:/var/lib/postgresql/data
+    - /etc/passwd:/etc/passwd:ro
 
   synapse:
     image: matrixdotorg/synapse:v0.34.1.1-py3
+    user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
+    entrypoint: python
+    command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
     restart: on-failure
     ports:
     # This server does not federate, so we don't expose any more ports.
     - "41408:8008"
-    environment:
-     SYNAPSE_SERVER_NAME: matrix-corporal.127.0.0.1.xip.io
-     SYNAPSE_REPORT_STATS: "no"
-     SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
     links:
     - postgres:postgres
     volumes:
-    - ./matrix-synapse:/data
-    - ./shared_secret_authenticator.py:/usr/local/lib/python3.6/site-packages/shared_secret_authenticator.py:ro
-    - ../../var/matrix-synapse-media-store:/media_store
+    - ../etc/services/matrix-synapse:/data
+    - ./../etc/services/shared_secret_authenticator.py:/usr/local/lib/python3.6/site-packages/shared_secret_authenticator.py:ro
+    - ./matrix-synapse-media-store:/media_store
 
   riot-web:
     image: bubuntux/riot-web:v0.17.9
+    user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
-    - "41465:80"
+    - "41465:8080"
     volumes:
-    - ./matrix-riot-web/config.json:/etc/riot-web/config.json:ro
+    - ../etc/services/matrix-riot-web/nginx.conf:/etc/nginx/nginx.conf:ro
+    - /dev/null:/etc/nginx/conf.d/default.conf:ro
+    - ../etc/services/matrix-riot-web/config.json:/etc/riot-web/config.json:ro
