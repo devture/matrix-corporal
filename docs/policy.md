@@ -9,7 +9,7 @@ Policies are loaded into `matrix-corporal` through the help of a [policy provide
 
 The policy is a JSON document that looks like this:
 
-```yaml
+```json
 {
 	"schemaVersion": 1,
 
