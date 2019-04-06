@@ -1,6 +1,5 @@
 /var
-/vendor/src
-/vendor/pkg
+/vendor/
 /pkg
-/bin
 /etc/docker/Dockerfile
+/matrix-corporal
