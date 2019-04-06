@@ -36,3 +36,6 @@ build: ## Builds the matrix-corporal code
 
 test: ## Runs the tests
 	go test ./...
+
+docker-build: ## Builds a Docker container image
+	docker build -t devture/matrix-corporal -f etc/docker/Dockerfile .
