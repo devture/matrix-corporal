@@ -6,11 +6,7 @@ If you'd like to contribute code to this project or give it a try locally (befor
 
 - get [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) -- used for running a local Matrix Synapse + riot-web setup, for testing
 
-- get a [Go](https://golang.org/) compiler
-
-- make sure you've got [gb](https://getgb.io/) installed - using your package manager or with [these instructions](https://getgb.io/docs/install/)
-
-- install all 3rd party libraries that our code depends on: `gb vendor restore`
+- get a [Go](https://golang.org/) compiler (version 1.12 or later is required)
 
 - start all dependency services (Postgres, Matrix Synapse, riot-web): `make services-start`. You can stop them later with `make services-stop` or tail their logs with `make services-tail-logs`
 

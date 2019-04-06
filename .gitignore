@@ -1,7 +1,5 @@
-/bin
-/pkg
 /var
-/vendor/src
-/vendor/pkg
+/vendor
+/matrix-corporal
 /config.json
 /policy.json

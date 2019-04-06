@@ -29,10 +29,10 @@ create-sample-system-user: _prepare_services ## Creates a system user, used for 
 		http://localhost:8008
 
 run: build ## Builds and runs matrix-corporal
-	./bin/matrix-corporal
+	./matrix-corporal
 
 build: ## Builds the matrix-corporal code
-	gb build
+	go build matrix-corporal.go
 
 test: ## Runs the tests
-	gb test -v
+	go test ./...
