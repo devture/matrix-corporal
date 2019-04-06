@@ -1,3 +1,9 @@
+# Version 1.4.0 (2019-04-06)
+
+Building is now based on Go modules, not on the [gb](https://getgb.io/) tool.
+Go 1.12 or later is required.
+
+
 # Version 1.3.0 (2019-01-25)
 
 Reconciliation is now much faster, due to the way we retrieve account data from the Matrix server (no longer doing `/sync`).
