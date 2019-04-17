@@ -98,7 +98,7 @@ http://matrix.example.com/_matrix/corporal/user/@user:example.com/access-token/n
 
 **Endpoint**: `DELETE /_matrix/corporal/user/{userId}/access-token`
 
-To obtain an access token for a user, submit a `DELETE` request to the following endpoint.
+To release a previously-obtained access token for a user, submit a `DELETE` request to the following endpoint.
 
 You are required to submit the access token to delete (release) in the body payload:
 
