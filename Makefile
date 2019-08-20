@@ -28,11 +28,16 @@ create-sample-system-user: _prepare_services ## Creates a system user, used for 
 		-c /data/homeserver.yaml \
 		http://localhost:8008
 
+run-locally-quick: ## Builds and runs matrix-corporal locally (no containers, no govvv)
+	go run matrix-corporal.go
+
 run-locally: build-locally ## Builds and runs matrix-corporal locally (no containers)
 	./matrix-corporal
 
 build-locally: ## Builds the matrix-corporal code locally (no containers)
-	go build matrix-corporal.go
+	go get -u -v github.com/ahmetb/govvv
+	rm -f matrix-corporal
+	go build -a -ldflags "`~/go/bin/govvv -flags`" matrix-corporal.go
 
 test: ## Runs the tests locally (no containers)
 	go test ./...

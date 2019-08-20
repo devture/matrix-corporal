@@ -26,6 +26,7 @@ import (
 	"devture-matrix-corporal/corporal/policy/provider"
 	"devture-matrix-corporal/corporal/reconciliation/reconciler"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,7 +34,44 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Following variables will be statically linked at the time of compiling
+// Source: https://oddcode.daveamit.com/2018/08/17/embed-versioning-information-in-golang-binary/
+
+// GitCommit holds short commit hash of source tree
+var GitCommit string
+
+// GitBranch holds current branch name the code is built off
+var GitBranch string
+
+// GitState shows whether there are uncommitted changes
+var GitState string
+
+// GitSummary holds output of git describe --tags --dirty --always
+var GitSummary string
+
+// BuildDate holds RFC3339 formatted UTC date (build time)
+var BuildDate string
+
+// Version holds contents of ./VERSION file, if exists, or the value passed via the -version option
+var Version string
+
 func main() {
+	fmt.Printf(`
+                 _        _                                                _
+ _ __ ___   __ _| |_ _ __(_)_  __      ___ ___  _ __ _ __   ___  _ __ __ _| |
+| '_ \ _ \ / _\ | __| '__| \ \/ /____ / __/ _ \| '__| '_ \ / _ \| '__/ _\ | |
+| | | | | | (_| | |_| |  | |>  <_____| (_| (_) | |  | |_) | (_) | | | (_| | |
+|_| |_| |_|\__,_|\__|_|  |_/_/\_\     \___\___/|_|  | .__/ \___/|_|  \__,_|_|
+                                                    |_|
+---------------------------------------------------------- [ Version: %s ]
+GitCommit: %s
+GitBranch: %s
+GitState: %s
+GitSummary: %s
+BuildDate: %s
+
+`, Version, GitCommit, GitBranch, GitState, GitSummary, BuildDate)
+
 	configPath := flag.String("config", "config.json", "configuration file to use")
 	flag.Parse()
 
