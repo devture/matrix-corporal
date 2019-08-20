@@ -43,7 +43,7 @@ func (me *SynapseConnector) DetermineCurrentState(
 	// we could just loop over the managedUserIds, see which users exist and fetch the state then.
 	//
 	// Since we can't do that (yet), we're forced to loop over "all users on the server"
-	// and figure things out that way. This is more inefficient, but there doesn't seem a better way
+	// and figure things out that way. This is more inefficient, but there doesn't seem to be a better way
 	// to do things now.
 
 	var users []matrix.ApiAdminEntityUser
@@ -90,6 +90,11 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId string) error {
 
 	var nonceResponse matrix.ApiUserAccountRegisterNonceResponse
 	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register.nonce", func() error {
+		// The canonical admin/register API is available at `/_synapse/admin/v1/register`.
+		// What we hit below is an alias, which might stop working some time in the future.
+		//
+		// We can't hit the canonical URL easily, because gomatrix insists on pre-pending
+		// `/_matrix/client/r0` to URLs built via `BuildURL()`.
 		return client.MakeRequest(
 			"GET",
 			client.BuildURL("admin/register"),
@@ -139,6 +144,9 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId string) error {
 	var registerResponse matrix.ApiUserAccountRegisterResponse
 
 	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register.actual", func() error {
+		// The canonical admin/register API is available at `/_synapse/admin/v1/register`.
+		// What we hit below is an alias, which might stop working some time in the future.
+		// See above for why we can't easily use it.
 		return client.MakeRequest(
 			"POST",
 			client.BuildURL("admin/register"),
