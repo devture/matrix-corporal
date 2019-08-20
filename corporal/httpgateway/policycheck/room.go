@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/matrix-org/gomatrix"
 )
 
 // CheckRoomLeave is a policy checker for: /_matrix/client/r0/rooms/{roomId}/leave
@@ -79,7 +80,7 @@ func CheckRoomKick(r *http.Request, ctx context.Context, policy policy.Policy, c
 		}
 	}
 
-	var payload matrix.ApiRoomKickRequestPayload
+	var payload gomatrix.ReqKickUser
 	err := httphelp.GetJsonFromRequestBody(r, &payload)
 	if err != nil {
 		return PolicyCheckResponse{

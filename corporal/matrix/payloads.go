@@ -1,9 +1,5 @@
 package matrix
 
-import (
-	"github.com/matrix-org/gomatrix"
-)
-
 // ApiAdminEntityUser represents a user entity that is part of the list response
 // at: GET /_matrix/client/r0/admin/users/{userId}
 type ApiAdminEntityUser struct {
@@ -32,11 +28,6 @@ type ApiUserProfileDisplayNameRequestPayload struct {
 // ApiJoinedGroupsResponse is a response as found at: GET /_matrix/client/r0/joined_groups
 type ApiJoinedGroupsResponse struct {
 	GroupIds []string `json:"groups"`
-}
-
-// ApiJoinedRoomsResponse is a response as found at: GET /_matrix/client/r0/joined_rooms
-type ApiJoinedRoomsResponse struct {
-	RoomIds []string `json:"joined_rooms"`
 }
 
 // ApiAdminRegisterNonceResponse is a response as found at: GET /_matrix/client/r0/admin/register
@@ -76,9 +67,4 @@ type ApiEntityCommunityInvitedUser struct {
 	Id          string  `json:"user_id"`
 	DisplayName string  `json:"displayname"`
 	AvatarUrl   *string `json:"avatar_url"`
-}
-
-// ApiUserAccountRegisterRequestPayload is a request payload for: POST /_matrix/client/r0/rooms/{roomId}/kick
-type ApiRoomKickRequestPayload struct {
-	gomatrix.ReqKickUser
 }

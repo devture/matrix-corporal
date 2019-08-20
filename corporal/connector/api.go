@@ -304,14 +304,12 @@ func (me *ApiConnector) getJoinedRoomIdsByUserId(
 		return nil, err
 	}
 
-	var resp matrix.ApiJoinedRoomsResponse
-
-	err = client.MakeRequest("GET", client.BuildURL("/joined_rooms"), nil, &resp)
+	resp, err := client.JoinedRooms()
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.RoomIds, nil
+	return resp.JoinedRooms, nil
 }
 
 func (me *ApiConnector) SetUserAvatar(
@@ -557,7 +555,8 @@ func (me *ApiConnector) JoinRoom(
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.join", func() error {
 		// This request is idempotent.
-		return client.MakeRequest("POST", client.BuildURL(fmt.Sprintf("/rooms/%s/join", roomId)), nil, nil)
+		_, err := client.JoinRoom(roomId, "", nil)
+		return err
 	})
 }
 
