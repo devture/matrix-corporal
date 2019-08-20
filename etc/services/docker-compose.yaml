@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   postgres:
-    image: postgres:11.2-alpine
+    image: postgres:11.5-alpine
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     environment:
      POSTGRES_USER: synapse
@@ -13,7 +13,7 @@ services:
     - /etc/passwd:/etc/passwd:ro
 
   synapse:
-    image: matrixdotorg/synapse:v0.99.3-py3
+    image: matrixdotorg/synapse:v1.3.1
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     entrypoint: python
     command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
@@ -25,11 +25,11 @@ services:
     - postgres:postgres
     volumes:
     - ../etc/services/matrix-synapse:/data
-    - ./../etc/services/shared_secret_authenticator.py:/usr/local/lib/python3.6/site-packages/shared_secret_authenticator.py:ro
+    - ./../etc/services/shared_secret_authenticator.py:/usr/local/lib/python3.7/site-packages/shared_secret_authenticator.py:ro
     - ./matrix-synapse-media-store:/media_store
 
   riot-web:
-    image: bubuntux/riot-web:v1.0.6
+    image: bubuntux/riot-web:v1.3.3
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "41465:8080"
