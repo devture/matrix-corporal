@@ -1,3 +1,9 @@
+# Version 1.5.0 (2019-08-20)
+
+Various dependencies were updated and code has been refactored a bit.
+There are no functionality changes, but the internal refactoring justifies a version bump.
+
+
 # Version 1.4.0 (2019-04-06)
 
 Building is now based on Go modules, not on the [gb](https://getgb.io/) tool.
