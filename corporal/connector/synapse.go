@@ -47,7 +47,7 @@ func (me *SynapseConnector) DetermineCurrentState(
 	// to do things now.
 
 	var users []matrix.ApiAdminEntityUser
-	_, err = client.MakeRequest("GET", client.BuildURL(fmt.Sprintf("/admin/users/%s", adminUserId)), nil, &users)
+	err = client.MakeRequest("GET", client.BuildURL(fmt.Sprintf("/admin/users/%s", adminUserId)), nil, &users)
 	if err != nil {
 		return nil, err
 	}
@@ -89,15 +89,13 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId string) error {
 	client, _ := gomatrix.NewClient(me.homeserverApiEndpoint, "", "")
 
 	var nonceResponse matrix.ApiUserAccountRegisterNonceResponse
-	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register", func() error {
-		_, err := client.MakeRequest(
+	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register.nonce", func() error {
+		return client.MakeRequest(
 			"GET",
 			client.BuildURL("admin/register"),
 			nil,
 			&nonceResponse,
 		)
-
-		return err
 	})
 	if err != nil {
 		return err
@@ -140,15 +138,13 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId string) error {
 
 	var registerResponse matrix.ApiUserAccountRegisterResponse
 
-	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register", func() error {
-		_, err := client.MakeRequest(
+	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register.actual", func() error {
+		return client.MakeRequest(
 			"POST",
 			client.BuildURL("admin/register"),
 			payload,
 			&registerResponse,
 		)
-
-		return err
 	})
 
 	if err != nil {

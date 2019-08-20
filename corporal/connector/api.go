@@ -94,7 +94,7 @@ func (me *ApiConnector) LogoutAllAccessTokensForUser(ctx *AccessTokenContext, us
 		return err
 	}
 
-	_, err = client.MakeRequest("POST", client.BuildURL("/logout/all"), nil, nil)
+	err = client.MakeRequest("POST", client.BuildURL("/logout/all"), nil, nil)
 	if err != nil {
 		return err
 	}
@@ -185,7 +185,7 @@ func (me *ApiConnector) storeAvatarSourceUriHashForUserAndMxcUri(
 	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.set_account_data", func() error {
 		// We'll completely overwrite the old account data at that key,
 		// storing only the avatar hash for the given mxcUri and purging everything else.
-		_, err := client.MakeRequest(
+		return client.MakeRequest(
 			"PUT",
 			client.BuildURL(
 				fmt.Sprintf(
@@ -197,7 +197,6 @@ func (me *ApiConnector) storeAvatarSourceUriHashForUserAndMxcUri(
 			payload,
 			nil,
 		)
-		return err
 	})
 
 	return err
@@ -241,7 +240,7 @@ func (me *ApiConnector) GetUserAccountDataContentByType(
 	}
 
 	var accountData map[string]interface{}
-	_, err = client.MakeRequest(
+	err = client.MakeRequest(
 		"GET",
 		client.BuildURL(
 			fmt.Sprintf("/user/%s/account_data/%s", userId, accountDataType),
@@ -272,7 +271,7 @@ func (me *ApiConnector) getJoinedCommunityIdsByUserId(
 
 	var resp matrix.ApiJoinedGroupsResponse
 
-	_, err = client.MakeRequest("GET", client.BuildURL("/joined_groups"), nil, &resp)
+	err = client.MakeRequest("GET", client.BuildURL("/joined_groups"), nil, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +287,7 @@ func (me *ApiConnector) GetUserProfileByUserId(ctx *AccessTokenContext, userId s
 
 	var resp matrix.ApiUserProfileResponse
 
-	_, err = client.MakeRequest("GET", client.BuildURL(fmt.Sprintf("/profile/%s", client.UserID)), nil, &resp)
+	err = client.MakeRequest("GET", client.BuildURL(fmt.Sprintf("/profile/%s", client.UserID)), nil, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +306,7 @@ func (me *ApiConnector) getJoinedRoomIdsByUserId(
 
 	var resp matrix.ApiJoinedRoomsResponse
 
-	_, err = client.MakeRequest("GET", client.BuildURL("/joined_rooms"), nil, &resp)
+	err = client.MakeRequest("GET", client.BuildURL("/joined_rooms"), nil, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +398,7 @@ func (me *ApiConnector) InviteUserToCommunity(
 	var response matrix.ApiCommunityInviteResponse
 
 	err = matrix.ExecuteWithRateLimitRetries(me.logger, "community.invite", func() error {
-		_, err := client.MakeRequest(
+		return client.MakeRequest(
 			"PUT",
 			client.BuildURL(fmt.Sprintf(
 				"/groups/%s/admin/users/invite/%s",
@@ -409,7 +408,6 @@ func (me *ApiConnector) InviteUserToCommunity(
 			map[string]interface{}{},
 			&response,
 		)
-		return err
 	})
 	if err == nil {
 		return nil
@@ -455,7 +453,7 @@ func (me *ApiConnector) isUserIdInvitedToCommunityByMatrixClient(
 ) (bool, error) {
 	var response matrix.ApiCommunityInvitedUsersResponse
 
-	_, err := client.MakeRequest(
+	err := client.MakeRequest(
 		"GET",
 		client.BuildURL(fmt.Sprintf(
 			"/groups/%s/invited_users",
@@ -488,7 +486,7 @@ func (me *ApiConnector) AcceptCommunityInvite(
 	}
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "community.accept_invite", func() error {
-		_, err := client.MakeRequest(
+		return client.MakeRequest(
 			"PUT",
 			client.BuildURL(fmt.Sprintf(
 				"/groups/%s/self/accept_invite",
@@ -497,7 +495,6 @@ func (me *ApiConnector) AcceptCommunityInvite(
 			map[string]interface{}{},
 			nil,
 		)
-		return err
 	})
 }
 
@@ -518,7 +515,7 @@ func (me *ApiConnector) KickUserFromCommunity(
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "community.kick", func() error {
 		// This request is idempotent.
-		_, err := client.MakeRequest(
+		return client.MakeRequest(
 			"PUT",
 			client.BuildURL(fmt.Sprintf(
 				"/groups/%s/admin/users/remove/%s",
@@ -528,7 +525,6 @@ func (me *ApiConnector) KickUserFromCommunity(
 			map[string]interface{}{},
 			nil,
 		)
-		return err
 	})
 }
 
@@ -561,8 +557,7 @@ func (me *ApiConnector) JoinRoom(
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.join", func() error {
 		// This request is idempotent.
-		_, err := client.MakeRequest("POST", client.BuildURL(fmt.Sprintf("/rooms/%s/join", roomId)), nil, nil)
-		return err
+		return client.MakeRequest("POST", client.BuildURL(fmt.Sprintf("/rooms/%s/join", roomId)), nil, nil)
 	})
 }
 
@@ -684,7 +679,7 @@ func (me *ApiConnector) verifyAccessToken(userId string, accessToken string) err
 
 	var resp matrix.ApiWhoAmIResponse
 
-	_, err = client.MakeRequest("GET", client.BuildURL("/account/whoami"), nil, &resp)
+	err = client.MakeRequest("GET", client.BuildURL("/account/whoami"), nil, &resp)
 	if err != nil {
 		return err
 	}

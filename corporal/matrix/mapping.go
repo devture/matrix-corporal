@@ -3,7 +3,7 @@ package matrix
 import (
 	"fmt"
 
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 
 	"github.com/matrix-org/gomatrix"
 	"github.com/sirupsen/logrus"
@@ -50,7 +50,7 @@ func (me *UserMappingResolver) ResolveByAccessToken(accessToken string) (string,
 
 	var resp ApiWhoAmIResponse
 	matrixClient, _ := gomatrix.NewClient(me.homeserverApiEndpoint, "unknown user id", accessToken)
-	_, err := matrixClient.MakeRequest("GET", matrixClient.BuildURL("/account/whoami"), nil, &resp)
+	err := matrixClient.MakeRequest("GET", matrixClient.BuildURL("/account/whoami"), nil, &resp)
 	if err != nil {
 		//Certain common and expected errors (M_UNKNOWN_TOKEN), we try to interpret and possibly cache.
 		//Others, we just return blindly, without caching.
