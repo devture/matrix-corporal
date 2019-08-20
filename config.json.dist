@@ -1,7 +1,7 @@
 {
 	"Matrix": {
 		"HomeserverDomainName": "matrix-corporal.127.0.0.1.xip.io",
-		"HomeserverApiEndpoint": "http://matrix-corporal.127.0.0.1.xip.io:41408",
+		"HomeserverApiEndpoint": "http://synapse:8008",
 		"AuthSharedSecret": "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF",
 		"RegistrationSharedSecret": "y4aTYam;zxKZ#MnaHRrGDPs4&dS*3VEv_&Ck_;pe1=CrtM8*=7",
 		"TimeoutMilliseconds": 45000

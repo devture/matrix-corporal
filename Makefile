@@ -28,14 +28,26 @@ create-sample-system-user: _prepare_services ## Creates a system user, used for 
 		-c /data/homeserver.yaml \
 		http://localhost:8008
 
-run: build ## Builds and runs matrix-corporal
+run-locally: build-locally ## Builds and runs matrix-corporal locally (no containers)
 	./matrix-corporal
 
-build: ## Builds the matrix-corporal code
+build-locally: ## Builds the matrix-corporal code locally (no containers)
 	go build matrix-corporal.go
 
-test: ## Runs the tests
+test: ## Runs the tests locally (no containers)
 	go test ./...
 
-docker-build: ## Builds a Docker container image
-	docker build -t devture/matrix-corporal -f etc/docker/Dockerfile .
+build-container-image: ## Builds a Docker container image
+	docker build -t devture/matrix-corporal:latest -f etc/docker/Dockerfile .
+
+run-in-container: build-container-image ## Runs email2matrix in a container
+	docker run \
+	-it \
+	--rm \
+	--name=matrix-corporal \
+	-p 41080:41080 \
+	-p 41081:41081 \
+	--mount type=bind,src=`pwd`/config.json,dst=/config.json,ro \
+	--mount type=bind,src=`pwd`/policy.json,dst=/policy.json,ro \
+	--network=matrix-corporal_default \
+	devture/matrix-corporal:latest

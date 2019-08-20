@@ -1,5 +1,6 @@
 /var
 /vendor/
 /pkg
-/etc/docker/Dockerfile
 /matrix-corporal
+/config.json
+/policy.json
