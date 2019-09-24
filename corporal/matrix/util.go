@@ -74,6 +74,10 @@ func CleanDeactivationMarkerFromDisplayName(displayName string) string {
 
 // DetermineFullUserId takes a user id and converts it to a full Matrix user id of the given home server (if not already)
 func DetermineFullUserId(userIdLocalOrFull, homeserverDomainName string) (string, error) {
+	if userIdLocalOrFull == "" {
+		return "", fmt.Errorf("Empty user id")
+	}
+
 	if strings.HasPrefix(userIdLocalOrFull, "@") {
 		// Somewhat looks like a full user id.
 		// We don't care if it's on the same homeserver or not.
