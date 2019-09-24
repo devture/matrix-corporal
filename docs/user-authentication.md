@@ -115,18 +115,18 @@ If the HTTP authentication service is down (unreachable or responds with some no
 
 ## How authentication works?
 
-The Matrix Synapse server only works with `bcrypt` passwords for users.
+The Synapse server only works with `bcrypt` passwords for users.
 
-To make all password providers (as described above) work, we can't possibly store passwords inside Matrix Synapse's database.
+To make all password providers (as described above) work, we can't possibly store passwords inside Synapse's database.
 
 Instead, passwords are either stored inside the policy (in the case of [plain-text passwords](#plain-text-passwords) and [hashed passwords](#hashed-passwords)) or delegated to an external service (in the case of [External authentication via REST API calls](#external-authentication-via-rest-api-calls)).
 
 To make all these work, `matrix-corporal` intercepts the authentication endpoint of the client API (something like `/_matrix/client/r0/login`). Once intercepted, the login request is processed in `matrix-corporal`.
 
-Authentication requests for users not managed by `matrix-corporal` (users that do not have a corresponding user policy in the [policy](policy.md)) are directly forwarded to Matrix Synapse -- these users are not managed by `matrix-corporal`, so they are left alone.
+Authentication requests for users not managed by `matrix-corporal` (users that do not have a corresponding user policy in the [policy](policy.md)) are directly forwarded to the upstream server -- these users are not managed by `matrix-corporal`, so they are left alone.
 
 If a user is managed by `matrix-corporal`, authentication proceeds depending on the [user authentication](user-authentication.md) type (`authType` user policy field) for the particular user trying to log in.
 
-If the request ends up being **not authenticated**, `matrix-corporal` outright rejects it and it never reaches Matrix Synapse.
+If the request ends up being **not authenticated**, `matrix-corporal` outright rejects it and it never reaches the upstream server.
 
-If the request ends up being **authenticated**, `matrix-corporal` modifies it (in a way that Matrix Synapse would accept) and forwards it over to Matrix Synapse. The modification part relies on the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) module being enabled in Matrix Synapse. This is how `matrix-corporal` manages to obtain access tokens for any user in the system or create `/login` requests that Matrix Synapse would accept.
+If the request ends up being **authenticated**, `matrix-corporal` modifies it (in a way that the upstream server would accept) and forwards it over to the upstream server. The modification part relies on the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) module being enabled in Synapse. This is how `matrix-corporal` manages to obtain access tokens for any user in the system or create `/login` requests that Synapse would accept.
