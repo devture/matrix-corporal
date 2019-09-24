@@ -66,6 +66,27 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorBadJson, "Bad input")
 	}
 
+	loggingContextFields["type"] = payload.Type
+
+	if payload.Type == matrix.LoginTypeToken {
+		// This is a Token Authentication request related to SSO (CAS or SAML).
+		// Let it pass as-is to the upstream server in order to avoid breaking such login flows.
+		return InterceptorResponse{
+			Result:               InterceptorResultProxy,
+			LoggingContextFields: loggingContextFields,
+		}
+	}
+
+	if payload.Type != matrix.LoginTypePassword {
+		// This is some other unrecognized login flow.
+		// It's unknown whether we should let it pass or block it.
+		// We'll block it to be on the safe side.
+		message := fmt.Sprintf("Denying login type: %s", payload.Type)
+		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, message)
+	}
+
+	// Proceed handling password authentication..
+
 	loggingContextFields["userId"] = payload.User
 
 	userIdFull, err := matrix.DetermineFullUserId(payload.User, me.homeserverDomainName)
@@ -78,14 +99,6 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 
 	if !matrix.IsFullUserIdOfDomain(userIdFull, me.homeserverDomainName) {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, "Rejecting non-own domains")
-	}
-
-	if payload.Type != matrix.LoginTypePassword {
-		// This is a Token Authentication or other request.
-		// We don't know of any use cases for this,
-		// so we'll outright reject it for now, just to be on the safe side.
-		message := fmt.Sprintf("Denying type: %s", payload.Type)
-		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, message)
 	}
 
 	policy := me.policyStore.Get()

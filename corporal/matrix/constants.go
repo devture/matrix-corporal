@@ -21,6 +21,7 @@ const (
 
 const (
 	LoginTypePassword = "m.login.password"
+	LoginTypeToken    = "m.login.token"
 
 	RegistrationTypeSharedSecret = "org.matrix.login.shared_secret"
 )

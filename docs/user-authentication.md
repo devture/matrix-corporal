@@ -123,6 +123,8 @@ Instead, passwords are either stored inside the policy (in the case of [plain-te
 
 To make all these work, `matrix-corporal` intercepts the authentication endpoint of the client API (something like `/_matrix/client/r0/login`). Once intercepted, the login request is processed in `matrix-corporal`.
 
+Authentication requests with a login flow of `m.login.token` (used by CAS/SAML SSO login) are directly forwarded to the upstream server unchanged.
+
 Authentication requests for users not managed by `matrix-corporal` (users that do not have a corresponding user policy in the [policy](policy.md)) are directly forwarded to the upstream server -- these users are not managed by `matrix-corporal`, so they are left alone.
 
 If a user is managed by `matrix-corporal`, authentication proceeds depending on the [user authentication](user-authentication.md) type (`authType` user policy field) for the particular user trying to log in.
