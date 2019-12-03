@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   postgres:
-    image: postgres:11.5-alpine
+    image: postgres:12.1-alpine
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     environment:
      POSTGRES_USER: synapse
@@ -13,7 +13,7 @@ services:
     - /etc/passwd:/etc/passwd:ro
 
   synapse:
-    image: matrixdotorg/synapse:v1.3.1
+    image: matrixdotorg/synapse:v1.6.1
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     entrypoint: python
     command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
@@ -29,11 +29,11 @@ services:
     - ./matrix-synapse-media-store:/media_store
 
   riot-web:
-    image: bubuntux/riot-web:v1.3.3
+    image: vectorim/riot-web:v1.5.5
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "41465:8080"
     volumes:
     - ../etc/services/matrix-riot-web/nginx.conf:/etc/nginx/nginx.conf:ro
     - /dev/null:/etc/nginx/conf.d/default.conf:ro
-    - ../etc/services/matrix-riot-web/config.json:/etc/riot-web/config.json:ro
+    - ../etc/services/matrix-riot-web/config.json:/app/config.json:ro
