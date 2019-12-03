@@ -45,7 +45,7 @@ test: ## Runs the tests locally (no containers)
 build-container-image: ## Builds a Docker container image
 	docker build -t devture/matrix-corporal:latest -f etc/docker/Dockerfile .
 
-run-in-container: build-container-image ## Runs email2matrix in a container
+run-in-container: build-container-image ## Runs matrix-corporal in a container
 	docker run \
 	-it \
 	--rm \
