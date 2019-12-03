@@ -11,8 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/matrix-org/gomatrix"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -58,7 +56,7 @@ func NewLoginInterceptor(
 func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 	loggingContextFields := logrus.Fields{}
 
-	var payload gomatrix.ReqLogin
+	var payload matrix.ApiLoginRequestPayload
 
 	err := httphelp.GetJsonFromRequestBody(r, &payload)
 	if err != nil {
@@ -87,9 +85,18 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 
 	// Proceed handling password authentication..
 
-	loggingContextFields["userId"] = payload.User
+	userId := ""
+	if payload.Identifier.User != "" {
+		// New, preferred field
+		userId = payload.Identifier.User
+	} else {
+		// Old deprecated field
+		userId = payload.User
+	}
 
-	userIdFull, err := matrix.DetermineFullUserId(payload.User, me.homeserverDomainName)
+	loggingContextFields["userId"] = userId
+
+	userIdFull, err := matrix.DetermineFullUserId(userId, me.homeserverDomainName)
 	if err != nil {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, "Cannot interpret user id")
 	}

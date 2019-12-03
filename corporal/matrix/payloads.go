@@ -1,5 +1,27 @@
 package matrix
 
+// ApiLoginRequestPayload represents is a request payload for: POST /_matrix/client/r0/login
+type ApiLoginRequestPayload struct {
+	Type     string `json:"type"`
+	Password string `json:"password,omitempty"`
+	Medium   string `json:"medium,omitempty"`
+
+	// User is deprecated in favor of Identifier
+	User string `json:"user,omitempty"`
+
+	Address                  string `json:"address,omitempty"`
+	Token                    string `json:"token,omitempty"`
+	DeviceID                 string `json:"device_id,omitempty"`
+	InitialDeviceDisplayName string `json:"initial_device_display_name,omitempty"`
+
+	Identifier ApiLoginRequestIdentifier `json:"identifier"`
+}
+
+type ApiLoginRequestIdentifier struct {
+	Type string `json:"type"`
+	User string `json:"user"`
+}
+
 // ApiAdminEntityUser represents a user entity that is part of the list response
 // at: GET /_matrix/client/r0/admin/users/{userId}
 type ApiAdminEntityUser struct {
