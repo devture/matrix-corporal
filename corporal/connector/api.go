@@ -59,14 +59,21 @@ func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (
 
 	var resp *gomatrix.RespLogin
 	err := matrix.ExecuteWithRateLimitRetries(me.logger, "user.obtain_access_token", func() error {
-		var innerErr error
-		resp, innerErr = client.Login(&gomatrix.ReqLogin{
-			Type:     matrix.LoginTypePassword,
-			User:     userId,
+		payload := &matrix.ApiLoginRequestPayload{
+			Type: matrix.LoginTypePassword,
+
+			// Old deprecated field
+			User: userId,
+
+			Identifier: matrix.ApiLoginRequestIdentifier{
+				User: userId,
+			},
+
 			Password: me.sharedSecretAuthPasswordGenerator.GenerateForUserId(userId),
 			DeviceID: deviceId,
-		})
-		return innerErr
+		}
+
+		return client.MakeRequest("POST", client.BuildURL("/login"), payload, &resp)
 	})
 
 	if err != nil {
