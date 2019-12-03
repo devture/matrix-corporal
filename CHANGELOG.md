@@ -1,3 +1,8 @@
+# Version 1.7.0 (2019-12-03)
+
+`/login` requests now support the new `identifier.user` payload parameter, not just the deprecated `user` parameter.
+
+
 # Version 1.6.0 (2019-09-24)
 
 `m.login.token` requests to `/login` are no longer denied, but rather passed through to the upstream server (Synapse).
