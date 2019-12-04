@@ -1,3 +1,8 @@
+# Version 1.7.1 (2019-12-04)
+
+`/login` requests now respond with `M_USER_DEACTIVATED` for inactive users, instead of `M_FORBIDDEN`.
+
+
 # Version 1.7.0 (2019-12-03)
 
 `/login` requests now support the new `identifier.user` payload parameter, not just the deprecated `user` parameter.
