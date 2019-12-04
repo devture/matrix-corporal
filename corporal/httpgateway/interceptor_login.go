@@ -124,7 +124,7 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 	}
 
 	if !userPolicy.Active {
-		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, "Deactivated in policy")
+		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUserDeactivated, "Deactivated in policy")
 	}
 
 	loggingContextFields["authType"] = userPolicy.AuthType

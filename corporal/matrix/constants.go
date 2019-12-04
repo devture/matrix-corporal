@@ -8,6 +8,7 @@ const (
 	ErrorUnknownToken     = "M_UNKNOWN_TOKEN"
 	ErrorUserInUse        = "M_USER_IN_USE"
 	ErrorInvalidUsername  = "M_INVALID_USERNAME"
+	ErrorUserDeactivated  = "M_USER_DEACTIVATED"
 	ErrorLimitExceeded    = "M_LIMIT_EXCEEDED"
 	ErrorMissingParameter = "M_MISSING_PARAM"
 	ErrorNotFound         = "M_NOT_FOUND"
