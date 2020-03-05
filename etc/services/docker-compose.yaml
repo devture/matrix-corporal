@@ -13,7 +13,7 @@ services:
     - /etc/passwd:/etc/passwd:ro
 
   synapse:
-    image: matrixdotorg/synapse:v1.6.1
+    image: matrixdotorg/synapse:v1.11.1
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     entrypoint: python
     command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
@@ -29,7 +29,7 @@ services:
     - ./matrix-synapse-media-store:/media_store
 
   riot-web:
-    image: vectorim/riot-web:v1.5.5
+    image: vectorim/riot-web:v1.5.12
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "41465:8080"
