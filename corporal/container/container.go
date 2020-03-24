@@ -117,7 +117,7 @@ func BuildContainer(
 			container.Get("policy.store").(*policy.Store),
 			container.Get("policy.checker").(*policy.Checker),
 			container.Get("httpgateway.interceptor.login").(httpgateway.Interceptor),
-			time.Duration(configuration.Matrix.TimeoutMilliseconds)*time.Millisecond,
+			time.Duration(configuration.HttpGateway.TimeoutMilliseconds)*time.Millisecond,
 		)
 
 		shutdownHandler.Add(func() {
@@ -132,7 +132,7 @@ func BuildContainer(
 			logger,
 			configuration.HttpApi,
 			container.Get("httpapi.server.handler_registrators").([]handler.HandlerRegistrator),
-			time.Duration(configuration.Matrix.TimeoutMilliseconds)*time.Millisecond,
+			time.Duration(configuration.HttpApi.TimeoutMilliseconds)*time.Millisecond,
 		)
 
 		shutdownHandler.Add(func() {

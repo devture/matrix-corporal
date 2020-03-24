@@ -20,10 +20,12 @@ type HttpApi struct {
 	Enabled                  bool
 	ListenAddress            string
 	AuthorizationBearerToken string
+	TimeoutMilliseconds      int
 }
 
 type HttpGateway struct {
-	ListenAddress string
+	ListenAddress       string
+	TimeoutMilliseconds int
 }
 
 type Matrix struct {
@@ -82,6 +84,21 @@ func validateConfiguration(configuration *Configuration) error {
 
 	if configuration.Reconciliation.RetryIntervalMilliseconds <= 0 {
 		return fmt.Errorf("Reconciliation.RetryIntervalMilliseconds needs to be a positive number")
+	}
+
+	if configuration.HttpGateway.TimeoutMilliseconds <= 0 {
+		return fmt.Errorf("HttpGateway.TimeoutMilliseconds needs to be a positive number")
+	}
+	if configuration.HttpGateway.TimeoutMilliseconds < configuration.Matrix.TimeoutMilliseconds {
+		return fmt.Errorf(
+			"HttpGateway.TimeoutMilliseconds (%d) needs to be larger than Matrix.TimeoutMilliseconds (%d)",
+			configuration.HttpGateway.TimeoutMilliseconds,
+			configuration.Matrix.TimeoutMilliseconds,
+		)
+	}
+
+	if configuration.HttpApi.TimeoutMilliseconds <= 0 {
+		return fmt.Errorf("HttpGateway.HttpApi needs to be a positive number")
 	}
 
 	return nil

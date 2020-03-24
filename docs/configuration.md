@@ -52,7 +52,7 @@ The configuration contains the following fields:
 
 	- `RegistrationSharedSecret` - the secret for Matrix Synapse's `/admin/register` API. Can be found in Matrix Synapse's `homeserver.yaml` file under the configuration key: `registration_shared_secret`
 
-	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out. Since clients often use long-polling (usually with a 30-second limit), setting this to a value of more than `30000` is recommended. This value is also used to configure the timeout for `matrix-corporal`'s HTTP API and HTTP Gateway servers.
+	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out. Since clients often use long-polling for `/sync` (usually with a 30-second limit), setting this to a value of more than `30000` is recommended.
 
 
 - `Reconciliation` - reconciliation-related configuration
@@ -66,6 +66,8 @@ The configuration contains the following fields:
 
 	- `ListenAddress` - the network address to listen on. It's most likely a local one, as there's usually a reverse proxy (like nginx) capturing all traffic first and forwarding it here later on. If you're running this inside a container, use something like `0.0.0.0:41080`.
 
+	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests are allowed to take before being timed out. Since clients often use long-polling for `/sync` (usually with a 30-second limit), setting this to a value of more than `30000` is recommended. For this same reason, making this value larger than `Matrix.TimeoutMilliseconds` is recommended.
+
 
 - `HttpApi` - HTTP API-related configuration
 
@@ -74,6 +76,8 @@ The configuration contains the following fields:
 	- `ListenAddress` - the network address to listen on. It's most likely a local one, as there's usually a reverse proxy (like nginx) capturing all traffic first and forwarding it here later on. If you're running this inside a container, use something like `0.0.0.0:41081`.
 
 	- `AuthorizationBearerToken` - a shared secret between `matrix-corporal` and your other remote system that will use its API. You can generate it with something like: `pwgen -s 128 1`
+
+	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests are allowed to take before being timed out.
 
 
 - `PolicyProvider` - [policy provider](policy-providers.md) configuration.
