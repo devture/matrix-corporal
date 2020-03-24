@@ -1,3 +1,12 @@
+# Version 1.8.0 (2020-03-24)
+
+The HTTP Gateway and HTTP API servers no longer obey `Matrix.TimeoutMilliseconds`,
+but rather have their own explicit timeout settings (`HttpGateway.TimeoutMilliseconds` and `HttpApi.TimeoutMilliseconds`).
+
+You'll need to update your configuration to define these settings.
+A large value is recommended for `HttpGateway.TimeoutMilliseconds` (at least the same as or larger than `Matrix.TimeoutMilliseconds`).
+
+
 # Version 1.7.2 (2020-03-24)
 
 The HTTP Gateway and HTTP API servers no longer use a hardcoded timeout value of 15 seconds,

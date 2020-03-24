@@ -66,7 +66,7 @@ The configuration contains the following fields:
 
 	- `ListenAddress` - the network address to listen on. It's most likely a local one, as there's usually a reverse proxy (like nginx) capturing all traffic first and forwarding it here later on. If you're running this inside a container, use something like `0.0.0.0:41080`.
 
-	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests are allowed to take before being timed out. Since clients often use long-polling for `/sync` (usually with a 30-second limit), setting this to a value of more than `30000` is recommended. For this same reason, making this value larger than `Matrix.TimeoutMilliseconds` is recommended.
+	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests are allowed to take before being timed out. Since clients often use long-polling for `/sync` (usually with a 30-second limit), setting this to a value of more than `30000` is recommended. For this same reason, making this value larger than `Matrix.TimeoutMilliseconds` is required.
 
 
 - `HttpApi` - HTTP API-related configuration
