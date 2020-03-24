@@ -1,3 +1,10 @@
+# Version 1.7.2 (2020-03-24)
+
+The HTTP Gateway and HTTP API servers no longer use a hardcoded timeout value of 15 seconds,
+but rather obey `Matrix.TimeoutMilliseconds`, thus fixing a problem where long-running
+`/sync` requests were terminated prematurely.
+
+
 # Version 1.7.1 (2019-12-04)
 
 `/login` requests now respond with `M_USER_DEACTIVATED` for inactive users, instead of `M_FORBIDDEN`.
