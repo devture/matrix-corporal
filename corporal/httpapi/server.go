@@ -17,6 +17,7 @@ type Server struct {
 	logger              *logrus.Logger
 	configuration       configuration.HttpApi
 	handlerRegistrators []handler.HandlerRegistrator
+	writeTimeout        time.Duration
 
 	server *http.Server
 }
@@ -25,11 +26,13 @@ func NewServer(
 	logger *logrus.Logger,
 	configuration configuration.HttpApi,
 	handlerRegistrators []handler.HandlerRegistrator,
+	writeTimeout time.Duration,
 ) *Server {
 	return &Server{
 		logger:              logger,
 		configuration:       configuration,
 		handlerRegistrators: handlerRegistrators,
+		writeTimeout:        writeTimeout,
 
 		server: nil,
 	}
@@ -39,7 +42,7 @@ func (me *Server) Start() error {
 	me.server = &http.Server{
 		Handler:      me.createRouter(),
 		Addr:         me.configuration.ListenAddress,
-		WriteTimeout: 15 * time.Second,
+		WriteTimeout: me.writeTimeout,
 		ReadTimeout:  15 * time.Second,
 	}
 

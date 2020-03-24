@@ -23,6 +23,7 @@ type Server struct {
 	policyStore         *policy.Store
 	policyChecker       *policy.Checker
 	loginInterceptor    Interceptor
+	writeTimeout        time.Duration
 
 	server *http.Server
 }
@@ -35,6 +36,7 @@ func NewServer(
 	policyStore *policy.Store,
 	policyChecker *policy.Checker,
 	loginInterceptor Interceptor,
+	writeTimeout time.Duration,
 ) *Server {
 	return &Server{
 		logger:              logger,
@@ -44,6 +46,7 @@ func NewServer(
 		policyStore:         policyStore,
 		policyChecker:       policyChecker,
 		loginInterceptor:    loginInterceptor,
+		writeTimeout:        writeTimeout,
 
 		server: nil,
 	}
@@ -53,8 +56,8 @@ func (me *Server) Start() error {
 	me.server = &http.Server{
 		Handler:      me.createRouter(),
 		Addr:         me.configuration.ListenAddress,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		WriteTimeout: me.writeTimeout,
+		ReadTimeout:  10 * time.Second,
 	}
 
 	me.logger.Infof("Starting HTTP Gateway Server on %s", me.server.Addr)

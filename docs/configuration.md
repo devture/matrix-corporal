@@ -52,7 +52,7 @@ The configuration contains the following fields:
 
 	- `RegistrationSharedSecret` - the secret for Matrix Synapse's `/admin/register` API. Can be found in Matrix Synapse's `homeserver.yaml` file under the configuration key: `registration_shared_secret`
 
-	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out. Since clients often use long-polling (usually with a 30-second limit), setting this to a value of more than `30000` is recommended.
+	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out. Since clients often use long-polling (usually with a 30-second limit), setting this to a value of more than `30000` is recommended. This value is also used to configure the timeout for `matrix-corporal`'s HTTP API and HTTP Gateway servers.
 
 
 - `Reconciliation` - reconciliation-related configuration
