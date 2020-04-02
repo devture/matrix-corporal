@@ -303,7 +303,7 @@ func (me *ReconciliationStateComputator) computeUserCommunityChanges(
 	if currentUserState != nil {
 		for _, communityId := range currentUserState.JoinedCommunityIds {
 			if !util.IsStringInArray(communityId, managedCommunityIds) {
-				//We rightfully ignore communities we don't care about.
+				//We rightfully ignore rooms we don't care about.
 				continue
 			}
 
@@ -358,7 +358,7 @@ func (me *ReconciliationStateComputator) computeUserRoomChanges(
 	if currentUserState != nil {
 		for _, roomId := range currentUserState.JoinedRoomIds {
 			if !util.IsStringInArray(roomId, managedRoomIds) {
-				//We rightfully ignore communities we don't care about.
+				//We rightfully ignore rooms we don't care about.
 				continue
 			}
 
