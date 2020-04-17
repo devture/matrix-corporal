@@ -11,6 +11,23 @@ import (
 	"github.com/matrix-org/gomatrix"
 )
 
+// CheckRoomCreate is a policy checker for: /_matrix/client/r0/createRoom
+func CheckRoomCreate(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
+	userId := ctx.Value("userId").(string)
+
+	if !checker.CanUserCreateRoom(policy, userId) {
+		return PolicyCheckResponse{
+			Allow:        false,
+			ErrorCode:    matrix.ErrorForbidden,
+			ErrorMessage: "Denied by policy",
+		}
+	}
+
+	return PolicyCheckResponse{
+		Allow: true,
+	}
+}
+
 // CheckRoomLeave is a policy checker for: /_matrix/client/r0/rooms/{roomId}/leave
 func CheckRoomLeave(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)

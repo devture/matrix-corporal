@@ -37,15 +37,25 @@ type PolicyFlags struct {
 	// Tells whether users are allowed to have avatars,
 	// which deviate from the ones in the policy.
 	AllowCustomUserAvatars bool `json:"allowCustomUserAvatars"`
+
+	// Tells whether users are forbidden from creating rooms.
+	// When there's a dedicated `UserPolicy` for the user, that one takes precedence over this default.
+	ForbidRoomCreation bool `json:"forbidRoomCreation"`
 }
 
 type UserPolicy struct {
-	Id                 string   `json:"id"`
-	Active             bool     `json:"active"`
-	AuthType           string   `json:"authType"`
-	AuthCredential     string   `json:"authCredential"`
-	DisplayName        string   `json:"displayName"`
-	AvatarUri          string   `json:"avatarUri"`
+	Id     string `json:"id"`
+	Active bool   `json:"active"`
+
+	AuthType       string `json:"authType"`
+	AuthCredential string `json:"authCredential"`
+
+	DisplayName string `json:"displayName"`
+	AvatarUri   string `json:"avatarUri"`
+
 	JoinedCommunityIds []string `json:"joinedCommunityIds"`
 	JoinedRoomIds      []string `json:"joinedRoomIds"`
+
+	// Tells whether this user is forbidden from creating rooms.
+	ForbidRoomCreation *bool `json:"forbidRoomCreation"`
 }

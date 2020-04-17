@@ -1,6 +1,8 @@
 {
 	"flags": {
-		"allowCustomUserDisplayNames": false
+		"allowCustomUserDisplayNames": false,
+		"allowCustomUserAvatars": false,
+		"forbidRoomCreation": false
 	},
 
 	"managedCommunityIds": [
@@ -17,7 +19,8 @@
 			"authCredential": "test",
 			"displayName": "User A",
 			"joinedCommunityIds": [],
-			"joinedRoomIds": []
+			"joinedRoomIds": [],
+			"forbidRoomCreation": false
 		},
 		{
 			"id": "@b:matrix-corporal.127.0.0.1.xip.io",
@@ -27,7 +30,8 @@
 			"displayName": "User B",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
 			"joinedCommunityIds": [],
-			"joinedRoomIds": []
+			"joinedRoomIds": [],
+			"forbidRoomCreation": true
 		},
 		{
 			"id": "@c:matrix-corporal.127.0.0.1.xip.io",

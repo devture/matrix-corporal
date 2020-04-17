@@ -15,7 +15,8 @@ The policy is a JSON document that looks like this:
 
 	"flags": {
 		"allowCustomUserDisplayNames": false,
-		"allowCustomUserAvatars": false
+		"allowCustomUserAvatars": false,
+		"forbidRoomCreation": false
 	},
 
 	"managedCommunityIds": [
@@ -37,7 +38,8 @@ The policy is a JSON document that looks like this:
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
 			"joinedCommunityIds": ["+a:example.com"],
-			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
+			"forbidRoomCreation": true
 		},
 		{
 			"id": "@peter:example.com",
@@ -47,7 +49,8 @@ The policy is a JSON document that looks like this:
 			"displayName": "Just Peter",
 			"avatarUri": "",
 			"joinedCommunityIds": ["+b:example.com"],
-			"joinedRoomIds": ["!roomB:example.com"]
+			"joinedRoomIds": ["!roomB:example.com"],
+			"forbidRoomCreation": false
 		},
 		{
 			"id": "@george:example.com",
@@ -87,6 +90,8 @@ The following policy flags are supported:
 
 - `allowCustomUserAvatars` (`true` or `false`, defaults to `false`) - controls whether users are allowed to set custom avatar images. By default, users are created with the avatar image specified in the policy. Whether they're able to set a custom one by themselves later on is controlled by this flag.
 
+- `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether users are forbidden from creating rooms. The `forbidRoomCreation` [User policy field](#user-policy-fields) takes precedence over this. This is just a global default in case the user policy does not specify a value.
+
 
 ## User policy fields
 
@@ -103,7 +108,8 @@ A user policy object looks like this:
 	"displayName": "John",
 	"avatarUri": "https://example.com/john.jpg",
 	"joinedCommunityIds": ["+a:example.com"],
-	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
+	"forbidRoomCreation": false
 }
 ```
 
@@ -125,3 +131,5 @@ A user-policy contains the following fields:
 - `joinedCommunityIds` - a list of community identifiers (e.g. `+community:server`) that the user is part of. The user will be auto-joined to any communities listed here, unless already joined. If the user happens to be joined to a community which is not listed here, but appears in the top-level `managedCommunityIds` field, the user will be kicked out of that community. The user can be part of any number of other communities which are not listed in `joinedCommunityIds`, as long as they are also not listed in `managedCommunityIds`.
 
 - `joinedRoomIds` - a list of room identifiers (e.g. `!room:server`) that the user is part of. The user will be auto-joined to any rooms listed here, unless already joined. If the user happens to be joined to a room which is not listed here, but appears in the top-level `managedRoomIds` field, the user will be kicked out of that room. The user can be part of any number of other room which are not listed in `joinedRoomIds`, as long as they are also not listed in `managedRoomIds`.
+
+- `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether this user is forbidden from creating rooms. If this field is omitted, the global `forbidRoomCreation` [flag](#flags) is used as a fallback.

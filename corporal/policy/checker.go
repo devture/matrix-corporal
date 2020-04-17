@@ -11,6 +11,19 @@ func NewChecker() *Checker {
 	return &Checker{}
 }
 
+func (me *Checker) CanUserCreateRoom(policy Policy, userId string) bool {
+	userPolicy := policy.GetUserPolicyByUserId(userId)
+	if userPolicy != nil {
+		if userPolicy.ForbidRoomCreation != nil {
+			return !*userPolicy.ForbidRoomCreation
+		}
+	}
+
+	// No dedicated policy for this user (likely an unmanaged user) or undefined ForbidRoomCreation policy field.
+	// Stick to the global defaults.
+	return !policy.Flags.ForbidRoomCreation
+}
+
 func (me *Checker) CanUserLeaveRoom(policy Policy, userId string, roomId string) bool {
 	return me.CanUserChangeOwnMembershipStateInRoom(policy, userId, roomId)
 }
