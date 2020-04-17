@@ -1,3 +1,9 @@
+# Version 1.9.0 (2020-04-17)
+
+Users can now be prevented from creating rooms (that is, matrix-corporal can restrict the `/createRoom` API).
+See the new `forbidRoomCreation` [policy](docs/policy.md) fields.
+
+
 # Version 1.8.0 (2020-03-24)
 
 The HTTP Gateway and HTTP API servers no longer obey `Matrix.TimeoutMilliseconds`,
