@@ -14,12 +14,24 @@ import (
 // CheckRoomCreate is a policy checker for: /_matrix/client/r0/createRoom
 func CheckRoomCreate(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
+	members := ctx.Value("invite").([]string)
 
 	if !checker.CanUserCreateRoom(policy, userId) {
 		return PolicyCheckResponse{
 			Allow:        false,
 			ErrorCode:    matrix.ErrorForbidden,
 			ErrorMessage: "Denied by policy",
+		}
+	}
+
+	// Check if powerlevel of invited members are same or less than the user powerlevel
+	for _, memberId := range members {
+		if !checker.CanSendInvite(policy, userId, memberId) {
+			return PolicyCheckResponse{
+				Allow:        false,
+				ErrorCode:    matrix.ErrorForbidden,
+				ErrorMessage: "Denied by policy",
+			}
 		}
 	}
 

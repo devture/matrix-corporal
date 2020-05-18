@@ -65,3 +65,19 @@ func (me *Checker) CanUserUseCustomDisplayName(policy Policy, userId string) boo
 func (me *Checker) CanUserUseCustomAvatar(policy Policy, userId string) bool {
 	return policy.Flags.AllowCustomUserAvatars
 }
+
+//Compares the power level of sender and invited members. Allows invite only within their power level and below.
+
+func (me *Checker) CanSendInvite(policy, userId, memberId)  bool {
+	memberPolicy := policy.GetUserPolicyByUserId(memberId)	
+	userPolicy := policy.GetUserPolicyByUserId(userId)	
+	if memberPolicy == nil {
+		return true
+	}
+
+	if userPolicy == nil {
+		return false
+	}
+
+	return memberPolicy.PowerLevel <= userPolicy.PowerLevel
+}
