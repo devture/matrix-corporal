@@ -58,4 +58,8 @@ type UserPolicy struct {
 
 	// Tells whether this user is forbidden from creating rooms.
 	ForbidRoomCreation *bool `json:"forbidRoomCreation"`
+
+	//PowerLevel.
+	PowerLevel int `json:"powerLevel"`
+
 }
