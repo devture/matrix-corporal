@@ -98,7 +98,7 @@ func validateConfiguration(configuration *Configuration) error {
 	}
 
 	if configuration.HttpApi.TimeoutMilliseconds <= 0 {
-		return fmt.Errorf("HttpGateway.HttpApi needs to be a positive number")
+		return fmt.Errorf("HttpApi.TimeoutMilliseconds needs to be a positive number")
 	}
 
 	return nil
