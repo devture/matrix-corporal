@@ -18,13 +18,15 @@ The `matrix-corporal` configuration is a JSON document that looks like this:
 	},
 
 	"HttpGateway": {
-		"ListenAddress": "127.0.0.1:41080"
+		"ListenAddress": "127.0.0.1:41080",
+		"TimeoutMilliseconds": 60000
 	},
 
 	"HttpApi": {
 		"Enabled": true,
 		"ListenAddress": "127.0.0.1:41081",
-		"AuthorizationBearerToken": "UB42Gd0qUH6rkR4yxWbtTX85XCC9B0X1G7tFp64q9UlBjVdjZrtqaBIxFzj4dQvSiRYmxfF4hMAel6bw3xO7jnRgCGQBwBnjpPEfW1lrVAZFP3p55KxBra3mQDGrntE0"
+		"AuthorizationBearerToken": "UB42Gd0qUH6rkR4yxWbtTX85XCC9B0X1G7tFp64q9UlBjVdjZrtqaBIxFzj4dQvSiRYmxfF4hMAel6bw3xO7jnRgCGQBwBnjpPEfW1lrVAZFP3p55KxBra3mQDGrntE0",
+		"TimeoutMilliseconds": 15000
 	},
 
 	"PolicyProvider": {
