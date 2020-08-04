@@ -30,6 +30,7 @@ type ApiResponseError struct {
 }
 
 func Respond(w http.ResponseWriter, httpStatusCode int, resp interface{}) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(httpStatusCode)
 
 	respBytes, err := json.Marshal(resp)
