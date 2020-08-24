@@ -10,7 +10,7 @@ import (
 )
 
 func respondWithMatrixError(w http.ResponseWriter, httpStatusCode int, errorCode string, errorMessage string) {
-    w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(httpStatusCode)
 
 	resp := gomatrix.RespError{
