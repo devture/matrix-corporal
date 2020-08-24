@@ -23,6 +23,7 @@ type Server struct {
 	policyStore         *policy.Store
 	policyChecker       *policy.Checker
 	loginInterceptor    Interceptor
+	uiAuthInterceptor   Interceptor
 	writeTimeout        time.Duration
 
 	server *http.Server
@@ -36,6 +37,7 @@ func NewServer(
 	policyStore *policy.Store,
 	policyChecker *policy.Checker,
 	loginInterceptor Interceptor,
+	uiAuthInterceptor   Interceptor,
 	writeTimeout time.Duration,
 ) *Server {
 	return &Server{
@@ -46,6 +48,7 @@ func NewServer(
 		policyStore:         policyStore,
 		policyChecker:       policyChecker,
 		loginInterceptor:    loginInterceptor,
+		uiAuthInterceptor:   uiAuthInterceptor,
 		writeTimeout:        writeTimeout,
 
 		server: nil,
@@ -151,6 +154,23 @@ func (me *Server) createRouter() http.Handler {
 	r.Handle(
 		"/_matrix/client/r0/login",
 		me.createInterceptorHandler("login", me.loginInterceptor),
+	).Methods("POST")
+
+	r.Handle(
+		"/_matrix/client/r0/devices/{deviceId}",
+		me.createUiEndpointHandler("device.delete"),
+	).Methods("DELETE")
+
+	r.Handle(
+		"/_matrix/client/r0/delete_devices",
+		me.createUiEndpointHandler("devices.delete"),
+	).Methods("POST")
+
+	// https://github.com/uhoreg/matrix-doc/blob/cross-signing2/proposals/1756-cross-signing.md
+	// Cross-signing upload (not technically part of the spec yet)
+	r.Handle(
+		"/_matrix/client/unstable/keys/device_signing/upload",
+		me.createUiEndpointHandler("device_signing.upload"),
 	).Methods("POST")
 
 	r.PathPrefix("/").Handler(NewCatchAllHandler(me.reverseProxy, me.logger))
@@ -266,4 +286,8 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 
 		logger.Fatalf("HTTP gateway: unexpected interceptor result: %#v", interceptorResult)
 	}
+}
+
+func (me *Server) createUiEndpointHandler(name string) http.HandlerFunc {
+	return me.createInterceptorHandler(name, me.uiAuthInterceptor)
 }

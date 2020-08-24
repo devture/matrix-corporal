@@ -108,6 +108,15 @@ func BuildContainer(
 		)
 	})
 
+	container.Set("httpgateway.interceptor.uiauth", func(c service.Container) interface{} {
+		return httpgateway.NewUiAuthInterceptor(
+			container.Get("policy.store").(*policy.Store),
+			configuration.Matrix.HomeserverDomainName,
+			container.Get("policy.userauth.checker").(*userauth.Checker),
+			container.Get("matrix.shared_secret_auth.password_generator").(*matrix.SharedSecretAuthPasswordGenerator),
+		)
+	})
+
 	container.Set("httpgateway.server", func(c service.Container) interface{} {
 		instance := httpgateway.NewServer(
 			logger,
@@ -117,6 +126,7 @@ func BuildContainer(
 			container.Get("policy.store").(*policy.Store),
 			container.Get("policy.checker").(*policy.Checker),
 			container.Get("httpgateway.interceptor.login").(httpgateway.Interceptor),
+			container.Get("httpgateway.interceptor.uiauth").(httpgateway.Interceptor),
 			time.Duration(configuration.HttpGateway.TimeoutMilliseconds)*time.Millisecond,
 		)
 
