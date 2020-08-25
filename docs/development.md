@@ -12,6 +12,8 @@ If you'd like to contribute code to this project or give it a try locally (befor
 
 - copy the sample configuration: `cp config.json.dist config.json`
 
+- change the `ListenAddress` from `127.0.0.1` to `0.0.0.0` in `config.json`
+
 - copy the sample policy: `cp policy.json.dist policy.json`
 
 - build and run the `matrix-corporal` program by executing: `make run-in-container`
