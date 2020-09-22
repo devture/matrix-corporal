@@ -1,3 +1,10 @@
+# Version 1.10.0 (2020-09-22)
+
+We now use `/_synapse/admin/v2/users` for fetching the list of users on the server (and not `/_matrix/client/r0/admin/users/{userId}`).
+
+The latter should still work for [Synapse v1.20.0](https://github.com/matrix-org/synapse/releases/tag/v1.20.0), but using the newer API is more future-proof.
+
+
 # Version 1.9.0 (2020-04-17)
 
 Users can now be prevented from creating rooms (that is, matrix-corporal can restrict the `/createRoom` API).
