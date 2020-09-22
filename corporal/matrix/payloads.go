@@ -23,12 +23,20 @@ type ApiLoginRequestIdentifier struct {
 }
 
 // ApiAdminEntityUser represents a user entity that is part of the list response
-// at: GET /_matrix/client/r0/admin/users/{userId}
+// at: GET /_synapse/admin/v2/users
+type ApiAdminResponseUsers struct {
+	Users []ApiAdminEntityUser `json:"users"`
+}
+
+// ApiAdminEntityUser represents a user entity that is part of the list response
+// at: GET /_synapse/admin/v2/users
 type ApiAdminEntityUser struct {
 	Id           string `json:"name"`
 	Admin        int    `json:"admin"`    //0 or 1
 	Guest        int    `json:"is_guest"` //0 or 1
 	PasswordHash string `json:"password_hash"`
+	DisplayName  string `json:"displayname"`
+	AvatarURL    string `json:"avatar_url"`
 }
 
 // ApiWhoAmIResponse is a response as found at: GET /_matrix/client/r0/account/whoami

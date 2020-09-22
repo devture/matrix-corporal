@@ -4,6 +4,7 @@ import (
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/util"
 	"fmt"
+	"strings"
 
 	"crypto/hmac"
 	"crypto/sha1"
@@ -39,20 +40,37 @@ func (me *SynapseConnector) DetermineCurrentState(
 		return nil, err
 	}
 
-	// If the /admin/whois/{userId} API would let us differentiate between a user that exists and one that doesn't,
-	// we could just loop over the managedUserIds, see which users exist and fetch the state then.
+	// The `/_synapse/admin/v2/users` API lets us use the `user_id` parameter
+	// to query for individual users.
 	//
-	// Since we can't do that (yet), we're forced to loop over "all users on the server"
-	// and figure things out that way. This is more inefficient, but there doesn't seem to be a better way
-	// to do things now.
+	// Instead of looping through all users on the server (potentially millions?),
+	// we could loop over the managedUserIds, and fetch the state for them,
+	// instead of fetching all users (like we do below).
+	//
+	// On a server with millions of unmanaged users and a subset of managed users,
+	// it's more beneficial to do it selectively.
+	//
+	// On a server where pretty much all users are managed users and there are lots of them,
+	// it's better to avoid doing an individual query for each managed
 
-	var users []matrix.ApiAdminEntityUser
-	err = client.MakeRequest("GET", client.BuildURL(fmt.Sprintf("/admin/users/%s", adminUserId)), nil, &users)
+	url := client.BuildURLWithQuery([]string{"/_synapse/admin/v2/users"}, map[string]string{
+		// We don't support pagination yet
+		"limit":       "100000000000",
+		"guests":      "false",
+		"deactivated": "true",
+	})
+	// The URL-building function above forces us under the `/_matrix/client/r0/` prefix.
+	// We'd like to work at the top-level though, hence this hack.
+	url = strings.Replace(url, "/_matrix/client/r0/", "/", 1)
+
+	var response matrix.ApiAdminResponseUsers
+	err = client.MakeRequest("GET", url, nil, &response)
 	if err != nil {
 		return nil, err
 	}
+
 	var currentUserIds []string
-	for _, user := range users {
+	for _, user := range response.Users {
 		currentUserIds = append(currentUserIds, user.Id)
 	}
 
