@@ -133,3 +133,10 @@ A user-policy contains the following fields:
 - `joinedRoomIds` - a list of room identifiers (e.g. `!room:server`) that the user is part of. The user will be auto-joined to any rooms listed here, unless already joined. If the user happens to be joined to a room which is not listed here, but appears in the top-level `managedRoomIds` field, the user will be kicked out of that room. The user can be part of any number of other room which are not listed in `joinedRoomIds`, as long as they are also not listed in `managedRoomIds`.
 
 - `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether this user is forbidden from creating rooms. If this field is omitted, the global `forbidRoomCreation` [flag](#flags) is used as a fallback.
+
+
+## Generating the policy file
+
+You can generate the matrix-corporal policy file directly (from your own software), or with the help of some other tool.
+
+If you're using LDAP, you may find this tool useful: [cmuller/ldap_matrix](https://github.com/cmuller/ldap_matrix) - Matrix Corporal Policy Specification Using LDAP Groups
