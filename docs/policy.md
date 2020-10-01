@@ -16,6 +16,7 @@ The policy is a JSON document that looks like this:
 	"flags": {
 		"allowCustomUserDisplayNames": false,
 		"allowCustomUserAvatars": false,
+		"allowCustomPassthroughUserPasswords": false,
 		"forbidRoomCreation": false
 	},
 
@@ -89,6 +90,8 @@ The following policy flags are supported:
 - `allowCustomUserDisplayNames` (`true` or `false`, defaults to `false`) - controls whether users are allowed to set custom display names. By default, users are created with the display name specified in the policy. Whether they're able to set a custom one by themselves later on is controlled by this flag.
 
 - `allowCustomUserAvatars` (`true` or `false`, defaults to `false`) - controls whether users are allowed to set custom avatar images. By default, users are created with the avatar image specified in the policy. Whether they're able to set a custom one by themselves later on is controlled by this flag.
+
+- `allowCustomPassthroughUserPasswords` (`true` or `false`, defaults to `false`) - controls whether users with `authType=passthrough` can set custom passwsords. By default, such users are created with an initial password as defined in `authCredential`. Whether they can change their homeserver password later or not is controlled by this flag.
 
 - `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether users are forbidden from creating rooms. The `forbidRoomCreation` [User policy field](#user-policy-fields) takes precedence over this. This is just a global default in case the user policy does not specify a value.
 

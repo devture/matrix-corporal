@@ -104,7 +104,12 @@ func (me *Reconciler) reconcileForActionUserCreate(ctx *connector.AccessTokenCon
 		return err
 	}
 
-	err = me.connector.EnsureUserAccountExists(userId)
+	password, err := action.GetStringPayloadDataByKey("password")
+	if err != nil {
+		return err
+	}
+
+	err = me.connector.EnsureUserAccountExists(userId, password)
 	if err != nil {
 		return fmt.Errorf("Failed ensuring %s is created: %s", userId, err)
 	}

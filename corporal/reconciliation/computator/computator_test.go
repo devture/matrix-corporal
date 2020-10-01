@@ -127,5 +127,32 @@ func determineUserActionMismatchError(expected, computed *reconciliation.StateAc
 		)
 	}
 
+	if expected.Type == reconciliation.ActionUserCreate {
+		passwordComputed, err := computed.GetStringPayloadDataByKey("password")
+		if err != nil {
+			return fmt.Errorf("Did not expect computed %s action to not have a password payload: %s", reconciliation.ActionUserCreate, err)
+		}
+
+		passwordExpected, err := expected.GetStringPayloadDataByKey("password")
+		if err != nil {
+			return fmt.Errorf("Did not expect expected %s action to not have a password payload: %s", reconciliation.ActionUserCreate, err)
+		}
+
+		if passwordExpected == "__RANDOM__" {
+			if len(passwordComputed) != 128 {
+				return fmt.Errorf("Expected a randomly-generated 128-character password, got: %s", passwordComputed)
+			}
+			return nil
+		}
+
+		if passwordExpected != passwordComputed {
+			return fmt.Errorf("Expected password %s, got %s", passwordExpected, passwordComputed)
+		}
+
+		return nil
+	}
+
+	// TODO - we can validate other actions in more detail
+
 	return nil
 }

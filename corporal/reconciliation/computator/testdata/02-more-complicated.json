@@ -92,7 +92,8 @@
 			{
 				"type": "user.create",
 				"payload": {
-					"userId": "@c:host"
+					"userId": "@c:host",
+					"password": "__RANDOM__"
 				}
 			},
 			{

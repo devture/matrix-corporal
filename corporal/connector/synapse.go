@@ -98,7 +98,7 @@ func (me *SynapseConnector) DetermineCurrentState(
 	return connectorState, nil
 }
 
-func (me *SynapseConnector) EnsureUserAccountExists(userId string) error {
+func (me *SynapseConnector) EnsureUserAccountExists(userId, password string) error {
 	userIdLocalPart, err := gomatrix.ExtractUserLocalpart(userId)
 	if err != nil {
 		return err
@@ -123,22 +123,6 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId string) error {
 	if err != nil {
 		return err
 	}
-
-	// We create users with random passwords.
-	// Those passwords are never meant to be given out or used.
-	//
-	// Whenever we need to authenticate, we can just obtain an access token
-	// thanks to shared-secret-auth, regardless of the database password.
-	// (see ObtainNewAccessTokenForUserId)
-	//
-	// Whenever users need to log in, we intercept the /login API
-	// and possibly turn the call into a request that shared-secret-auth understands
-	// (see LoginInterceptor).
-	passwordBytes, err := util.GenerateRandomBytes(64)
-	if err != nil {
-		return err
-	}
-	password := fmt.Sprintf("%x", passwordBytes)
 
 	// Generating the HMAC the same way that the `register_new_matrix_user` script from Matrix Synapse does it.
 	mac := hmac.New(sha1.New, []byte(me.registrationSharedSecret))

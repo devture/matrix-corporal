@@ -14,7 +14,7 @@ type MatrixConnector interface {
 
 	DetermineCurrentState(ctx *AccessTokenContext, managedUserIds []string, adminUserId string) (*CurrentState, error)
 
-	EnsureUserAccountExists(userId string) error
+	EnsureUserAccountExists(userId, password string) error
 
 	GetUserProfileByUserId(ctx *AccessTokenContext, userId string) (*matrix.ApiUserProfileResponse, error)
 	SetUserDisplayName(ctx *AccessTokenContext, userId string, displayName string) error

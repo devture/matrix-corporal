@@ -2,10 +2,11 @@
 
 A [policy](policy.md) contains various users, which `matrix-corporal` manages.
 
-Each user can be authenticated in a different way.
-For some users, passwords can be specified in the policy as plain-text.
-For other users, passwords can be specified in the policy as a hash (`md5`, `sha1`, etc.).
-For others still, passwords can be avoided in the policy and authentication can happen with a REST API call.
+Each user can be authenticated in a different way:
+- using a passwords specified in the policy as plain-text. See [Plain-text passwords](#plain-text-passwords)
+- by using an initial plain-text password specified in the policy, but then delegating password management to the homeserver. See [Passthrough authentication](#passthrough-authentication)
+- using a password specified in the policy as a hash (`md5`, `sha1`, etc.). See [Hashed passwords](#hashed-passwords)
+- by not specifying a password in the policy, but rather delegating authentication to some REST API. See [External authentication via REST API calls](#external-authentication-via-rest-api-calls)
 
 The `authType` field in the user policy (see [user policy fields](policy.md#user-policy-fields)), specifies the authentication method for the given user. The `authCredential` field usually contains the actual password, but may contain some other configuration depending on the authentication type (see below).
 
@@ -16,36 +17,83 @@ If you're curious how `matrix-corporal` makes authentication work behind the sce
 
 The simplest (and most insecure) way to specify passwords for users in your policy is to embed the passwords in the policy as plain text.
 
-Here's an example user policy:
+Here's an example policy:
 
 ```json
 {
-	"id": "@john:example.com",
-	"active": true,
-	"authType": "plain",
-	"authCredential": "PaSSw0rD",
-	"displayName": "John",
-	"avatarUri": "https://example.com/john.jpg",
-	"joinedCommunityIds": ["+a:example.com"],
-	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+	"users": [
+		{
+			"id": "@john:example.com",
+			"active": true,
+			"authType": "plain",
+			"authCredential": "PaSSw0rD",
+			"displayName": "John",
+			"avatarUri": "https://example.com/john.jpg",
+			"joinedCommunityIds": ["+a:example.com"],
+			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+		}
+	]
+}
+```
+
+Users are created on the homeserver with a long-random password. Still, authentication is intercepted by matrix-corporal and password-matching is performed against the **current** password found in `authCredential`.
+
+
+## Passthrough authentication
+
+A variation of [Plain-text passwords](#plain-text-passwords) is the `passthrough` authentication type.
+
+It's similar to plain-text authentication, but:
+
+- actually creates users on the homeserver with the given plain-text password (as opposed to a random long password)
+- subsequent changes to the `authCredential` value in the policy do not update the homeserver password (that is, `authCredential` is just an initial password)
+- authentication is not handled in matrix-corporal (as with all other auth types), but is instead forwarded to the homeserver and happens against the password stored there
+- users **may** be allowed to change their homeserver password, depending on the `allowCustomPassthroughUserPasswords` flag in the **main** policy (defaults to `false`). See [Policy Flags](policy.md#flags)
+
+Here's an example policy:
+
+```json
+{
+	"flags": {
+		"allowCustomPassthroughUserPasswords": true
+	},
+
+	"users": [
+		{
+			"id": "@john:example.com",
+			"active": true,
+			"authType": "passthrough",
+			"authCredential": "some-initial-password",
+			"displayName": "John",
+			"avatarUri": "https://example.com/john.jpg",
+			"joinedCommunityIds": ["+a:example.com"],
+			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+		}
+	]
 }
 ```
 
 
 ## Hashed passwords
 
-For additional security (or in case you only have a hashed password for your users), you can specify passwords as hashed in your user policy. Example:
+For additional security (or in case you only have a hashed password for your users), you can specify passwords as hashed in your user policy.
+
+Here's an example policy:
 
 ```json
 {
-	"id": "@peter:example.com",
-	"active": true,
-	"authType": "sha1",
-	"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
-	"displayName": "Just Peter",
-	"avatarUri": "",
-	"joinedCommunityIds": ["+b:example.com"],
-	"joinedRoomIds": ["!roomB:example.com"]
+	"users": [
+		{
+			"id": "@peter:example.com",
+			"active": true,
+			"authType": "sha1",
+			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
+			"displayName": "Just Peter",
+			"avatarUri": "",
+			"joinedCommunityIds": ["+b:example.com"],
+			"joinedRoomIds": ["!roomB:example.com"]
+		}
+	]
 }
 ```
 
@@ -60,18 +108,22 @@ If you'd rather not have passwords right inside the policy document, you can pro
 
 This way, `matrix-corporal` relies on an external HTTP service to do the actual authentication.
 
-Example user policy:
+Here's an example policy:
 
 ```json
 {
-	"id": "@george:example.com",
-	"active": true,
-	"authType": "rest",
-	"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
-	"displayName": "Georgey",
-	"avatarUri": "",
-	"joinedCommunityIds": ["+a:example.com", "+b:example.com"],
-	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+	"users": [
+		{
+			"id": "@george:example.com",
+			"active": true,
+			"authType": "rest",
+			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
+			"displayName": "Georgey",
+			"avatarUri": "",
+			"joinedCommunityIds": ["+a:example.com", "+b:example.com"],
+			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+		}
+	]
 }
 ```
 
@@ -127,7 +179,9 @@ Authentication requests with a login flow of `m.login.token` (used by CAS/SAML S
 
 Authentication requests for users not managed by `matrix-corporal` (users that do not have a corresponding user policy in the [policy](policy.md)) are directly forwarded to the upstream server -- these users are not managed by `matrix-corporal`, so they are left alone.
 
-If a user is managed by `matrix-corporal`, authentication proceeds depending on the [user authentication](user-authentication.md) type (`authType` user policy field) for the particular user trying to log in.
+Requests for users having `authType=passthrough` are forwarded to the upstream server unchanged.
+
+For requests for users having another auth type (different than `passthrough`), authentication proceeds depending on the [user authentication](user-authentication.md) type (`authType` user policy field) for the particular user trying to log in.
 
 If the request ends up being **not authenticated**, `matrix-corporal` outright rejects it and it never reaches the upstream server.
 

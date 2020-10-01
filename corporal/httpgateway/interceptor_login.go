@@ -108,12 +108,12 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, "Rejecting non-own domains")
 	}
 
-	policy := me.policyStore.Get()
-	if policy == nil {
+	policyObj := me.policyStore.Get()
+	if policyObj == nil {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUnknown, "Missing policy")
 	}
 
-	userPolicy := policy.GetUserPolicyByUserId(userIdFull)
+	userPolicy := policyObj.GetUserPolicyByUserId(userIdFull)
 	if userPolicy == nil {
 		// Not a user we manage.
 		// Let it go through and let the upstream server's policies apply, whatever they may be.
@@ -126,6 +126,19 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 	if !userPolicy.Active {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUserDeactivated, "Deactivated in policy")
 	}
+
+	if userPolicy.AuthType == policy.UserAuthTypePassthrough {
+		// UserAuthTypePassthrough is a special AuthType, authentication for which is not meant to be handled by us.
+		// Users are created with an initial password as defined in userPolicy.AuthCredential,
+		// but password-management is then potentially left to the homeserver (depending on policyObj.Flags.AllowCustomPassthroughUserPasswords).
+		// Authentication always happens at the homeserver.
+		return InterceptorResponse{
+			Result:               InterceptorResultProxy,
+			LoggingContextFields: loggingContextFields,
+		}
+	}
+
+	// Authentication for all other auth types is handled by us (below)
 
 	loggingContextFields["authType"] = userPolicy.AuthType
 

@@ -6,6 +6,7 @@ import (
 	"devture-matrix-corporal/corporal/policy"
 	"devture-matrix-corporal/corporal/reconciliation"
 	"devture-matrix-corporal/corporal/util"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
@@ -95,7 +96,8 @@ func (me *ReconciliationStateComputator) computeUserActivationChanges(
 			actions = append(actions, &reconciliation.StateAction{
 				Type: reconciliation.ActionUserCreate,
 				Payload: map[string]interface{}{
-					"userId": userPolicy.Id,
+					"userId":   userPolicy.Id,
+					"password": me.generateInitialPasswordForUser(*userPolicy),
 				},
 			})
 		}
@@ -377,4 +379,32 @@ func (me *ReconciliationStateComputator) computeUserRoomChanges(
 	}
 
 	return actions
+}
+
+func (me *ReconciliationStateComputator) generateInitialPasswordForUser(userPolicy policy.UserPolicy) string {
+	// UserAuthTypePassthrough is a special AuthType. Users are created with an initial password as specified in the policy.
+	// For such users, authentication is delegated to the homeserver.
+	// We can do password matching on our side as well (at least initially), but delegating authentication to the homeserver,
+	// allows users to change their password there, etc.
+	// The actual password on the homeserver may change over time.
+	if userPolicy.AuthType == policy.UserAuthTypePassthrough {
+		return userPolicy.AuthCredential
+	}
+
+	// Some other auth type. We create such users with a random password.
+	// These passwords are never meant to be given out or used.
+	//
+	// Whenever we need to authenticate, we can just obtain an access token
+	// thanks to shared-secret-auth, regardless of the actual password that the user has been created with on the homeserver.
+	// (see ObtainNewAccessTokenForUserId)
+	//
+	// Whenever users need to log in, we intercept the /login API
+	// and possibly turn the call into a request that shared-secret-auth understands
+	// (see LoginInterceptor).
+
+	passwordBytes, err := util.GenerateRandomBytes(64)
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%x", passwordBytes)
 }

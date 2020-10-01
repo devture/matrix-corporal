@@ -28,10 +28,10 @@ func CheckUserDeactivate(r *http.Request, ctx context.Context, policy policy.Pol
 }
 
 // CheckUserSetPassword is a policy checker for: /_matrix/client/r0/account/password
-func CheckUserSetPassword(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
+func CheckUserSetPassword(r *http.Request, ctx context.Context, policyObj policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 
-	userPolicy := policy.GetUserPolicyByUserId(userId)
+	userPolicy := policyObj.GetUserPolicyByUserId(userId)
 	if userPolicy == nil {
 		// Not a user we manage.
 		// Let it go through and let the upstream server's policies apply, whatever they may be.
@@ -40,9 +40,23 @@ func CheckUserSetPassword(r *http.Request, ctx context.Context, policy policy.Po
 		}
 	}
 
+	if userPolicy.AuthType == policy.UserAuthTypePassthrough {
+		if policyObj.Flags.AllowCustomPassthroughUserPasswords {
+			return PolicyCheckResponse{
+				Allow: true,
+			}
+		}
+
+		return PolicyCheckResponse{
+			Allow:        false,
+			ErrorCode:    matrix.ErrorForbidden,
+			ErrorMessage: "Denied: passthrough user, but policy does not allow changes",
+		}
+	}
+
 	return PolicyCheckResponse{
 		Allow:        false,
 		ErrorCode:    matrix.ErrorForbidden,
-		ErrorMessage: "Denied",
+		ErrorMessage: "Denied: non-passthrough users are always authenticated against matrix-corporal",
 	}
 }
