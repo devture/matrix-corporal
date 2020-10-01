@@ -45,10 +45,9 @@ A variation of [Plain-text passwords](#plain-text-passwords) is the `passthrough
 
 It's similar to plain-text authentication, but:
 
-- actually creates users on the homeserver with the given plain-text password (as opposed to a random long password)
-- subsequent changes to the `authCredential` value in the policy do not update the homeserver password (that is, `authCredential` is just an initial password)
-- authentication is not handled in matrix-corporal (as with all other auth types), but is instead forwarded to the homeserver and happens against the password stored there
-- users **may** be allowed to change their homeserver password, depending on the `allowCustomPassthroughUserPasswords` flag in the **main** policy (defaults to `false`). See [Policy Flags](policy.md#flags)
+- actually creates users on the homeserver with the plain-text password provided in `authCredential` (as opposed to a random long password)
+- authentication is not handled in `matrix-corporal` (as with all other auth types), but is instead forwarded to the homeserver and happens against the password stored there
+- users **may** be allowed to change their password stored on the homeserver, depending on the `allowCustomPassthroughUserPasswords` flag in the **main** policy (defaults to `false`). See [Policy Flags](policy.md#flags)
 
 Here's an example policy:
 
@@ -72,6 +71,8 @@ Here's an example policy:
 	]
 }
 ```
+
+Note that subsequent changes to the `authCredential` value in the policy do not update the homeserver password for the user. That is, `authCredential` only serves as an initial password, which get be changed later, independently of `matrix-corporal`.
 
 
 ## Hashed passwords

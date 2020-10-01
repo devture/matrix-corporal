@@ -1,3 +1,9 @@
+# Version 1.11.0 (2020-10-01)
+
+This version adds support for `authType=passthrough` user authentication.
+Learn more from the [User Authentication documentation](docs/user-authentication.md).
+
+
 # Version 1.10.0 (2020-09-22)
 
 We now use `/_synapse/admin/v2/users` for fetching the list of users on the server (and not `/_matrix/client/r0/admin/users/{userId}`).
