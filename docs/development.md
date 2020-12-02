@@ -4,9 +4,9 @@ If you'd like to contribute code to this project or give it a try locally (befor
 
 - clone this repository
 
-- get [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) -- used for running a local Matrix Synapse + riot-web setup, for testing
+- get [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) -- used for running a local Matrix Synapse + element-web setup, for testing
 
-- start all dependency services (Postgres, Matrix Synapse, riot-web): `make services-start`. You can stop them later with `make services-stop` or tail their logs with `make services-tail-logs`
+- start all dependency services (Postgres, Matrix Synapse, element-web): `make services-start`. You can stop them later with `make services-stop` or tail their logs with `make services-tail-logs`
 
 - create a sample "system" user: `make create-sample-system-user`
 
@@ -18,11 +18,11 @@ If you'd like to contribute code to this project or give it a try locally (befor
 
 - build and run the `matrix-corporal` program by executing: `make run-in-container`
 
-- you should now be able to log in with user `a` and password `test` (as per the policy) to the [riot-web instance](http://matrix-corporal.127.0.0.1.xip.io:41465)
+- you should now be able to log in with user `a` and password `test` (as per the policy) to the [element-web instance](http://matrix-corporal.127.0.0.1.xip.io:41465)
 
-- you should also be able to log in with the system user `matrix-corporal` and password `system-user-password` to the [riot-web instance](http://matrix-corporal.127.0.0.1.xip.io:41465)
+- you should also be able to log in with the system user `matrix-corporal` and password `system-user-password` to the [element-web instance](http://matrix-corporal.127.0.0.1.xip.io:41465)
 
-- create a few rooms or communities manually, through riot-web with that system (`matrix-corporal`) user
+- create a few rooms or communities manually, through element-web with that system (`matrix-corporal`) user
 
 - modify `policy.json` (e.g. defining new managed rooms/communities, definining users, defining community/room memberships, etc) and watch `matrix-corporal` reconciliate the server state
 
