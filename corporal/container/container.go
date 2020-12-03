@@ -4,6 +4,7 @@ import (
 	"devture-matrix-corporal/corporal/avatar"
 	"devture-matrix-corporal/corporal/configuration"
 	"devture-matrix-corporal/corporal/connector"
+	"devture-matrix-corporal/corporal/hook"
 	"devture-matrix-corporal/corporal/httpapi"
 	"devture-matrix-corporal/corporal/httpapi/handler"
 	"devture-matrix-corporal/corporal/httpgateway"
@@ -108,6 +109,21 @@ func BuildContainer(
 		)
 	})
 
+	container.Set("httpgateway.hook_runner", func(c service.Container) interface{} {
+		return httpgateway.NewHookRunner(
+			container.Get("policy.store").(*policy.Store),
+			container.Get("hook.executor").(*hook.Executor),
+		)
+	})
+
+	container.Set("httpgateway.catch_all_handler", func(c service.Container) interface{} {
+		return httpgateway.NewCatchAllHandler(
+			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
+			logger,
+			container.Get("httpgateway.hook_runner").(*httpgateway.HookRunner),
+		)
+	})
+
 	container.Set("httpgateway.server", func(c service.Container) interface{} {
 		instance := httpgateway.NewServer(
 			logger,
@@ -116,6 +132,8 @@ func BuildContainer(
 			container.Get("matrix.user_mapping_resolver").(*matrix.UserMappingResolver),
 			container.Get("policy.store").(*policy.Store),
 			container.Get("policy.checker").(*policy.Checker),
+			container.Get("httpgateway.hook_runner").(*httpgateway.HookRunner),
+			container.Get("httpgateway.catch_all_handler").(*httpgateway.CatchAllHandler),
 			container.Get("httpgateway.interceptor.login").(httpgateway.Interceptor),
 			time.Duration(configuration.HttpGateway.TimeoutMilliseconds)*time.Millisecond,
 		)
@@ -160,6 +178,17 @@ func BuildContainer(
 		return handler.NewUserApiHandlerRegistrator(
 			configuration.Matrix.HomeserverDomainName,
 			container.Get("connector.synapse").(*connector.SynapseConnector),
+		)
+	})
+
+	container.Set("hook.rest_service_consultor", func(c service.Container) interface{} {
+		// TODO - do not hardcode
+		return hook.NewRESTServiceConsultor(30 * time.Second)
+	})
+
+	container.Set("hook.executor", func(c service.Container) interface{} {
+		return hook.NewExecutor(
+			container.Get("hook.rest_service_consultor").(*hook.RESTServiceConsultor),
 		)
 	})
 

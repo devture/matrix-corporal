@@ -1,6 +1,7 @@
 package httpgateway
 
 import (
+	"devture-matrix-corporal/corporal/hook"
 	"net/http"
 	"net/http/httputil"
 
@@ -10,12 +11,18 @@ import (
 type CatchAllHandler struct {
 	reverseProxy *httputil.ReverseProxy
 	logger       *logrus.Logger
+	hookRunner   *HookRunner
 }
 
-func NewCatchAllHandler(reverseProxy *httputil.ReverseProxy, logger *logrus.Logger) *CatchAllHandler {
+func NewCatchAllHandler(
+	reverseProxy *httputil.ReverseProxy,
+	logger *logrus.Logger,
+	hookRunner *HookRunner,
+) *CatchAllHandler {
 	return &CatchAllHandler{
 		reverseProxy: reverseProxy,
 		logger:       logger,
+		hookRunner:   hookRunner,
 	}
 }
 
@@ -37,6 +44,24 @@ func (me *CatchAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Debugf("HTTP gateway: proxying catch-all")
-	me.reverseProxy.ServeHTTP(w, r)
+	hookResult := me.hookRunner.RunFirstMatchingType(hook.EventTypeBeforeAnyRequest, w, r, logger)
+	if hookResult.SkipProceedingFurther {
+		logger.Debugf("HTTP gateway (catch-all): %s hook said we should not proceed further", hook.EventTypeBeforeAnyRequest)
+		return
+	}
+
+	reverseProxyToUse := me.reverseProxy
+
+	if hookResult.ReverseProxyResponseModifier == nil {
+		logger.Debugf("HTTP gateway (catch-all): proxying")
+	} else {
+		logger.Debugf("HTTP gateway (catch-all): proxying (with response modification)")
+
+		reverseProxyCopy := *reverseProxyToUse
+		reverseProxyCopy.ModifyResponse = *hookResult.ReverseProxyResponseModifier
+
+		reverseProxyToUse = &reverseProxyCopy
+	}
+
+	reverseProxyToUse.ServeHTTP(w, r)
 }

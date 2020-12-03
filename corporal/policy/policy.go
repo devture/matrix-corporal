@@ -1,9 +1,13 @@
 package policy
 
+import "devture-matrix-corporal/corporal/hook"
+
 type Policy struct {
 	SchemaVerson int `json:"schemaVersion"`
 
 	Flags PolicyFlags `json:"flags"`
+
+	Hooks []*hook.Hook `json:"hooks"`
 
 	ManagedCommunityIds []string `json:"managedCommunityIds"`
 

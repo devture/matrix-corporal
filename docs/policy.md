@@ -30,6 +30,30 @@ The policy is a JSON document that looks like this:
 		"!roomB:example.com",
 	],
 
+	"hooks": [
+		{
+			"id": "custom-hook-to-prevent-banning",
+			"eventType": "beforeAnyRequest",
+			"routeMatchesRegex": "^/_matrix/client/r0/rooms/([^/]+)/ban",
+			"methodMatchesRegex": "POST",
+			"action": "reject",
+			"responseStatusCode": 403,
+			"rejectionErrorCode": "M_FORBIDDEN",
+			"rejectionErrorMessage": "Banning is forbidden on this server. We're nice like that!"
+		},
+
+		{
+			"id": "custom-hook-to-reject-room-creation-once-in-a-while",
+			"eventType": "beforeAuthenticatedPolicyCheckedRequest",
+			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"action": "consult.RESTServiceURL",
+			"RESTServiceURL": "http://hook-rest-service:8080/reject/with-33-percent-chance",
+			"RESTServiceRequestHeaders": {
+				"Authorization": "Bearer SOME_TOKEN"
+			}
+		}
+	],
+
 	"users": [
 		{
 			"id": "@john:example.com",
@@ -79,6 +103,8 @@ A policy contains the following fields:
 - `managedCommunityIds` - a list of community identifiers (like `+community:server`) that `matrix-corporal` is allowed to manage for `users`. Any community that is not listed here will be left untouched.
 
 - `managedRoomIds` - a list of room identifiers (like `!room:server`) that `matrix-corporal` is allowed to manage for `users`. Any room that is not listed here will be left untouched.
+
+- `hooks` - a list of hooks and their configuration. This is a new feature, which hasn't been documented yet. The details around it may also change in the near future.
 
 - `users` - a list of users and their configuration (see [user policy fields](#user-policy-fields) below). Any server user that is not listed here will be left untouched.
 

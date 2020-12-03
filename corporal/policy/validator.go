@@ -30,5 +30,16 @@ func (me *Validator) Validate(policy *Policy) error {
 		}
 	}
 
+	for idx, hook := range policy.Hooks {
+		err := hook.Validate()
+		if err != nil {
+			return fmt.Errorf(
+				"Hook at index `%d` is invalid: %s",
+				idx,
+				err,
+			)
+		}
+	}
+
 	return nil
 }

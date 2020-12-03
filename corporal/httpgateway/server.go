@@ -3,6 +3,7 @@ package httpgateway
 import (
 	"context"
 	"devture-matrix-corporal/corporal/configuration"
+	"devture-matrix-corporal/corporal/hook"
 	"devture-matrix-corporal/corporal/httpgateway/policycheck"
 	"devture-matrix-corporal/corporal/httphelp"
 	"devture-matrix-corporal/corporal/matrix"
@@ -22,6 +23,8 @@ type Server struct {
 	userMappingResolver *matrix.UserMappingResolver
 	policyStore         *policy.Store
 	policyChecker       *policy.Checker
+	hookRunner          *HookRunner
+	catchAllHandler     *CatchAllHandler
 	loginInterceptor    Interceptor
 	writeTimeout        time.Duration
 
@@ -35,6 +38,8 @@ func NewServer(
 	userMappingResolver *matrix.UserMappingResolver,
 	policyStore *policy.Store,
 	policyChecker *policy.Checker,
+	hookRunner *HookRunner,
+	catchAllHandler *CatchAllHandler,
 	loginInterceptor Interceptor,
 	writeTimeout time.Duration,
 ) *Server {
@@ -45,6 +50,8 @@ func NewServer(
 		userMappingResolver: userMappingResolver,
 		policyStore:         policyStore,
 		policyChecker:       policyChecker,
+		hookRunner:          hookRunner,
+		catchAllHandler:     catchAllHandler,
 		loginInterceptor:    loginInterceptor,
 		writeTimeout:        writeTimeout,
 
@@ -153,7 +160,7 @@ func (me *Server) createRouter() http.Handler {
 		me.createInterceptorHandler("login", me.loginInterceptor),
 	).Methods("POST")
 
-	r.PathPrefix("/").Handler(NewCatchAllHandler(me.reverseProxy, me.logger))
+	r.PathPrefix("/").Handler(me.catchAllHandler)
 
 	return r
 }
@@ -164,11 +171,22 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 		logger = logger.WithField("uri", r.RequestURI)
 		logger = logger.WithField("handler", name)
 
+		httpResponseModifierFuncs := make([]hook.HttpResponseModifierFunc, 0)
+
+		hookResult := me.hookRunner.RunFirstMatchingType(hook.EventTypeBeforeAnyRequest, w, r, logger)
+		if hookResult.SkipProceedingFurther {
+			logger.Debugf("HTTP gateway (policy-checked): %s hook said we should not proceed further", hook.EventTypeBeforeAnyRequest)
+			return
+		}
+		if hookResult.ReverseProxyResponseModifier != nil {
+			httpResponseModifierFuncs = append(httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
+		}
+
 		accessToken := httphelp.GetAccessTokenFromRequest(r)
 		if accessToken == "" {
-			logger.Debugf("HTTP gateway: rejecting (missing access token)")
+			logger.Debugf("HTTP gateway (policy-checked): rejecting (missing access token)")
 
-			respondWithMatrixError(
+			httphelp.RespondWithMatrixError(
 				w,
 				http.StatusUnauthorized,
 				matrix.ErrorMissingToken,
@@ -179,9 +197,9 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		userId, err := me.userMappingResolver.ResolveByAccessToken(accessToken)
 		if err != nil {
-			logger.Debugf("HTTP gateway: rejecting (failed to map access token)")
+			logger.Debugf("HTTP gateway (policy-checked): rejecting (failed to map access token)")
 
-			respondWithMatrixError(
+			httphelp.RespondWithMatrixError(
 				w,
 				http.StatusForbidden,
 				matrix.ErrorUnknownToken,
@@ -191,14 +209,24 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 		}
 		logger = logger.WithField("userId", userId)
 
+		// These will be read in handlers and in hooks (like `hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest`).
 		r = r.WithContext(context.WithValue(r.Context(), "accessToken", accessToken))
 		r = r.WithContext(context.WithValue(r.Context(), "userId", userId))
 
+		hookResult = me.hookRunner.RunFirstMatchingType(hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest, w, r, logger)
+		if hookResult.SkipProceedingFurther {
+			logger.Debugf("HTTP gateway (policy-checked): %s hook said we should not proceed further", hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest)
+			return
+		}
+		if hookResult.ReverseProxyResponseModifier != nil {
+			httpResponseModifierFuncs = append(httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
+		}
+
 		policy := me.policyStore.Get()
 		if policy == nil {
-			logger.Infof("HTTP gateway: denying (missing policy)")
+			logger.Infof("HTTP gateway (policy-checked): denying (missing policy)")
 
-			respondWithMatrixError(
+			httphelp.RespondWithMatrixError(
 				w,
 				http.StatusForbidden,
 				matrix.ErrorForbidden,
@@ -211,12 +239,12 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		if !policyResponse.Allow {
 			logger.Infof(
-				"HTTP gateway: denying (%s: %s)",
+				"HTTP gateway (policy-checked): denying (%s: %s)",
 				policyResponse.ErrorCode,
 				policyResponse.ErrorMessage,
 			)
 
-			respondWithMatrixError(
+			httphelp.RespondWithMatrixError(
 				w,
 				http.StatusForbidden,
 				policyResponse.ErrorCode,
@@ -225,8 +253,30 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 			return
 		}
 
-		logger.Infof("HTTP gateway: proxying")
-		me.reverseProxy.ServeHTTP(w, r)
+		reverseProxyToUse := me.reverseProxy
+
+		if len(httpResponseModifierFuncs) == 0 {
+			logger.Debugf("HTTP gateway (policy-checked): proxying")
+		} else {
+			logger.Debugf("HTTP gateway (policy-checked): proxying (with response modification)")
+
+			var chainedResponseModifier hook.HttpResponseModifierFunc = func(response *http.Response) error {
+				for _, httpResponseModifierFunc := range httpResponseModifierFuncs {
+					err := httpResponseModifierFunc(response)
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			}
+
+			reverseProxyCopy := *reverseProxyToUse
+			reverseProxyCopy.ModifyResponse = chainedResponseModifier
+
+			reverseProxyToUse = &reverseProxyCopy
+		}
+
+		reverseProxyToUse.ServeHTTP(w, r)
 	}
 }
 
@@ -240,7 +290,7 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 		logger = logger.WithFields(interceptorResult.LoggingContextFields)
 
 		if interceptorResult.Result == InterceptorResultProxy {
-			logger.Infof("HTTP gateway: proxying")
+			logger.Infof("HTTP gateway (intercepted): proxying")
 
 			me.reverseProxy.ServeHTTP(w, r)
 
@@ -249,12 +299,12 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 
 		if interceptorResult.Result == InterceptorResultDeny {
 			logger.Infof(
-				"HTTP gateway: denying (%s: %s)",
+				"HTTP gateway (intercepted): denying (%s: %s)",
 				interceptorResult.ErrorCode,
 				interceptorResult.ErrorMessage,
 			)
 
-			respondWithMatrixError(
+			httphelp.RespondWithMatrixError(
 				w,
 				http.StatusForbidden,
 				interceptorResult.ErrorCode,
@@ -264,6 +314,6 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 			return
 		}
 
-		logger.Fatalf("HTTP gateway: unexpected interceptor result: %#v", interceptorResult)
+		logger.Fatalf("HTTP gateway (intercepted): unexpected interceptor result: %#v", interceptorResult)
 	}
 }

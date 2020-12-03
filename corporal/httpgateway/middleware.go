@@ -1,6 +1,7 @@
 package httpgateway
 
 import (
+	"devture-matrix-corporal/corporal/httphelp"
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/util"
 	"net/http"
@@ -42,6 +43,6 @@ func denyUnsupportedApiVersionsMiddleware(next http.Handler) http.Handler {
 		// (that is, that we don't capture and handle below).
 		// Letting these requests go through would be a security risk.
 
-		respondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "API version not supported by gateway")
+		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "API version not supported by gateway")
 	})
 }

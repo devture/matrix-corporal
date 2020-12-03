@@ -58,6 +58,30 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 		"+b:example.com"
 	],
 
+	"hooks": [
+		{
+			"id": "custom-hook-to-prevent-banning",
+			"eventType": "beforeAnyRequest",
+			"routeMatchesRegex": "^/_matrix/client/r0/rooms/([^/]+)/ban",
+			"methodMatchesRegex": "POST",
+			"action": "reject",
+			"responseStatusCode": 403,
+			"rejectionErrorCode": "M_FORBIDDEN",
+			"rejectionErrorMessage": "Banning is forbidden on this server. We're nice like that!"
+		},
+
+		{
+			"id": "custom-hook-to-reject-room-creation-once-in-a-while",
+			"eventType": "beforeAuthenticatedPolicyCheckedRequest",
+			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"action": "consult.RESTServiceURL",
+			"RESTServiceURL": "http://hook-rest-service:8080/reject/with-33-percent-chance",
+			"RESTServiceRequestHeaders": {
+				"Authorization": "Bearer SOME_TOKEN"
+			}
+		}
+	],
+
 	"users": [
 		{
 			"id": "@john:example.com",

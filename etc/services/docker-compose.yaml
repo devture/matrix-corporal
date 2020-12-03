@@ -40,3 +40,11 @@ services:
     - ../etc/services/matrix-element-web/nginx.conf:/etc/nginx/nginx.conf:ro
     - /dev/null:/etc/nginx/conf.d/default.conf:ro
     - ../etc/services/matrix-element-web/config.json:/app/config.json:ro
+
+  hook-rest-service:
+    image: docker.io/php:8.0.0-fpm-alpine3.12
+    ports:
+    - "41466:8080"
+    volumes:
+    - ../etc/services/hook-rest-service:/work:ro
+    command: "/usr/local/bin/php -S 0.0.0.0:8080 /work/index.php"
