@@ -21,6 +21,8 @@ For each API endpoint, when an error occurs, a [standard Matrix error response](
 
 API endpoints:
 
+- [Policy fetching endpoint](#policy-fetching-endpoint) - `GET /_matrix/corporal/policy`
+
 - [Policy submission endpoint](#policy-submission-endpoint) - `PUT /_matrix/corporal/policy`
 
 - [Policy-provider reload endpoint](#policy-provider-reload-endpoint) - `POST /_matrix/corporal/policy/provider/reload`
@@ -28,6 +30,23 @@ API endpoints:
 - [User access-token retrieval endpoint](#user-access-token-retrieval-endpoint) - `POST /_matrix/corporal/user/{userId}/access-token/new`
 
 - [User access-token release endpoint](#user-access-token-release-endpoint) - `DELETE /_matrix/corporal/user/{userId}/access-token`
+
+
+## Policy fetching endpoint
+
+**Endpoint**: `GET /_matrix/corporal/policy`
+
+Regardless of the type of [policy provider](policy-providers.md) being used,
+`matrix-corporal` can report what [policy](policy.md) it's currently using over its HTTP API.
+This is useful for debugging purposes.
+
+Example (using [curl](https://curl.haxx.se/)):
+
+```bash
+curl \
+-H 'Authorization: Bearer HTTP_API_TOKEN' \
+http://matrix.example.com/_matrix/corporal/policy
+```
 
 
 ## Policy submission endpoint

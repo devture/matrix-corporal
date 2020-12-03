@@ -26,8 +26,18 @@ func NewPolicyApiHandlerRegistrator(
 }
 
 func (me *PolicyApiHandlerRegistrator) RegisterRoutesWithRouter(router *mux.Router) {
+	router.HandleFunc("/_matrix/corporal/policy", me.actionPolicyGet).Methods("GET")
 	router.HandleFunc("/_matrix/corporal/policy", me.actionPolicyPut).Methods("PUT")
 	router.HandleFunc("/_matrix/corporal/policy/provider/reload", me.actionPolicyProviderReload).Methods("POST")
+}
+
+func (me *PolicyApiHandlerRegistrator) actionPolicyGet(w http.ResponseWriter, r *http.Request) {
+	// May be nil
+	policy := me.policyStore.Get()
+
+	Respond(w, http.StatusOK, map[string]interface{}{
+		"policy": policy,
+	})
 }
 
 func (me *PolicyApiHandlerRegistrator) actionPolicyPut(w http.ResponseWriter, r *http.Request) {
