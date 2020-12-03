@@ -5,6 +5,15 @@ import "devture-matrix-corporal/corporal/hook"
 type Policy struct {
 	SchemaVerson int `json:"schemaVersion"`
 
+	// IdentificationStamp holds a policy identification value.
+	// Policy providers/generators can attach any string value to a policy to help identify it.
+	//
+	// This could be a semver-like version, a timestamp, etc.
+	// We don't care and we don't do anything with it for now.
+	// In the future, we might suppress reconciliation if a new policy arrives and its identification stamp
+	// matches the previous one.
+	IdentificationStamp *string `json:"identificationStamp"`
+
 	Flags PolicyFlags `json:"flags"`
 
 	Hooks []*hook.Hook `json:"hooks"`

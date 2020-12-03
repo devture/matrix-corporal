@@ -13,6 +13,8 @@ The policy is a JSON document that looks like this:
 {
 	"schemaVersion": 1,
 
+	"identificationStamp": null,
+
 	"flags": {
 		"allowCustomUserDisplayNames": false,
 		"allowCustomUserAvatars": false,
@@ -97,6 +99,8 @@ The policy is a JSON document that looks like this:
 A policy contains the following fields:
 
 - `schemaVersion` - tells which schema version this policy is using. This field will be useful in case we introduce backward-incompatible changes in the future. For now, it's always set to `1`.
+
+- `identificationStamp` - an optional `string` value provided by you to help you identify this policy. For now, it's only used for debugging purposes, but in the future we might suppress reconciliation if we fetch a policy which has the same stamp as the one last used for reconciliation. So, if you provide this value at all, make sure it gets a new value, at least whenever the policy changes.
 
 - `flags` - a list of flags telling `matrix-corporal` what other global restrictions to apply. See [flags](#flags) below.
 
