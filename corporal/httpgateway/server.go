@@ -136,6 +136,11 @@ func (me *Server) createRouter() http.Handler {
 	).Methods("POST")
 
 	r.HandleFunc(
+		"/_matrix/client/r0/rooms/{roomId}/send/{eventType}/{txnId}",
+		me.createPolicyCheckingHandler("room.send_event", policycheck.CheckRoomSendEvent),
+	).Methods("PUT")
+
+	r.HandleFunc(
 		"/_matrix/client/r0/profile/{targetUserId}/displayname",
 		me.createPolicyCheckingHandler("user.set_display_name", policycheck.CheckProfileSetDisplayName),
 	).Methods("PUT")

@@ -28,6 +28,25 @@ func CheckRoomCreate(r *http.Request, ctx context.Context, policy policy.Policy,
 	}
 }
 
+// CheckRoomSendEvent is a policy checker for: /_matrix/client/r0/rooms/{roomId}/send/{eventType}/{txnId}
+func CheckRoomSendEvent(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
+	userId := ctx.Value("userId").(string)
+	eventType := mux.Vars(r)["eventType"]
+	roomId := mux.Vars(r)["roomId"]
+
+	if !checker.CanUserSendEventToRoom(policy, userId, eventType, roomId) {
+		return PolicyCheckResponse{
+			Allow:        false,
+			ErrorCode:    matrix.ErrorForbidden,
+			ErrorMessage: "Denied by policy",
+		}
+	}
+
+	return PolicyCheckResponse{
+		Allow: true,
+	}
+}
+
 // CheckRoomLeave is a policy checker for: /_matrix/client/r0/rooms/{roomId}/leave
 func CheckRoomLeave(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)

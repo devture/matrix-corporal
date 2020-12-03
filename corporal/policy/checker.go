@@ -24,6 +24,14 @@ func (me *Checker) CanUserCreateRoom(policy Policy, userId string) bool {
 	return !policy.Flags.ForbidRoomCreation
 }
 
+func (me *Checker) CanUserSendEventToRoom(policy Policy, userId string, eventType string, roomId string) bool {
+	// Everyone can send everything wherywhere now.
+	// We don't have policy rules that affect this.
+	//
+	// However, people can intercept and control this via hooks.
+	return true
+}
+
 func (me *Checker) CanUserLeaveRoom(policy Policy, userId string, roomId string) bool {
 	return me.CanUserChangeOwnMembershipStateInRoom(policy, userId, roomId)
 }
