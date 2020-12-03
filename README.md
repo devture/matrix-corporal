@@ -1,3 +1,5 @@
+[![Support room on Matrix](https://img.shields.io/matrix/matrix-corporal:devture.com.svg?label=%23matrix-corporal%3Adevture.com&logo=matrix&style=for-the-badge&server_fqdn=matrix.devture.com)](https://matrix.to/#/#matrix-corporal:devture.com) [![donate](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/s.pantaleev/donate)
+
 # Matrix Corporal: reconciliator and gateway for a managed Matrix server
 
 `matrix-corporal` manages your [Matrix](http://matrix.org/) server according to a configuration policy.
