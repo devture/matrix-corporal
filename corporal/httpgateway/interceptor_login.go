@@ -16,7 +16,7 @@ import (
 
 // LoginInterceptor is an HTTP request interceptor that handles the /login API path.
 //
-// It's goal is to authenticate users described in the policy and let them get an access token
+// Its goal is to authenticate users described in the policy and let them get an access token
 // if credentials match.
 //
 // Requests by users which are not described in the policy (also called non-managed-users) are

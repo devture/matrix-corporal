@@ -1,38 +1,44 @@
 <?php
 
+$respondWithJsonAndExit = function (array $responsePayload): void {
+	$responsePayloadString = json_encode($responsePayload);
+
+	echo $responsePayloadString;
+
+	file_put_contents('php://stdout', sprintf("Responding with: %s\n", $responsePayloadString));
+
+	exit;
+};
+
 if ($_SERVER['REQUEST_URI'] === '/reject/with-33-percent-chance') {
 	if (rand(0, 2) === 0) {
-		echo json_encode([
+		$respondWithJsonAndExit([
 			'id' => 'rejecting-unlucky-ones',
 			'action' => 'reject',
 			'responseStatusCode' => 403,
 			'rejectionErrorCode' => 'M_FORBIDDEN',
-			'rejectionErrorMessage' => 'Rejecting it via a hook',
-		]);
-	} else {
-		echo json_encode([
-			'id' => 'allowing-lucky-ones',
-			'action' => 'pass.unmodified',
+			'rejectionErrorMessage' => 'Rejecting it via a hook delivered from a REST service',
 		]);
 	}
 
-	exit;
+	$respondWithJsonAndExit([
+		'id' => 'allowing-lucky-ones',
+		'action' => 'pass.unmodified',
+	]);
 }
 
 if ($_SERVER['REQUEST_URI'] === '/reject/forbidden') {
-	echo json_encode([
+	$respondWithJsonAndExit([
 		'id' => 'rejection-response-hook',
 		'action' => 'reject',
 		'responseStatusCode' => 403,
 		'rejectionErrorCode' => 'M_FORBIDDEN',
-		'rejectionErrorMessage' => 'Rejecting it via a hook',
+		'rejectionErrorMessage' => 'Rejecting it via a hook delivered from a REST service',
 	]);
-
-	exit;
 }
 
 if ($_SERVER['REQUEST_URI'] === '/inject-something') {
-	echo json_encode([
+	$respondWithJsonAndExit([
 		'id' => 'injection-response-hook',
 		'action' => 'pass.injectJSONIntoResponse',
 		"injectJSONIntoResponse" => [
@@ -42,8 +48,21 @@ if ($_SERVER['REQUEST_URI'] === '/inject-something') {
 			'X-Custom-Header' => 'Header-Value',
 		],
 	]);
+}
 
-	exit;
+if ($_SERVER['REQUEST_URI'] === '/respond-with-something') {
+	// We could read the request (and possibly response) information here,
+	// and act depending on that.
+	//
+	// See how we do it for the `/dump` handler for an example.
+	$respondWithJsonAndExit([
+		'id' => 'respond-directly',
+		'action' => 'respond',
+		"responseStatusCode" => 200,
+		'responsePayload' => [
+			'message' => 'This response is coming from the REST service',
+		],
+	]);
 }
 
 
@@ -66,15 +85,13 @@ if ($_SERVER['REQUEST_URI'] === '/dump') {
 		file_put_contents('php://stdout', "Payload JSON parsing: OK\n");
 	}
 
-	echo json_encode([
+	$respondWithJsonAndExit([
 		'id' => 'passed-after-dump',
 		'action' => 'pass.unmodified',
 	]);
-
-	exit;
 }
 
-echo json_encode([
+$respondWithJsonAndExit([
 	'id' => 'default',
 	'action' => 'pass.unmodified',
 ]);
