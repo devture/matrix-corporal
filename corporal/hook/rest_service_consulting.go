@@ -61,6 +61,9 @@ func NewRESTServiceConsultor(defaultTimeoutDuration time.Duration) *RESTServiceC
 // The result-Hook defines some other action to take (pass, reject, consult another REST service, etc).
 func (me *RESTServiceConsultor) Consult(request *http.Request, hook Hook, logger *logrus.Entry) (*Hook, error) {
 	consultingHTTPRequest, err := prepareConsultingHTTPRequest(request, hook, me.defaultTimeoutDuration)
+	if err != nil {
+		return nil, err
+	}
 
 	logger.Debugf("RESTServiceConsultor: calling %s %s", consultingHTTPRequest.Method, consultingHTTPRequest.URL)
 
@@ -148,7 +151,7 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, hook Hook) (*RES
 
 	payloadBytes, err := httphelp.GetRequestBody(request)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading request body")
+		return nil, fmt.Errorf("Failed reading request body: %s", err)
 	}
 	consultingRequest.Payload = string(payloadBytes)
 
