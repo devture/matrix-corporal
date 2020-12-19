@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/Jeffail/gabs v1.4.0
+	github.com/ahmetb/govvv v0.3.0 // indirect
 	github.com/euskadi31/go-service v1.3.2
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gorilla/mux v1.8.0

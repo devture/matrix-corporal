@@ -34,6 +34,17 @@
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
 			}
+		},
+
+		{
+			"id": "custom-hook-to-capture-room-creation-details",
+			"eventType": "afterAnyRequest",
+			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"action": "consult.RESTServiceURL",
+			"RESTServiceURL": "http://hook-rest-service:8080/dump",
+			"RESTServiceRequestHeaders": {
+				"Authorization": "Bearer SOME_TOKEN"
+			}
 		}
 	],
 

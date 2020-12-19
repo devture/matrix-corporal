@@ -178,13 +178,8 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 
 		httpResponseModifierFuncs := make([]hook.HttpResponseModifierFunc, 0)
 
-		hookResult := me.hookRunner.RunFirstMatchingType(hook.EventTypeBeforeAnyRequest, w, r, logger)
-		if hookResult.SkipProceedingFurther {
-			logger.Debugf("HTTP gateway (policy-checked): %s hook said we should not proceed further", hook.EventTypeBeforeAnyRequest)
+		if !me.runHook(hook.EventTypeBeforeAnyRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
-		}
-		if hookResult.ReverseProxyResponseModifier != nil {
-			httpResponseModifierFuncs = append(httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
 		}
 
 		accessToken := httphelp.GetAccessTokenFromRequest(r)
@@ -214,17 +209,16 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 		}
 		logger = logger.WithField("userId", userId)
 
-		// These will be read in handlers and in hooks (like `hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest`).
+		// These will be read in handlers and in hooks (like `hook.EventTypeBeforeAuthenticatedRequest`).
 		r = r.WithContext(context.WithValue(r.Context(), "accessToken", accessToken))
 		r = r.WithContext(context.WithValue(r.Context(), "userId", userId))
 
-		hookResult = me.hookRunner.RunFirstMatchingType(hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest, w, r, logger)
-		if hookResult.SkipProceedingFurther {
-			logger.Debugf("HTTP gateway (policy-checked): %s hook said we should not proceed further", hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest)
+		if !me.runHook(hook.EventTypeBeforeAuthenticatedRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
-		if hookResult.ReverseProxyResponseModifier != nil {
-			httpResponseModifierFuncs = append(httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
+
+		if !me.runHook(hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest, w, r, logger, &httpResponseModifierFuncs) {
+			return
 		}
 
 		policy := me.policyStore.Get()
@@ -258,6 +252,18 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 			return
 		}
 
+		if !me.runHook(hook.EventTypeAfterAnyRequest, w, r, logger, &httpResponseModifierFuncs) {
+			return
+		}
+
+		if !me.runHook(hook.EventTypeAfterAuthenticatedRequest, w, r, logger, &httpResponseModifierFuncs) {
+			return
+		}
+
+		if !me.runHook(hook.EventTypeAfterAuthenticatedPolicyCheckedRequest, w, r, logger, &httpResponseModifierFuncs) {
+			return
+		}
+
 		reverseProxyToUse := me.reverseProxy
 
 		if len(httpResponseModifierFuncs) == 0 {
@@ -265,19 +271,8 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 		} else {
 			logger.Debugf("HTTP gateway (policy-checked): proxying (with response modification)")
 
-			var chainedResponseModifier hook.HttpResponseModifierFunc = func(response *http.Response) error {
-				for _, httpResponseModifierFunc := range httpResponseModifierFuncs {
-					err := httpResponseModifierFunc(response)
-					if err != nil {
-						return err
-					}
-				}
-				return nil
-			}
-
 			reverseProxyCopy := *reverseProxyToUse
-			reverseProxyCopy.ModifyResponse = chainedResponseModifier
-
+			reverseProxyCopy.ModifyResponse = hook.CreateChainedHttpResponseModifierFunc(httpResponseModifierFuncs)
 			reverseProxyToUse = &reverseProxyCopy
 		}
 
@@ -321,4 +316,27 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 
 		logger.Fatalf("HTTP gateway (intercepted): unexpected interceptor result: %#v", interceptorResult)
 	}
+}
+
+// runHook runs the first matching hook of a given type, possibly injects a response modifier and returns false if we should stop execution
+func (me *Server) runHook(
+	eventType string,
+	w http.ResponseWriter,
+	r *http.Request,
+	logger *logrus.Entry,
+	httpResponseModifierFuncs *[]hook.HttpResponseModifierFunc,
+) bool {
+	hookResult := me.hookRunner.RunFirstMatchingType(eventType, w, r, logger)
+	if hookResult.ResponseSent {
+		logger.WithField("hookId", hookResult.Hook.ID).WithField("hookEventType", hookResult.Hook.EventType).Infoln(
+			"HTTP gateway (policy-checked): hook delivered a response, so we're not proceeding further",
+		)
+		return false
+	}
+
+	if hookResult.ReverseProxyResponseModifier != nil {
+		*httpResponseModifierFuncs = append(*httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
+	}
+
+	return true
 }

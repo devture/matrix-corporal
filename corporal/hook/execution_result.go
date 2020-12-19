@@ -1,13 +1,13 @@
 package hook
 
-import "net/http"
-
-type HttpResponseModifierFunc func(*http.Response) error
-
 type ExecutionResult struct {
 	Hook *Hook
 
-	SkipProceedingFurther bool
+	// ResponseSent indicates that executing the hook made it write some response.
+	// In such cases, we wish to prevent further execution like:
+	// - reverse-proxying, when handling `before*` hooks
+	// - or delivering the reverse-proxy response, when handling `after*` hooks
+	ResponseSent bool
 
 	ProcessingError error
 
@@ -16,8 +16,7 @@ type ExecutionResult struct {
 
 func createProcessingErrorExecutionResult(hook *Hook, err error) ExecutionResult {
 	return ExecutionResult{
-		Hook:                  hook,
-		SkipProceedingFurther: true,
-		ProcessingError:       err,
+		Hook:            hook,
+		ProcessingError: err,
 	}
 }

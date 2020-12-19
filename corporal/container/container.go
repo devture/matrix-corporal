@@ -120,6 +120,7 @@ func BuildContainer(
 		return httpgateway.NewCatchAllHandler(
 			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
 			logger,
+			container.Get("matrix.user_mapping_resolver").(*matrix.UserMappingResolver),
 			container.Get("httpgateway.hook_runner").(*httpgateway.HookRunner),
 		)
 	})

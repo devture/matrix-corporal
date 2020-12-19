@@ -35,13 +35,15 @@ func (me *HookRunner) RunFirstMatchingType(eventType string, w http.ResponseWrit
 		)
 
 		return hook.ExecutionResult{
-			SkipProceedingFurther: true,
+			ResponseSent: true,
 		}
 	}
 
 	for _, hookObj := range policyObj.Hooks {
 		if hookObj.EventType == eventType && hookObj.MatchesRequest(request) {
 			logger = logger.WithField("hookId", hookObj.ID)
+			logger = logger.WithField("hookEventType", hookObj.EventType)
+			logger = logger.WithField("hookAction", hookObj.Action)
 			return me.runHook(hookObj, w, request, logger)
 		}
 	}
@@ -49,7 +51,6 @@ func (me *HookRunner) RunFirstMatchingType(eventType string, w http.ResponseWrit
 	return hook.ExecutionResult{
 		Hook: nil,
 	}
-
 }
 
 func (me *HookRunner) runHook(hookObj *hook.Hook, w http.ResponseWriter, request *http.Request, logger *logrus.Entry) hook.ExecutionResult {
@@ -62,7 +63,7 @@ func (me *HookRunner) runHook(hookObj *hook.Hook, w http.ResponseWriter, request
 	if result.ProcessingError != nil {
 		logger = logger.WithField("error", result.ProcessingError)
 
-		logger.Errorf("Hook Runner: error\n")
+		logger.Errorf("Hook Runner: encountered processing error, so we're sending a response\n")
 
 		httphelp.RespondWithMatrixError(
 			w,
@@ -70,6 +71,8 @@ func (me *HookRunner) runHook(hookObj *hook.Hook, w http.ResponseWriter, request
 			matrix.ErrorUnknown,
 			"Hook execution failed, cannot proceed",
 		)
+
+		result.ResponseSent = true
 	}
 
 	return result

@@ -46,10 +46,21 @@ The policy is a JSON document that looks like this:
 
 		{
 			"id": "custom-hook-to-reject-room-creation-once-in-a-while",
-			"eventType": "beforeAuthenticatedPolicyCheckedRequest",
+			"eventType": "beforeAuthenticatedRequest",
 			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
 			"action": "consult.RESTServiceURL",
 			"RESTServiceURL": "http://hook-rest-service:8080/reject/with-33-percent-chance",
+			"RESTServiceRequestHeaders": {
+				"Authorization": "Bearer SOME_TOKEN"
+			}
+		},
+
+		{
+			"id": "custom-hook-to-capture-room-creation-details",
+			"eventType": "afterAuthenticatedRequest",
+			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"action": "consult.RESTServiceURL",
+			"RESTServiceURL": "http://hook-rest-service:8080/dump",
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
 			}

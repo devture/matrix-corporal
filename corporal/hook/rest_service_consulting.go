@@ -29,6 +29,10 @@ type RESTServiceConsultingRequest struct {
 
 	Payload string `json:"payload"`
 
+	// Response contains the HTTP response payload for consultation requests pertaining to requests which already received a response.
+	// That is, requests for `after*` hooks.
+	Response *string `json:"response"`
+
 	// If the Matrix Client-Server API request is for an authenticated user, this holds the ID for it.
 	// Whether this is set depends on the hook event type.
 	//
@@ -59,8 +63,8 @@ func NewRESTServiceConsultor(defaultTimeoutDuration time.Duration) *RESTServiceC
 
 // Consult consults the specified REST service and returns a new Hook containing the response.
 // The result-Hook defines some other action to take (pass, reject, consult another REST service, etc).
-func (me *RESTServiceConsultor) Consult(request *http.Request, hook Hook, logger *logrus.Entry) (*Hook, error) {
-	consultingHTTPRequest, err := prepareConsultingHTTPRequest(request, hook, me.defaultTimeoutDuration)
+func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Response, hook Hook, logger *logrus.Entry) (*Hook, error) {
+	consultingHTTPRequest, err := prepareConsultingHTTPRequest(request, response, hook, me.defaultTimeoutDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -82,21 +86,21 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, hook Hook, logger
 		return nil, fmt.Errorf("Failed reading HTTP response body at %s: %s", *hook.RESTServiceURL, err)
 	}
 
-	var response Hook
-	err = json.Unmarshal(bodyBytes, &response)
+	var responseHook Hook
+	err = json.Unmarshal(bodyBytes, &responseHook)
 	if err != nil {
 		return nil, fmt.Errorf("Failed parsing JSON out of response at %s: %s", *hook.RESTServiceURL, err)
 	}
 
-	return &response, nil
+	return &responseHook, nil
 }
 
-func prepareConsultingHTTPRequest(request *http.Request, hook Hook, defaultTimeoutDuration time.Duration) (*http.Request, error) {
+func prepareConsultingHTTPRequest(request *http.Request, response *http.Response, hook Hook, defaultTimeoutDuration time.Duration) (*http.Request, error) {
 	if hook.RESTServiceURL == nil || *hook.RESTServiceURL == "" {
 		return nil, fmt.Errorf("Cannot use NewRESTServiceConsultor with an empty RESTServiceURL")
 	}
 
-	consultingRequestPayload, err := prepareConsultingHTTPRequestPayload(request, hook)
+	consultingRequestPayload, err := prepareConsultingHTTPRequestPayload(request, response, hook)
 	if err != nil {
 		return nil, fmt.Errorf("Could not prepare request payload to be sent to the REST service: %s", err)
 	}
@@ -137,7 +141,7 @@ func prepareConsultingHTTPRequest(request *http.Request, hook Hook, defaultTimeo
 	return consultingHTTPRequest, nil
 }
 
-func prepareConsultingHTTPRequestPayload(request *http.Request, hook Hook) (*RESTServiceConsultingRequest, error) {
+func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.Response, hook Hook) (*RESTServiceConsultingRequest, error) {
 	consultingRequest := RESTServiceConsultingRequest{}
 	consultingRequest.RequestURI = request.RequestURI
 	consultingRequest.Method = request.Method
@@ -159,6 +163,19 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, hook Hook) (*RES
 	if matrixUserIDInterface != nil {
 		matrixUserIDString := matrixUserIDInterface.(string)
 		consultingRequest.AuthenticatedMatrixUserID = &matrixUserIDString
+	}
+
+	if response != nil {
+		responseBytes, err := httphelp.GetResponseBody(response)
+		if err != nil {
+			return nil, fmt.Errorf("Failed reading response body: %s", err)
+		}
+
+		responseStr := string(responseBytes)
+		consultingRequest.Response = &responseStr
+
+		// Restore what we've read since we've exhausted that reader
+		response.Body = ioutil.NopCloser(bytes.NewReader(responseBytes))
 	}
 
 	return &consultingRequest, nil
