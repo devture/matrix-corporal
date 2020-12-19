@@ -52,6 +52,12 @@ The policy is a JSON document that looks like this:
 			"RESTServiceURL": "http://hook-rest-service:8080/reject/with-33-percent-chance",
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
+			},
+			"RESTContingencyHook": {
+				"action": "reject",
+				"responseStatusCode": 403,
+				"rejectionErrorCode": "M_FORBIDDEN",
+				"rejectionErrorMessage": "REST service down. Rejecting you to be on the safe side"
 			}
 		},
 

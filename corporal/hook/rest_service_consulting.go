@@ -69,27 +69,50 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 		return nil, err
 	}
 
+	respondWithContingencyHookOrError := func(err error) (*Hook, error) {
+		if hook.RESTContingencyHook == nil {
+			// No contingency. We have no choice but to error-out.
+			return nil, err
+		}
+
+		logger.Warnf("Swallowing REST service error and responding with contingency hook: %s", err)
+
+		return hook.RESTContingencyHook, nil
+	}
+
 	logger.Debugf("RESTServiceConsultor: calling %s %s", consultingHTTPRequest.Method, consultingHTTPRequest.URL)
 
 	resp, err := me.httpClient.Do(consultingHTTPRequest)
 	if err != nil {
-		return nil, err
+		return respondWithContingencyHookOrError(err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Non-200 response fetching from URL %s: %d", *hook.RESTServiceURL, resp.StatusCode)
+		return respondWithContingencyHookOrError(fmt.Errorf(
+			"Non-200 response fetching from URL %s: %d",
+			*hook.RESTServiceURL,
+			resp.StatusCode,
+		))
 	}
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading HTTP response body at %s: %s", *hook.RESTServiceURL, err)
+		return respondWithContingencyHookOrError(fmt.Errorf(
+			"Failed reading HTTP response body at %s: %s",
+			*hook.RESTServiceURL,
+			err,
+		))
 	}
 
 	var responseHook Hook
 	err = json.Unmarshal(bodyBytes, &responseHook)
 	if err != nil {
-		return nil, fmt.Errorf("Failed parsing JSON out of response at %s: %s", *hook.RESTServiceURL, err)
+		return respondWithContingencyHookOrError(fmt.Errorf(
+			"Failed parsing JSON out of response at %s: %s",
+			*hook.RESTServiceURL,
+			err,
+		))
 	}
 
 	return &responseHook, nil

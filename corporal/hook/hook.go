@@ -28,6 +28,14 @@ type restActionHookDetails struct {
 	//		"Authorization": "Bearer: SOME_TOKEN",
 	//	}
 	RESTServiceRequestHeaders *map[string]string `json:"RESTServiceRequestHeaders"`
+
+	// RESTContingencyHook contains a fallback hook to return as a result if the REST service fails.
+	//
+	// This can both be a communication failure or it returning a response we can't make sense of.
+	//
+	// If RESTContingencyHook is not defined, any such REST service failures
+	// cause execution to stop (503 / "service unavailable").
+	RESTContingencyHook *Hook `json:"RESTContingencyHook"`
 }
 
 type respondActionHookDetails struct {
