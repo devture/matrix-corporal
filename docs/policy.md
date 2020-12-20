@@ -53,7 +53,7 @@ The policy is a JSON document that looks like this:
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
 			},
-			"RESTContingencyHook": {
+			"RESTServiceContingencyHook": {
 				"action": "reject",
 				"responseStatusCode": 403,
 				"rejectionErrorCode": "M_FORBIDDEN",

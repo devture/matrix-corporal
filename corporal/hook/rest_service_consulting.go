@@ -70,14 +70,14 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 	}
 
 	respondWithContingencyHookOrError := func(err error) (*Hook, error) {
-		if hook.RESTContingencyHook == nil {
+		if hook.RESTServiceContingencyHook == nil {
 			// No contingency. We have no choice but to error-out.
 			return nil, err
 		}
 
 		logger.Warnf("Swallowing REST service error and responding with contingency hook: %s", err)
 
-		return hook.RESTContingencyHook, nil
+		return hook.RESTServiceContingencyHook, nil
 	}
 
 	logger.Debugf("RESTServiceConsultor: calling %s %s", consultingHTTPRequest.Method, consultingHTTPRequest.URL)
