@@ -1,7 +1,7 @@
 package hook
 
 // `before*` hooks are executed in the order they're defined below.
-// If course, some only apply to policy-checked routes, some only for authenticated users, etc,
+// Of course, some only apply to policy-checked routes, some only for authenticated users, etc,
 // so it varies depending on what we're working with.
 var (
 	// EventTypeBeforeAnyRequest is a hook event type which gets executed before requests.
@@ -31,7 +31,7 @@ var (
 )
 
 // `after*` hooks are executed in the order they're defined below.
-// If course, some only apply to policy-checked routes, some only for authenticated users, etc,
+// Of course, some only apply to policy-checked routes, some only for authenticated users, etc,
 // so it varies depending on what we're working with.
 //
 // All `after*` hooks are executed AFTER the request had been forwarded to the reverse-proxy
@@ -77,5 +77,6 @@ var knownEventTypes = []string{
 
 	EventTypeAfterAnyRequest,
 	EventTypeAfterAuthenticatedRequest,
+	EventTypeAfterAuthenticatedPolicyCheckedRequest,
 	EventTypeAfterUnauthenticatedRequest,
 }
