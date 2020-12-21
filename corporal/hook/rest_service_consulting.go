@@ -46,6 +46,10 @@ type restServiceConsultingRequestRequestInformation struct {
 
 // restServiceConsultingRequestResponseInformation represents the information about an upstream HTTP response we're consulting about
 type restServiceConsultingRequestResponseInformation struct {
+	StatusCode int `json:"statusCode"`
+
+	Headers map[string]string `json:"headers"`
+
 	Payload string `json:"payload"`
 }
 
@@ -263,9 +267,7 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 
 	consultingRequest.Request.Headers = map[string]string{}
 	for headerName, headerValuesList := range request.Header {
-		// Go from []string{"gzip, deflate"} to `"gzip, deflate"`
-		headerValue := strings.Join(headerValuesList, ", ")
-		consultingRequest.Request.Headers[headerName] = headerValue
+		consultingRequest.Request.Headers[headerName] = httpHeaderListToHeaderValue(headerValuesList)
 	}
 
 	payloadBytes, err := httphelp.GetRequestBody(request)
@@ -281,7 +283,14 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 	}
 
 	if response != nil {
-		consultingRequest.Response = &restServiceConsultingRequestResponseInformation{}
+		consultingRequest.Response = &restServiceConsultingRequestResponseInformation{
+			StatusCode: response.StatusCode,
+		}
+
+		consultingRequest.Response.Headers = map[string]string{}
+		for headerName, headerValuesList := range response.Header {
+			consultingRequest.Response.Headers[headerName] = httpHeaderListToHeaderValue(headerValuesList)
+		}
 
 		responseBytes, err := httphelp.GetResponseBody(response)
 		if err != nil {
@@ -295,4 +304,9 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 	}
 
 	return &consultingRequest, nil
+}
+
+func httpHeaderListToHeaderValue(headerValuesList []string) string {
+	// Go from []string{"gzip, deflate"} to `"gzip, deflate"`
+	return strings.Join(headerValuesList, ", ")
 }
