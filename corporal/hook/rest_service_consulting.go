@@ -33,11 +33,7 @@ type RESTServiceConsultingRequest struct {
 	// That is, requests for `after*` hooks.
 	Response *string `json:"response"`
 
-	// If the Matrix Client-Server API request is for an authenticated user, this holds the ID for it.
-	// Whether this is set depends on the hook event type.
-	//
-	// For example, hooks of type `EventTypeBeforeAnyRequest` run very early on,
-	// before authentiation information has been figured out yet.
+	// If the Matrix Client-Server API request is for an authenticated user, this holds the full MXID of the user.
 	AuthenticatedMatrixUserID *string `json:"authenticatedMatrixUserId"`
 }
 
