@@ -249,6 +249,8 @@ func prepareConsultingHTTPRequestFactory(
 			return nil, err
 		}
 
+		consultingHTTPRequest.ContentLength = int64(len(consultingRequestPayloadBytes))
+
 		consultingHTTPRequest.Header.Set("Content-Type", "application/json")
 		if hook.RESTServiceRequestHeaders != nil {
 			for k, v := range *hook.RESTServiceRequestHeaders {
