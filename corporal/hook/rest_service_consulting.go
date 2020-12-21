@@ -220,7 +220,7 @@ func prepareConsultingHTTPRequestFactory(
 		return nil, fmt.Errorf("Could not prepare request payload to be sent to the REST service: %s", err)
 	}
 
-	consultingRequestBytes, err := json.Marshal(consultingRequestPayload)
+	consultingRequestPayloadBytes, err := json.Marshal(consultingRequestPayload)
 	if err != nil {
 		return nil, fmt.Errorf("Could not serialize request payload to be sent to the REST service: %s", err)
 	}
@@ -243,7 +243,7 @@ func prepareConsultingHTTPRequestFactory(
 			ctx,
 			consultingRequestMethod,
 			*hook.RESTServiceURL,
-			ioutil.NopCloser(bytes.NewReader(consultingRequestBytes)),
+			ioutil.NopCloser(bytes.NewReader(consultingRequestPayloadBytes)),
 		)
 		if err != nil {
 			return nil, err
