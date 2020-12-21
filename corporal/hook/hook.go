@@ -19,7 +19,16 @@ type restActionHookDetails struct {
 
 	// RESTServiceRequestTimeoutMilliseconds specifies how long the HTTP request to RESTServiceURL is allowed to take.
 	// If this is not defined, a default timeout value is used (30 seconds at the time of this writing).
-	RESTServiceRequestTimeoutMilliseconds *int `json:"RESTServiceRequestTimeoutMilliseconds"`
+	RESTServiceRequestTimeoutMilliseconds *uint `json:"RESTServiceRequestTimeoutMilliseconds"`
+
+	// RESTServiceRetryAttempts specifies how many times to retry the REST service HTTP request if failures are encountered.
+	// If not specified, no retries will be attempted.
+	RESTServiceRetryAttempts *uint `json:"RESTServiceRetryAttempts"`
+
+	// RESTServiceRetryWaitTimeMilliseconds specifies how long to wait between retries when contacting the REST service.
+	// This only makes sense if RESTServiceRetryAttempts is set to a positive number.
+	// If not specified, retries will happen immediately without waiting.
+	RESTServiceRetryWaitTimeMilliseconds *uint `json:"RESTServiceRetryWaitTimeMilliseconds"`
 
 	// RESTServiceRequestHeaders specifies any request headers that should be sent to the RESTServiceURL when making requests.
 	//

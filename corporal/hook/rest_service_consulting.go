@@ -80,42 +80,88 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 		return hook.RESTServiceContingencyHook, nil
 	}
 
-	logger.Debugf("RESTServiceConsultor: calling %s %s", consultingHTTPRequest.Method, consultingHTTPRequest.URL)
-
-	resp, err := me.httpClient.Do(consultingHTTPRequest)
+	responseHook, err := me.callRestServiceWithRetries(consultingHTTPRequest, hook, logger)
 	if err != nil {
 		return respondWithContingencyHookOrError(err)
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return respondWithContingencyHookOrError(fmt.Errorf(
-			"Non-200 response fetching from URL %s: %d",
-			*hook.RESTServiceURL,
-			resp.StatusCode,
-		))
+	return responseHook, nil
+}
+
+func (me *RESTServiceConsultor) callRestServiceWithRetries(requestToSend *http.Request, hook Hook, logger *logrus.Entry) (*Hook, error) {
+	logger = logger.WithFields(logrus.Fields{
+		"RESTRrequestMethod": requestToSend.Method,
+		"RESTRrequestURL":    requestToSend.URL,
+	})
+
+	attemptsCount := uint(1)
+	if hook.RESTServiceRetryAttempts != nil {
+		attemptsCount += *hook.RESTServiceRetryAttempts
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return respondWithContingencyHookOrError(fmt.Errorf(
-			"Failed reading HTTP response body at %s: %s",
-			*hook.RESTServiceURL,
-			err,
-		))
+	var restError error
+
+	for i := uint(1); i <= attemptsCount; i++ {
+		logger = logger.WithField("RESTRequestAttempt", i)
+
+		if i > 1 {
+			// All attempts after the first one are potentially delayed.
+			if hook.RESTServiceRetryWaitTimeMilliseconds != nil {
+				logger.Debugf("Waiting %d ms before retrying\n", *hook.RESTServiceRetryWaitTimeMilliseconds)
+
+				t := time.NewTimer(time.Duration(*hook.RESTServiceRetryWaitTimeMilliseconds) * time.Millisecond)
+				defer t.Stop()
+				<-t.C
+			}
+		}
+
+		logger.Debugf("RESTServiceConsultor: making HTTP request")
+
+		resp, err := me.httpClient.Do(requestToSend)
+		if err != nil {
+			restError = fmt.Errorf("Error fetching from URL: %s", err)
+			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
+			continue
+		}
+
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			restError = fmt.Errorf("Non-200 response: %d", resp.StatusCode)
+			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
+			continue
+		}
+
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			// This is probably an error on our side, so retrying may be silly.
+			restError = fmt.Errorf("Failed reading HTTP response body: %s", err)
+			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
+			continue
+		}
+
+		var responseHook Hook
+		err = json.Unmarshal(bodyBytes, &responseHook)
+		if err != nil {
+			restError = fmt.Errorf("Failed parsing JSON out of response: %s", err)
+			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
+			continue
+		}
+
+		return &responseHook, nil
 	}
 
-	var responseHook Hook
-	err = json.Unmarshal(bodyBytes, &responseHook)
-	if err != nil {
-		return respondWithContingencyHookOrError(fmt.Errorf(
-			"Failed parsing JSON out of response at %s: %s",
-			*hook.RESTServiceURL,
-			err,
-		))
-	}
+	err := fmt.Errorf(
+		"Failed calling %s %s after trying %d times. Last error: %s",
+		requestToSend.Method,
+		*hook.RESTServiceURL,
+		attemptsCount,
+		restError,
+	)
 
-	return &responseHook, nil
+	logger.Warnf("RESTServiceConsultor: ultimately failed: %s", restError)
+
+	return nil, err
 }
 
 func prepareConsultingHTTPRequest(request *http.Request, response *http.Response, hook Hook, defaultTimeoutDuration time.Duration) (*http.Request, error) {
