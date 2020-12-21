@@ -110,10 +110,10 @@ type Hook struct {
 	EventType string `json:"eventType"`
 
 	RouteMatchesRegex         *string `json:"routeMatchesRegex"`
-	RouteMatchesRegexCompiled *regexp.Regexp
+	routeMatchesRegexCompiled *regexp.Regexp
 
 	MethodMatchesRegex         *string `json:"methodMatchesRegex"`
-	MethodMatchesRegexCompiled *regexp.Regexp
+	methodMatchesRegexCompiled *regexp.Regexp
 
 	Action string `json:"action"`
 
@@ -159,14 +159,14 @@ func (me Hook) MatchesRequest(request *http.Request) bool {
 		panic(err)
 	}
 
-	if me.MethodMatchesRegexCompiled != nil {
-		if !me.MethodMatchesRegexCompiled.MatchString(request.Method) {
+	if me.methodMatchesRegexCompiled != nil {
+		if !me.methodMatchesRegexCompiled.MatchString(request.Method) {
 			return false
 		}
 	}
 
-	if me.RouteMatchesRegexCompiled != nil {
-		if !me.RouteMatchesRegexCompiled.MatchString(request.RequestURI) {
+	if me.routeMatchesRegexCompiled != nil {
+		if !me.routeMatchesRegexCompiled.MatchString(request.RequestURI) {
 			return false
 		}
 	}
@@ -175,20 +175,20 @@ func (me Hook) MatchesRequest(request *http.Request) bool {
 }
 
 func (me *Hook) ensureInitialized() error {
-	if me.RouteMatchesRegex != nil {
+	if me.RouteMatchesRegex != nil && me.routeMatchesRegexCompiled == nil {
 		regex, err := regexp.Compile(*me.RouteMatchesRegex)
 		if err != nil {
 			return err
 		}
-		me.RouteMatchesRegexCompiled = regex
+		me.routeMatchesRegexCompiled = regex
 	}
 
-	if me.MethodMatchesRegex != nil {
+	if me.MethodMatchesRegex != nil && me.methodMatchesRegexCompiled == nil {
 		regex, err := regexp.Compile(*me.MethodMatchesRegex)
 		if err != nil {
 			return err
 		}
-		me.MethodMatchesRegexCompiled = regex
+		me.methodMatchesRegexCompiled = regex
 	}
 
 	return nil
