@@ -42,8 +42,6 @@ func (me *HookRunner) RunFirstMatchingType(eventType string, w http.ResponseWrit
 	for _, hookObj := range policyObj.Hooks {
 		if hookObj.EventType == eventType && hookObj.MatchesRequest(request) {
 			logger = logger.WithField("hookId", hookObj.ID)
-			logger = logger.WithField("hookEventType", hookObj.EventType)
-			logger = logger.WithField("hookAction", hookObj.Action)
 			return me.runHook(hookObj, w, request, logger)
 		}
 	}
@@ -54,7 +52,7 @@ func (me *HookRunner) RunFirstMatchingType(eventType string, w http.ResponseWrit
 }
 
 func (me *HookRunner) runHook(hookObj *hook.Hook, w http.ResponseWriter, request *http.Request, logger *logrus.Entry) hook.ExecutionResult {
-	logger.Debugf("Hook Runner: executing")
+	logger.Debugf("Hook Runner: executing hook: %s\n", hookObj.String())
 
 	result := me.executor.Execute(hookObj, w, request, logger)
 
