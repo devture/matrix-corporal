@@ -243,13 +243,11 @@ func prepareConsultingHTTPRequestFactory(
 			ctx,
 			consultingRequestMethod,
 			*hook.RESTServiceURL,
-			ioutil.NopCloser(bytes.NewReader(consultingRequestPayloadBytes)),
+			bytes.NewReader(consultingRequestPayloadBytes),
 		)
 		if err != nil {
 			return nil, err
 		}
-
-		consultingHTTPRequest.ContentLength = int64(len(consultingRequestPayloadBytes))
 
 		consultingHTTPRequest.Header.Set("Content-Type", "application/json")
 		if hook.RESTServiceRequestHeaders != nil {
