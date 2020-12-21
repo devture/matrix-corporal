@@ -30,6 +30,21 @@ type restActionHookDetails struct {
 	// If not specified, retries will happen immediately without waiting.
 	RESTServiceRetryWaitTimeMilliseconds *uint `json:"RESTServiceRetryWaitTimeMilliseconds"`
 
+	// RESTServiceAsync specifies whether REST HTTP calls should be waited upon.
+	// If not specified, we default to waiting on them and extracting their result (a new hook object).
+	//
+	// If this is set to true, we'll simply fire the request and not care about what the response is.
+	// We'll still retry (obeying RESTServiceRetryAttempts and RESTServiceRetryWaitTimeMilliseconds) and expect an OK (200) response,
+	// but it will no longer block the request, nor can it influence it.
+	// The result of async REST hooks can be specified in RESTServiceAsync.
+	// By default (if not specified), we let the original request/response pass through unmodified.
+	RESTServiceAsync bool `json:"RESTServiceAsync"`
+
+	// RESTServiceAsyncResultHook contains the hook to return as a result for RESTServiceAsync = true REST service calls.
+	//
+	// If not specified, RESTServiceAsync = true hooks's result is a new hook with Action = ActionPassUnmodified.
+	RESTServiceAsyncResultHook *Hook `json:"RESTServiceAsyncResultHook"`
+
 	// RESTServiceRequestHeaders specifies any request headers that should be sent to the RESTServiceURL when making requests.
 	//
 	// Example:

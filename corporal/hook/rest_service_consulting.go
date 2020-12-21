@@ -69,7 +69,20 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 		return nil, err
 	}
 
-	respondWithContingencyHookOrError := func(err error) (*Hook, error) {
+	if hook.RESTServiceAsync {
+		// We do the same thing we do synchronously. We just do it in the background and don't care what happens.
+		// Still, logging, etc., is done.
+		go me.callRestServiceWithRetries(consultingHTTPRequest, hook, logger)
+
+		if hook.RESTServiceAsyncResultHook != nil {
+			return hook.RESTServiceAsyncResultHook, nil
+		}
+
+		return &Hook{Action: ActionPassUnmodified}, nil
+	}
+
+	responseHook, err := me.callRestServiceWithRetries(consultingHTTPRequest, hook, logger)
+	if err != nil {
 		if hook.RESTServiceContingencyHook == nil {
 			// No contingency. We have no choice but to error-out.
 			return nil, err
@@ -78,11 +91,6 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 		logger.Warnf("Swallowing REST service error and responding with contingency hook: %s", err)
 
 		return hook.RESTServiceContingencyHook, nil
-	}
-
-	responseHook, err := me.callRestServiceWithRetries(consultingHTTPRequest, hook, logger)
-	if err != nil {
-		return respondWithContingencyHookOrError(err)
 	}
 
 	return responseHook, nil
