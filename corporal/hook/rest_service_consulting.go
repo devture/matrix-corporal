@@ -16,14 +16,23 @@ import (
 
 type httpRequestFactory func() (*http.Request, error)
 
-// RESTServiceConsultingRequest reprents as request payload to be sent to a REST service.
+// restServiceConsultingRequest reprents as request payload to be sent to a REST service.
 //
 // It contains various fields holding information about the Matrix Client-Server API request
 // that was intercepted and is sent to the REST service for "consulting".
 //
 // See RESTServiceConsultor.
-type RESTServiceConsultingRequest struct {
-	RequestURI string `json:"requestURI"`
+type restServiceConsultingRequest struct {
+	Request restServiceConsultingRequestRequestInformation `json:"request"`
+
+	// Response contains the upstream response information (if available).
+	// This is only available for `after*` hooks.
+	Response *restServiceConsultingRequestResponseInformation `json:"response"`
+}
+
+// restServiceConsultingRequestRequestInformation represents the information about an HTTP request we're consulting about
+type restServiceConsultingRequestRequestInformation struct {
+	URI string `json:"URI"`
 
 	Method string `json:"method"`
 
@@ -31,12 +40,13 @@ type RESTServiceConsultingRequest struct {
 
 	Payload string `json:"payload"`
 
-	// Response contains the HTTP response payload for consultation requests pertaining to requests which already received a response.
-	// That is, requests for `after*` hooks.
-	Response *string `json:"response"`
-
 	// If the Matrix Client-Server API request is for an authenticated user, this holds the full MXID of the user.
 	AuthenticatedMatrixUserID *string `json:"authenticatedMatrixUserId"`
+}
+
+// restServiceConsultingRequestResponseInformation represents the information about an upstream HTTP response we're consulting about
+type restServiceConsultingRequestResponseInformation struct {
+	Payload string `json:"payload"`
 }
 
 // RESTServiceConsultor is a helper which consults a REST API about a specific Matrix Client-Server API request.
@@ -44,7 +54,7 @@ type RESTServiceConsultingRequest struct {
 // The API can in turn log or analyze the request payload and decide how it should be handled.
 // It can answer with any valid hook data (rejection, response, passthrough, another REST service call, etc.).
 //
-// The payload sent to the API is seen in RESTServiceConsultingRequest.
+// The payload sent to the API is seen in restServiceConsultingRequest.
 type RESTServiceConsultor struct {
 	defaultTimeoutDuration time.Duration
 
@@ -246,38 +256,39 @@ func prepareConsultingHTTPRequestFactory(
 	}, nil
 }
 
-func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.Response, hook Hook) (*RESTServiceConsultingRequest, error) {
-	consultingRequest := RESTServiceConsultingRequest{}
-	consultingRequest.RequestURI = request.RequestURI
-	consultingRequest.Method = request.Method
+func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.Response, hook Hook) (*restServiceConsultingRequest, error) {
+	consultingRequest := restServiceConsultingRequest{}
+	consultingRequest.Request.URI = request.RequestURI
+	consultingRequest.Request.Method = request.Method
 
-	consultingRequest.Headers = map[string]string{}
+	consultingRequest.Request.Headers = map[string]string{}
 	for headerName, headerValuesList := range request.Header {
 		// Go from []string{"gzip, deflate"} to `"gzip, deflate"`
 		headerValue := strings.Join(headerValuesList, ", ")
-		consultingRequest.Headers[headerName] = headerValue
+		consultingRequest.Request.Headers[headerName] = headerValue
 	}
 
 	payloadBytes, err := httphelp.GetRequestBody(request)
 	if err != nil {
 		return nil, fmt.Errorf("Failed reading request body: %s", err)
 	}
-	consultingRequest.Payload = string(payloadBytes)
+	consultingRequest.Request.Payload = string(payloadBytes)
 
 	matrixUserIDInterface := request.Context().Value("userId")
 	if matrixUserIDInterface != nil {
 		matrixUserIDString := matrixUserIDInterface.(string)
-		consultingRequest.AuthenticatedMatrixUserID = &matrixUserIDString
+		consultingRequest.Request.AuthenticatedMatrixUserID = &matrixUserIDString
 	}
 
 	if response != nil {
+		consultingRequest.Response = &restServiceConsultingRequestResponseInformation{}
+
 		responseBytes, err := httphelp.GetResponseBody(response)
 		if err != nil {
 			return nil, fmt.Errorf("Failed reading response body: %s", err)
 		}
 
-		responseStr := string(responseBytes)
-		consultingRequest.Response = &responseStr
+		consultingRequest.Response.Payload = string(responseBytes)
 
 		// Restore what we've read since we've exhausted that reader
 		response.Body = ioutil.NopCloser(bytes.NewReader(responseBytes))
