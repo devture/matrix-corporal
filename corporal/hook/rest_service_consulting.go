@@ -14,6 +14,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type httpRequestFactory func() (*http.Request, error)
+
 // RESTServiceConsultingRequest reprents as request payload to be sent to a REST service.
 //
 // It contains various fields holding information about the Matrix Client-Server API request
@@ -60,7 +62,14 @@ func NewRESTServiceConsultor(defaultTimeoutDuration time.Duration) *RESTServiceC
 // Consult consults the specified REST service and returns a new Hook containing the response.
 // The result-Hook defines some other action to take (pass, reject, consult another REST service, etc).
 func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Response, hook Hook, logger *logrus.Entry) (*Hook, error) {
-	consultingHTTPRequest, err := prepareConsultingHTTPRequest(request, response, hook, me.defaultTimeoutDuration)
+	// We use a factory, because:
+	// - each time we retry, we need to use a new http.Request.
+	//    - The request.Body reader can only be used once.
+	//    - Timeouts in the context also need to be reset.
+	// - we'd rather prepare the factory now (for async requests), because we can't guarantee what happens with the original
+	//   request's body in the future (once we exit this function). Something somewhere may consume it, making us unable
+	//   to build a proper payload for the request we'll send to the REST service.
+	consultingHTTPRequestFactory, err := prepareConsultingHTTPRequestFactory(request, response, hook, me.defaultTimeoutDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +77,7 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 	if hook.RESTServiceAsync {
 		// We do the same thing we do synchronously. We just do it in the background and don't care what happens.
 		// Still, logging, etc., is done.
-		go me.callRestServiceWithRetries(consultingHTTPRequest, hook, logger)
+		go me.callRestServiceWithRetries(consultingHTTPRequestFactory, hook, logger)
 
 		if hook.RESTServiceAsyncResultHook != nil {
 			return hook.RESTServiceAsyncResultHook, nil
@@ -77,7 +86,7 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 		return &Hook{Action: ActionPassUnmodified}, nil
 	}
 
-	responseHook, err := me.callRestServiceWithRetries(consultingHTTPRequest, hook, logger)
+	responseHook, err := me.callRestServiceWithRetries(consultingHTTPRequestFactory, hook, logger)
 	if err != nil {
 		if hook.RESTServiceContingencyHook == nil {
 			// No contingency. We have no choice but to error-out.
@@ -92,12 +101,11 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 	return responseHook, nil
 }
 
-func (me *RESTServiceConsultor) callRestServiceWithRetries(requestToSend *http.Request, hook Hook, logger *logrus.Entry) (*Hook, error) {
-	logger = logger.WithFields(logrus.Fields{
-		"RESTRrequestMethod": requestToSend.Method,
-		"RESTRrequestURL":    requestToSend.URL,
-	})
-
+func (me *RESTServiceConsultor) callRestServiceWithRetries(
+	requestFactory httpRequestFactory,
+	hook Hook,
+	logger *logrus.Entry,
+) (*Hook, error) {
 	attemptsCount := uint(1)
 	if hook.RESTServiceRetryAttempts != nil {
 		attemptsCount += *hook.RESTServiceRetryAttempts
@@ -105,10 +113,20 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(requestToSend *http.R
 
 	var restError error
 
-	for i := uint(1); i <= attemptsCount; i++ {
-		logger = logger.WithField("RESTRequestAttempt", i)
+	for attemptNumber := uint(1); attemptNumber <= attemptsCount; attemptNumber++ {
+		requestToSend, err := requestFactory()
+		if err != nil {
+			logger.Errorf("RESTServiceConsultor: failed preparing HTTP Request: %s", err)
+			return nil, err
+		}
 
-		if i > 1 {
+		logger = logger.WithFields(logrus.Fields{
+			"RESTRrequestMethod": requestToSend.Method,
+			"RESTRrequestURL":    requestToSend.URL,
+			"RESTRequestAttempt": attemptNumber,
+		})
+
+		if attemptNumber > 1 {
 			// All attempts after the first one are potentially delayed.
 			if hook.RESTServiceRetryWaitTimeMilliseconds != nil {
 				logger.Debugf("Waiting %d ms before retrying\n", *hook.RESTServiceRetryWaitTimeMilliseconds)
@@ -156,9 +174,7 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(requestToSend *http.R
 	}
 
 	err := fmt.Errorf(
-		"Failed calling %s %s after trying %d times. Last error: %s",
-		requestToSend.Method,
-		*hook.RESTServiceURL,
+		"Failed after trying %d times. Last error: %s",
 		attemptsCount,
 		restError,
 	)
@@ -168,11 +184,23 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(requestToSend *http.R
 	return nil, err
 }
 
-func prepareConsultingHTTPRequest(request *http.Request, response *http.Response, hook Hook, defaultTimeoutDuration time.Duration) (*http.Request, error) {
+func prepareConsultingHTTPRequestFactory(
+	request *http.Request,
+	response *http.Response,
+	hook Hook,
+	defaultTimeoutDuration time.Duration,
+) (httpRequestFactory, error) {
 	if hook.RESTServiceURL == nil || *hook.RESTServiceURL == "" {
 		return nil, fmt.Errorf("Cannot use NewRESTServiceConsultor with an empty RESTServiceURL")
 	}
 
+	// We extract the payload once, when making the factory, because that's when we know it's there
+	// and it's safe for us to operate on.
+	//
+	// It also makes sense to do it just once and reuse it for retries as well.
+	//
+	// Extracting the payload for each request is wasteful and may also not be possible to do,
+	// if we do it later on for `RESTServiceAsync = true` requests.
 	consultingRequestPayload, err := prepareConsultingHTTPRequestPayload(request, response, hook)
 	if err != nil {
 		return nil, fmt.Errorf("Could not prepare request payload to be sent to the REST service: %s", err)
@@ -192,26 +220,30 @@ func prepareConsultingHTTPRequest(request *http.Request, response *http.Response
 	if hook.RESTServiceRequestTimeoutMilliseconds != nil {
 		timeoutDuration = time.Duration(*hook.RESTServiceRequestTimeoutMilliseconds) * time.Millisecond
 	}
-	ctx, _ := context.WithTimeout(context.Background(), timeoutDuration)
 
-	consultingHTTPRequest, err := http.NewRequestWithContext(
-		ctx,
-		consultingRequestMethod,
-		*hook.RESTServiceURL,
-		ioutil.NopCloser(bytes.NewReader(consultingRequestBytes)),
-	)
-	if err != nil {
-		return nil, err
-	}
+	return func() (*http.Request, error) {
+		// This needs to be done each time, because it uses absolute time inside.
+		ctx, _ := context.WithTimeout(context.Background(), timeoutDuration)
 
-	consultingHTTPRequest.Header.Set("Content-Type", "application/json")
-	if hook.RESTServiceRequestHeaders != nil {
-		for k, v := range *hook.RESTServiceRequestHeaders {
-			consultingHTTPRequest.Header.Set(k, v)
+		consultingHTTPRequest, err := http.NewRequestWithContext(
+			ctx,
+			consultingRequestMethod,
+			*hook.RESTServiceURL,
+			ioutil.NopCloser(bytes.NewReader(consultingRequestBytes)),
+		)
+		if err != nil {
+			return nil, err
 		}
-	}
 
-	return consultingHTTPRequest, nil
+		consultingHTTPRequest.Header.Set("Content-Type", "application/json")
+		if hook.RESTServiceRequestHeaders != nil {
+			for k, v := range *hook.RESTServiceRequestHeaders {
+				consultingHTTPRequest.Header.Set(k, v)
+			}
+		}
+
+		return consultingHTTPRequest, nil
+	}, nil
 }
 
 func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.Response, hook Hook) (*RESTServiceConsultingRequest, error) {
