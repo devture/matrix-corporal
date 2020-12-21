@@ -298,9 +298,6 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 		}
 
 		consultingRequest.Response.Payload = string(responseBytes)
-
-		// Restore what we've read since we've exhausted that reader
-		response.Body = ioutil.NopCloser(bytes.NewReader(responseBytes))
 	}
 
 	return &consultingRequest, nil
