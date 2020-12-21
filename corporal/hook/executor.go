@@ -380,9 +380,8 @@ func executePassInjectJSONIntoResponse(hookObj *Hook, w http.ResponseWriter, req
 			return err
 		}
 
-		// We read the body, so we ought to restore it,
-		// so that other things (like reverse-proxying) can read it later.
 		response.Body = ioutil.NopCloser(bytes.NewReader(newResponseBytes))
+		response.ContentLength = int64(len(newResponseBytes))
 
 		if hookObj.InjectHeadersIntoResponse != nil {
 			for k, v := range *hookObj.InjectHeadersIntoResponse {
