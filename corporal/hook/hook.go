@@ -11,24 +11,24 @@ import (
 type restActionHookDetails struct {
 	// RESTServiceURL specifies the URL of the REST service to call when Action = ActionConsultRESTServiceURL
 	// Required field.
-	RESTServiceURL *string `json:"RESTServiceURL"`
+	RESTServiceURL *string `json:"RESTServiceURL,omitempty"`
 
 	// RESTServiceRequestMethod specifies the request method to use when making the HTTP request RESTServiceURL
 	// If not specified, a "POST" request will be used.
-	RESTServiceRequestMethod *string `json:"RESTServiceRequestMethod"`
+	RESTServiceRequestMethod *string `json:"RESTServiceRequestMethod,omitempty"`
 
 	// RESTServiceRequestTimeoutMilliseconds specifies how long the HTTP request to RESTServiceURL is allowed to take.
 	// If this is not defined, a default timeout value is used (30 seconds at the time of this writing).
-	RESTServiceRequestTimeoutMilliseconds *uint `json:"RESTServiceRequestTimeoutMilliseconds"`
+	RESTServiceRequestTimeoutMilliseconds *uint `json:"RESTServiceRequestTimeoutMilliseconds,omitempty"`
 
 	// RESTServiceRetryAttempts specifies how many times to retry the REST service HTTP request if failures are encountered.
 	// If not specified, no retries will be attempted.
-	RESTServiceRetryAttempts *uint `json:"RESTServiceRetryAttempts"`
+	RESTServiceRetryAttempts *uint `json:"RESTServiceRetryAttempts,omitempty"`
 
 	// RESTServiceRetryWaitTimeMilliseconds specifies how long to wait between retries when contacting the REST service.
 	// This only makes sense if RESTServiceRetryAttempts is set to a positive number.
 	// If not specified, retries will happen immediately without waiting.
-	RESTServiceRetryWaitTimeMilliseconds *uint `json:"RESTServiceRetryWaitTimeMilliseconds"`
+	RESTServiceRetryWaitTimeMilliseconds *uint `json:"RESTServiceRetryWaitTimeMilliseconds,omitempty"`
 
 	// RESTServiceAsync specifies whether REST HTTP calls should be waited upon.
 	// If not specified, we default to waiting on them and extracting their result (a new hook object).
@@ -38,12 +38,12 @@ type restActionHookDetails struct {
 	// but it will no longer block the request, nor can it influence it.
 	// The result of async REST hooks can be specified in RESTServiceAsync.
 	// By default (if not specified), we let the original request/response pass through unmodified.
-	RESTServiceAsync bool `json:"RESTServiceAsync"`
+	RESTServiceAsync bool `json:"RESTServiceAsync,omitempty"`
 
 	// RESTServiceAsyncResultHook contains the hook to return as a result for RESTServiceAsync = true REST service calls.
 	//
 	// If not specified, RESTServiceAsync = true hooks's result is a new hook with Action = ActionPassUnmodified.
-	RESTServiceAsyncResultHook *Hook `json:"RESTServiceAsyncResultHook"`
+	RESTServiceAsyncResultHook *Hook `json:"RESTServiceAsyncResultHook,omitempty"`
 
 	// RESTServiceRequestHeaders specifies any request headers that should be sent to the RESTServiceURL when making requests.
 	//
@@ -51,7 +51,7 @@ type restActionHookDetails struct {
 	//	RESTServiceRequestHeaders = map[string]string{
 	//		"Authorization": "Bearer: SOME_TOKEN",
 	//	}
-	RESTServiceRequestHeaders *map[string]string `json:"RESTServiceRequestHeaders"`
+	RESTServiceRequestHeaders *map[string]string `json:"RESTServiceRequestHeaders,omitempty"`
 
 	// RESTServiceContingencyHook contains a fallback hook to return as a result if the REST service fails.
 	//
@@ -59,26 +59,26 @@ type restActionHookDetails struct {
 	//
 	// If RESTServiceContingencyHook is not defined, any such REST service failures
 	// cause execution to stop (503 / "service unavailable").
-	RESTServiceContingencyHook *Hook `json:"RESTServiceContingencyHook"`
+	RESTServiceContingencyHook *Hook `json:"RESTServiceContingencyHook,omitempty"`
 }
 
 type respondActionHookDetails struct {
 	// Payload specifies the payload to respond with.
 	// This may be some key-value JSON thing (`map[string]interface{}`), a string, etc.
-	ResponsePayload interface{} `json:"responsePayload"`
+	ResponsePayload interface{} `json:"responsePayload,omitempty"`
 
 	// ResponseSkipPayloadJSONSerialization specifies whether the payload found in ResponsePayload should be JSON-serialized.
 	// This only applies when ResponseContentType = "application/json".
 	// This defaults to false. That is, we serialize to JSON by default (when ResponseContentType = "application/json").
-	ResponseSkipPayloadJSONSerialization bool `json:"responseSkipPayloadJSONSerialization"`
+	ResponseSkipPayloadJSONSerialization bool `json:"responseSkipPayloadJSONSerialization,omitempty"`
 
 	// ResponseStatusCode specifies the HTTP response code that we'll be responding with.
 	// Required field.
-	ResponseStatusCode *int `json:"responseStatusCode"`
+	ResponseStatusCode *int `json:"responseStatusCode,omitempty"`
 
 	// ResponseContentType specifies the HTTP `Content-Type` header that we'll be responding with.
 	// This defaults to "application/json".
-	ResponseContentType *string `json:"responseContentType"`
+	ResponseContentType *string `json:"responseContentType,omitempty"`
 }
 
 // rejectActionHookDetails contains some fields which are useful when Hook.Action = ActionReject
@@ -87,32 +87,32 @@ type rejectActionHookDetails struct {
 
 	// RejectionErrorCode specifies an error response's error code when Action = ActionReject
 	// It's one of the `matrix.Error*` constants or something similar (that list is not exhaustive).
-	RejectionErrorCode *string `json:"rejectionErrorCode"`
+	RejectionErrorCode *string `json:"rejectionErrorCode,omitempty"`
 
 	// RejectionErrorMessage specifies an error response's error message when Action = ActionReject
-	RejectionErrorMessage *string `json:"rejectionErrorMessage"`
+	RejectionErrorMessage *string `json:"rejectionErrorMessage,omitempty"`
 }
 
 // passInjectJSONIntoResponseActionHookDetails contains some fields which are useful when Hook.Action = ActionPassInjectJSONIntoResponse
 type passInjectJSONIntoResponseActionHookDetails struct {
 	// InjectJSONIntoResponse contains some JSON fields to inject into the original response
 	// Required field.
-	InjectJSONIntoResponse *map[string]interface{} `json:"injectJSONIntoResponse"`
+	InjectJSONIntoResponse *map[string]interface{} `json:"injectJSONIntoResponse,omitempty"`
 
 	// InjectHeadersIntoResponse contains a list of headers that will be injected into the original response
-	InjectHeadersIntoResponse *map[string]string `json:"injectHeadersIntoResponse"`
+	InjectHeadersIntoResponse *map[string]string `json:"injectHeadersIntoResponse,omitempty"`
 }
 
 type Hook struct {
 	// An identifier (name) for this hook
-	ID string `json:"id"`
+	ID string `json:"id,omitempty"`
 
-	EventType string `json:"eventType"`
+	EventType string `json:"eventType,omitempty"`
 
-	RouteMatchesRegex         *string `json:"routeMatchesRegex"`
+	RouteMatchesRegex         *string `json:"routeMatchesRegex,omitempty"`
 	routeMatchesRegexCompiled *regexp.Regexp
 
-	MethodMatchesRegex         *string `json:"methodMatchesRegex"`
+	MethodMatchesRegex         *string `json:"methodMatchesRegex,omitempty"`
 	methodMatchesRegexCompiled *regexp.Regexp
 
 	Action string `json:"action"`
