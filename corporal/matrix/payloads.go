@@ -2,7 +2,9 @@ package matrix
 
 // ApiLoginRequestPayload represents is a request payload for: POST /_matrix/client/r0/login
 type ApiLoginRequestPayload struct {
-	Type     string `json:"type"`
+	// Type is matrix.LoginTypeToken or something else
+	Type string `json:"type"`
+
 	Password string `json:"password,omitempty"`
 	Medium   string `json:"medium,omitempty"`
 
@@ -18,7 +20,11 @@ type ApiLoginRequestPayload struct {
 }
 
 type ApiLoginRequestIdentifier struct {
+	// Type is matrix.LoginIdentifierTypeUser (`m.id.user`) or something else.
+	// Different identifier types contain different fields.
 	Type string `json:"type"`
+
+	// User contains the username of the user logging in, when Type = matrix.LoginIdentifierTypeUser.
 	User string `json:"user"`
 }
 

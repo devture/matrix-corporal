@@ -6,6 +6,7 @@ import (
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/policy"
 	"devture-matrix-corporal/corporal/userauth"
+	"devture-matrix-corporal/corporal/util"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -85,6 +86,26 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 
 	// Proceed handling password authentication..
 
+	policyObj := me.policyStore.Get()
+	if policyObj == nil {
+		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUnknown, "Missing policy")
+	}
+
+	if util.IsStringInArray(payload.Identifier.Type, []string{matrix.LoginIdentifierTypeThirdParty, matrix.LoginIdentifierTypePhone}) {
+		// This is some 3pid login request.
+		// Letting it go through may have security implications, so we only do it if explicitly enabled.
+
+		if policyObj.Flags.Allow3pidLogin {
+			// Let it pass as-is to the upstream server in order to avoid breaking such login flows.
+			return InterceptorResponse{
+				Result:               InterceptorResultProxy,
+				LoggingContextFields: loggingContextFields,
+			}
+		}
+
+		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUnknown, "3pid login requests are not allowed on this server")
+	}
+
 	userId := ""
 	if payload.Identifier.User != "" {
 		// New, preferred field
@@ -106,11 +127,6 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 
 	if !matrix.IsFullUserIdOfDomain(userIdFull, me.homeserverDomainName) {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorForbidden, "Rejecting non-own domains")
-	}
-
-	policyObj := me.policyStore.Get()
-	if policyObj == nil {
-		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUnknown, "Missing policy")
 	}
 
 	userPolicy := policyObj.GetUserPolicyByUserId(userIdFull)

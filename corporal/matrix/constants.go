@@ -24,5 +24,10 @@ const (
 	LoginTypePassword = "m.login.password"
 	LoginTypeToken    = "m.login.token"
 
+	// See https://matrix.org/docs/spec/client_server/r0.6.1#identifier-types
+	LoginIdentifierTypeUser       = "m.id.user"
+	LoginIdentifierTypeThirdParty = "m.id.thirdparty"
+	LoginIdentifierTypePhone      = "m.id.phone"
+
 	RegistrationTypeSharedSecret = "org.matrix.login.shared_secret"
 )

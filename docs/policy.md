@@ -142,6 +142,7 @@ The following policy flags are supported:
 
 - `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether users are forbidden from creating rooms. The `forbidRoomCreation` [User policy field](#user-policy-fields) takes precedence over this. This is just a global default in case the user policy does not specify a value.
 
+- `allow3pidLogin` (`true` or `false`, defaults to `false`) - controls whether users would be able to log in with 3pid (third-party identifiers) associated with their user account (email address / phone number). If enabled, we let such login requests requests pass and go directly to the homeserver. This has some security implications - any checks matrix-corporal would have normally done (checking the `active` status in the user policy, etc.) are skipped.
 
 ## User policy fields
 

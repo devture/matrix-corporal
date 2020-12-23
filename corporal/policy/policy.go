@@ -66,6 +66,11 @@ type PolicyFlags struct {
 	// ForbidRoomCreation tells whether users are forbidden from creating rooms.
 	// When there's a dedicated `UserPolicy` for the user, that one takes precedence over this default.
 	ForbidRoomCreation bool `json:"forbidRoomCreation"`
+
+	// Allow3pidLogin tells whether login requests using an email address or phone number will be allowed to go through unmodified.
+	// Enabling this may have security implications.
+	// With this setting enabled, you're completely skipping matrix-corporal's login checks (`active` flag in the user policy, etc).
+	Allow3pidLogin bool `json:"allow3pidLogin"`
 }
 
 type UserPolicy struct {
