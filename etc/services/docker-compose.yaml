@@ -48,3 +48,5 @@ services:
     volumes:
     - ../etc/services/hook-rest-service:/work:ro
     command: "/usr/local/bin/php -S 0.0.0.0:8080 /work/index.php"
+    # PHP doesn't seem to respond to SIGTERM and we'd rather not wait.
+    stop_signal: SIGKILL
