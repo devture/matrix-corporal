@@ -56,7 +56,7 @@ func (me *HookRunner) runHook(hookObj *hook.Hook, w http.ResponseWriter, request
 
 	result := me.executor.Execute(hookObj, w, request, logger)
 
-	logger.Debugf("Hook Runner: result: %s\n", result)
+	logger.Debugf("Hook Runner: result: %#v\n", result)
 
 	if result.ProcessingError != nil {
 		logger = logger.WithField("error", result.ProcessingError)

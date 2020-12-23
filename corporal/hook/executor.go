@@ -168,7 +168,7 @@ func (me *Executor) executeAfterHook(
 		// but rather just write it out into the `response` object.
 		result := handler(hookObj, responseBoundWriter, request, response, logger)
 
-		logger.Debugf("After-hook execution result: %s\n", result)
+		logger.Debugf("After-hook execution result: %#v\n", result)
 
 		if result.ProcessingError != nil {
 			logger = logger.WithField("error", result.ProcessingError)
