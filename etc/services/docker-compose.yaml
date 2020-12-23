@@ -42,7 +42,7 @@ services:
     - ../etc/services/matrix-element-web/config.json:/app/config.json:ro
 
   hook-rest-service:
-    image: docker.io/php:8.0.0-fpm-alpine3.12
+    image: docker.io/php:8.0.0-cli-alpine3.12
     ports:
     - "41466:8080"
     volumes:
