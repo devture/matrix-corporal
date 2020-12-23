@@ -4,6 +4,7 @@ import (
 	"context"
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/policy"
+	"devture-matrix-corporal/corporal/userauth"
 	"net/http"
 )
 
@@ -40,7 +41,7 @@ func CheckUserSetPassword(r *http.Request, ctx context.Context, policyObj policy
 		}
 	}
 
-	if userPolicy.AuthType == policy.UserAuthTypePassthrough {
+	if userPolicy.AuthType == userauth.UserAuthTypePassthrough {
 		if policyObj.Flags.AllowCustomPassthroughUserPasswords {
 			return PolicyCheckResponse{
 				Allow: true,

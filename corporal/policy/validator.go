@@ -30,6 +30,18 @@ func (me *Validator) Validate(policy *Policy) error {
 		}
 	}
 
+	for idx, userPolicy := range policy.User {
+		err := userPolicy.Validate()
+		if err != nil {
+			return fmt.Errorf(
+				"User policy validation for `%s` (index %d) failed: %s",
+				userPolicy.Id,
+				idx,
+				err,
+			)
+		}
+	}
+
 	for idx, hook := range policy.Hooks {
 		err := hook.Validate()
 		if err != nil {

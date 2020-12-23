@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"crypto/subtle"
-	"devture-matrix-corporal/corporal/policy"
 	"encoding/hex"
 	"hash"
 )
@@ -42,17 +41,17 @@ func (me *HashAuthenticator) Authenticate(userId, givenPassword, authCredential 
 }
 
 func NewMd5Authenticator() Authenticator {
-	return NewHashAuthenticator(md5.New(), policy.UserAuthTypeMd5)
+	return NewHashAuthenticator(md5.New(), UserAuthTypeMd5)
 }
 
 func NewSha1Authenticator() Authenticator {
-	return NewHashAuthenticator(sha1.New(), policy.UserAuthTypeSha1)
+	return NewHashAuthenticator(sha1.New(), UserAuthTypeSha1)
 }
 
 func NewSha256Authenticator() Authenticator {
-	return NewHashAuthenticator(sha256.New(), policy.UserAuthTypeSha256)
+	return NewHashAuthenticator(sha256.New(), UserAuthTypeSha256)
 }
 
 func NewSha512Authenticator() Authenticator {
-	return NewHashAuthenticator(sha512.New(), policy.UserAuthTypeSha512)
+	return NewHashAuthenticator(sha512.New(), UserAuthTypeSha512)
 }

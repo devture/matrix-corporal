@@ -1,6 +1,10 @@
 package policy
 
-import "devture-matrix-corporal/corporal/hook"
+import (
+	"devture-matrix-corporal/corporal/hook"
+	"devture-matrix-corporal/corporal/userauth"
+	"fmt"
+)
 
 type Policy struct {
 	SchemaVerson int `json:"schemaVersion"`
@@ -64,14 +68,6 @@ type PolicyFlags struct {
 	ForbidRoomCreation bool `json:"forbidRoomCreation"`
 }
 
-const (
-	UserAuthTypePassthrough = "passthrough"
-	UserAuthTypeMd5         = "md5"
-	UserAuthTypeSha1        = "sha1"
-	UserAuthTypeSha256      = "sha256"
-	UserAuthTypeSha512      = "sha512"
-)
-
 type UserPolicy struct {
 	Id     string `json:"id"`
 	Active bool   `json:"active"`
@@ -96,4 +92,16 @@ type UserPolicy struct {
 
 	// Tells whether this user is forbidden from creating rooms.
 	ForbidRoomCreation *bool `json:"forbidRoomCreation"`
+}
+
+func (me UserPolicy) Validate() error {
+	if me.Id == "" {
+		return fmt.Errorf("User has no id")
+	}
+
+	if !userauth.IsKnownUserAuthType(me.AuthType) {
+		return fmt.Errorf("`%s` is an invalid auth type", me.AuthType)
+	}
+
+	return nil
 }

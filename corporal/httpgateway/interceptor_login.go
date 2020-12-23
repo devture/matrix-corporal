@@ -127,7 +127,7 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUserDeactivated, "Deactivated in policy")
 	}
 
-	if userPolicy.AuthType == policy.UserAuthTypePassthrough {
+	if userPolicy.AuthType == userauth.UserAuthTypePassthrough {
 		// UserAuthTypePassthrough is a special AuthType, authentication for which is not meant to be handled by us.
 		// Users are created with an initial password as defined in userPolicy.AuthCredential,
 		// but password-management is then potentially left to the homeserver (depending on policyObj.Flags.AllowCustomPassthroughUserPasswords).

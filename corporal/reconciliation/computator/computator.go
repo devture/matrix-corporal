@@ -5,6 +5,7 @@ import (
 	"devture-matrix-corporal/corporal/connector"
 	"devture-matrix-corporal/corporal/policy"
 	"devture-matrix-corporal/corporal/reconciliation"
+	"devture-matrix-corporal/corporal/userauth"
 	"devture-matrix-corporal/corporal/util"
 	"fmt"
 
@@ -387,7 +388,7 @@ func (me *ReconciliationStateComputator) generateInitialPasswordForUser(userPoli
 	// We can do password matching on our side as well (at least initially), but delegating authentication to the homeserver,
 	// allows users to change their password there, etc.
 	// The actual password on the homeserver may change over time.
-	if userPolicy.AuthType == policy.UserAuthTypePassthrough {
+	if userPolicy.AuthType == userauth.UserAuthTypePassthrough {
 		return userPolicy.AuthCredential
 	}
 
