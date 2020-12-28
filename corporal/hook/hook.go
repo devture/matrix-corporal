@@ -109,12 +109,27 @@ type Hook struct {
 
 	EventType string `json:"eventType,omitempty"`
 
+	// RouteMatchesRegex specifies a regular expression that needs to match against the incoming HTTP request's URI.
+	//
+	// If not specified, the Hook has a chance to run (provided it satisfies the rest of the matching criteria).
+	//
+	// If specified, matching is done against the parsed path of the request URI (no query string).
+	// Example:
+	// - original request URI: `/_matrix/client/r0/rooms/!AbCdEF%3Aexample.com/invite?something=here`
+	// - parsed path: `/_matrix/client/r0/rooms/!AbCdEF:example.com/invite`
 	RouteMatchesRegex         *string `json:"routeMatchesRegex,omitempty"`
 	routeMatchesRegexCompiled *regexp.Regexp
 
+	// MethodMatchesRegex specifies a regular expression that needs to match against the incoming HTTP request's method (GET, POST, etc.).
+	//
+	// If not specified, the Hook has a chance to run (provided it satisfies the rest of the matching criteria).
+	//
+	// Examples: `^POST$`, `POST`, `GET|POST`
 	MethodMatchesRegex         *string `json:"methodMatchesRegex,omitempty"`
 	methodMatchesRegexCompiled *regexp.Regexp
 
+	// Action specifies what should happen when the hook matches.
+	// See the various `Action*` constants.
 	Action string `json:"action"`
 
 	restActionHookDetails
@@ -166,7 +181,7 @@ func (me Hook) MatchesRequest(request *http.Request) bool {
 	}
 
 	if me.routeMatchesRegexCompiled != nil {
-		if !me.routeMatchesRegexCompiled.MatchString(request.RequestURI) {
+		if !me.routeMatchesRegexCompiled.MatchString(request.URL.Path) {
 			return false
 		}
 	}
