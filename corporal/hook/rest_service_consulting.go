@@ -32,7 +32,14 @@ type restServiceConsultingRequest struct {
 
 // restServiceConsultingRequestRequestInformation represents the information about an HTTP request we're consulting about
 type restServiceConsultingRequestRequestInformation struct {
+	// URI is the raw request URI (corresponds to request.RequestURI).
+	// It contains escape sequences, etc., and a query string.
+	// Example: `/_matrix/client/r0/rooms/!AbCdEF%3Aexample.com/invite?something=here`
 	URI string `json:"URI"`
+
+	// Path is the path parsed out of the raw request URI (corresponds to request.URL.Path).
+	// Example: `/_matrix/client/r0/rooms/!AbCdEF:example.com/invite`
+	Path string `json:"path"`
 
 	Method string `json:"method"`
 
@@ -263,6 +270,7 @@ func prepareConsultingHTTPRequestFactory(
 func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.Response, hook Hook) (*restServiceConsultingRequest, error) {
 	consultingRequest := restServiceConsultingRequest{}
 	consultingRequest.Request.URI = request.RequestURI
+	consultingRequest.Request.Path = request.URL.Path
 	consultingRequest.Request.Method = request.Method
 
 	consultingRequest.Request.Headers = map[string]string{}
