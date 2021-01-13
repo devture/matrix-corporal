@@ -37,10 +37,23 @@ if ($_SERVER['REQUEST_URI'] === '/reject/forbidden') {
 	]);
 }
 
-if ($_SERVER['REQUEST_URI'] === '/inject-something') {
+if ($_SERVER['REQUEST_URI'] === '/inject-something-into-request') {
+	$respondWithJsonAndExit([
+		'id' => 'injection-request-hook',
+		'action' => 'pass.modifiedRequest',
+		"injectJSONIntoRequest" => [
+			'customKey' => 'value',
+		],
+		'injectHeadersIntoRequest' => [
+			'X-Custom-Header' => 'Header-Value',
+		],
+	]);
+}
+
+if ($_SERVER['REQUEST_URI'] === '/inject-something-into-response') {
 	$respondWithJsonAndExit([
 		'id' => 'injection-response-hook',
-		'action' => 'pass.injectJSONIntoResponse',
+		'action' => 'pass.modifiedResponse',
 		"injectJSONIntoResponse" => [
 			'customKey' => 'value',
 		],

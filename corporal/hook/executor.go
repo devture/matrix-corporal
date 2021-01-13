@@ -27,12 +27,12 @@ func NewExecutor(restServiceConsultor *RESTServiceConsultor) *Executor {
 	}
 
 	me.actionToHandlerMap = map[string]executionHandler{
-		ActionConsultRESTServiceURL:      me.executeActionConsultRESTServiceURL,
-		ActionReject:                     executeActionReject,
-		ActionRespond:                    executeActionRespond,
-		ActionPassUnmodified:             executePassUnmodified,
-		ActionPassInjectJSONIntoRequest:  executePassInjectJSONIntoRequest,
-		ActionPassInjectJSONIntoResponse: executePassInjectJSONIntoResponse,
+		ActionConsultRESTServiceURL: me.executeActionConsultRESTServiceURL,
+		ActionReject:                executeActionReject,
+		ActionRespond:               executeActionRespond,
+		ActionPassUnmodified:        executePassUnmodified,
+		ActionPassModifiedRequest:   executePassModifiedRequest,
+		ActionPassModifiedResponse:  executePassModifiedResponse,
 	}
 
 	return me
@@ -340,7 +340,7 @@ func executePassUnmodified(hookObj *Hook, w http.ResponseWriter, request *http.R
 	}
 }
 
-func executePassInjectJSONIntoRequest(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
+func executePassModifiedRequest(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
 	if hookObj.InjectJSONIntoRequest == nil {
 		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("injectJSONIntoRequest information is required"))
 	}
@@ -381,7 +381,7 @@ func executePassInjectJSONIntoRequest(hookObj *Hook, w http.ResponseWriter, requ
 	}
 }
 
-func executePassInjectJSONIntoResponse(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
+func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
 	if hookObj.InjectJSONIntoResponse == nil {
 		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("injectJSONIntoResponse information is required"))
 	}

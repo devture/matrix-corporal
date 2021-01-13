@@ -93,18 +93,18 @@ type rejectActionHookDetails struct {
 	RejectionErrorMessage *string `json:"rejectionErrorMessage,omitempty"`
 }
 
-// passInjectJSONIntoResponseActionHookDetails contains some fields which are useful when Hook.Action = ActionPassInjectJSONIntoResponse
-type passInjectJSONIntoResponseActionHookDetails struct {
-	// InjectJSONIntoResponse contains some JSON fields to inject into the original response
+// passModifiedResponseActionHookDetails contains some fields which are useful when Hook.Action = ActionPassModifiedResponse
+type passModifiedResponseActionHookDetails struct {
+	// InjectJSONIntoResponse contains some JSON fields to inject into the upstream's response
 	// Required field.
 	InjectJSONIntoResponse *map[string]interface{} `json:"injectJSONIntoResponse,omitempty"`
 
-	// InjectHeadersIntoResponse contains a list of headers that will be injected into the original response
+	// InjectHeadersIntoResponse contains a list of headers that will be injected into the upstream's response
 	InjectHeadersIntoResponse *map[string]string `json:"injectHeadersIntoResponse,omitempty"`
 }
 
-// passInjectJSONIntoRequestActionHookDetails contains some fields which are useful when Hook.Action = ActionPassInjectJSONIntoRequest
-type passInjectJSONIntoRequestActionHookDetails struct {
+// passModifiedRequestActionHookDetails contains some fields which are useful when Hook.Action = ActionPassModifiedRequest
+type passModifiedRequestActionHookDetails struct {
 	// InjectJSONIntoResponse contains some JSON fields to inject into the original request
 	// Required field.
 	InjectJSONIntoRequest *map[string]interface{} `json:"injectJSONIntoRequest,omitempty"`
@@ -148,9 +148,9 @@ type Hook struct {
 
 	rejectActionHookDetails
 
-	passInjectJSONIntoResponseActionHookDetails
+	passModifiedResponseActionHookDetails
 
-	passInjectJSONIntoRequestActionHookDetails
+	passModifiedRequestActionHookDetails
 }
 
 func (me Hook) Validate() error {
