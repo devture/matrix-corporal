@@ -16,7 +16,7 @@ services:
     - /etc/passwd:/etc/passwd:ro
 
   synapse:
-    image: docker.io/matrixdotorg/synapse:v1.23.0
+    image: docker.io/matrixdotorg/synapse:v1.25.0
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     entrypoint: python
     command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
@@ -32,7 +32,7 @@ services:
     - ./matrix-synapse-media-store:/media_store
 
   element-web:
-    image: docker.io/vectorim/element-web:v1.7.14
+    image: docker.io/vectorim/element-web:v1.7.16
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "41465:8080"
