@@ -31,6 +31,7 @@ func NewExecutor(restServiceConsultor *RESTServiceConsultor) *Executor {
 		ActionReject:                     executeActionReject,
 		ActionRespond:                    executeActionRespond,
 		ActionPassUnmodified:             executePassUnmodified,
+		ActionPassInjectJSONIntoRequest:  executePassInjectJSONIntoRequest,
 		ActionPassInjectJSONIntoResponse: executePassInjectJSONIntoResponse,
 	}
 
@@ -334,6 +335,47 @@ func executeActionRespond(hookObj *Hook, w http.ResponseWriter, request *http.Re
 }
 
 func executePassUnmodified(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
+	return ExecutionResult{
+		Hook: hookObj,
+	}
+}
+
+func executePassInjectJSONIntoRequest(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
+	if hookObj.InjectJSONIntoRequest == nil {
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("injectJSONIntoRequest information is required"))
+	}
+
+	if (len(*hookObj.InjectJSONIntoRequest) == 0) &&
+		(hookObj.InjectHeadersIntoResponse == nil || len(*hookObj.InjectHeadersIntoResponse) == 0) {
+		// Optimization. If there's nothing to inject, we can skip modifying the response.
+		return executePassUnmodified(hookObj, w, request, response, logger)
+	}
+
+	var requestPayload map[string]interface{}
+	err := httphelp.GetJsonFromRequestBody(request, &requestPayload)
+	if err != nil {
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Failed to interpret original response body as JSON: %s", err))
+	}
+
+	for k, v := range *hookObj.InjectJSONIntoRequest {
+		requestPayload[k] = v
+	}
+
+	newRequestBytes, err := json.Marshal(requestPayload)
+	if err != nil {
+		// We don't expect this to happen, but..
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Failed to serialize modified response payload as JSON: %s", err))
+	}
+
+	request.Body = ioutil.NopCloser(bytes.NewReader(newRequestBytes))
+	request.ContentLength = int64(len(newRequestBytes))
+
+	if hookObj.InjectHeadersIntoRequest != nil {
+		for k, v := range *hookObj.InjectHeadersIntoRequest {
+			request.Header.Set(k, v)
+		}
+	}
+
 	return ExecutionResult{
 		Hook: hookObj,
 	}

@@ -103,6 +103,16 @@ type passInjectJSONIntoResponseActionHookDetails struct {
 	InjectHeadersIntoResponse *map[string]string `json:"injectHeadersIntoResponse,omitempty"`
 }
 
+// passInjectJSONIntoRequestActionHookDetails contains some fields which are useful when Hook.Action = ActionPassInjectJSONIntoRequest
+type passInjectJSONIntoRequestActionHookDetails struct {
+	// InjectJSONIntoResponse contains some JSON fields to inject into the original request
+	// Required field.
+	InjectJSONIntoRequest *map[string]interface{} `json:"injectJSONIntoRequest,omitempty"`
+
+	// InjectHeadersIntoRequest contains a list of headers that will be injected into the original request
+	InjectHeadersIntoRequest *map[string]string `json:"injectHeadersIntoRequest,omitempty"`
+}
+
 type Hook struct {
 	// An identifier (name) for this hook
 	ID string `json:"id,omitempty"`
@@ -139,6 +149,8 @@ type Hook struct {
 	rejectActionHookDetails
 
 	passInjectJSONIntoResponseActionHookDetails
+
+	passInjectJSONIntoRequestActionHookDetails
 }
 
 func (me Hook) Validate() error {

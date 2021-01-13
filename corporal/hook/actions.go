@@ -24,6 +24,10 @@ var (
 	// ActionPassInjectJSONIntoResponse is an action that lets the request pass and then adjusts the JSON response.
 	// See passInjectJSONIntoResponseActionHookDetails for fields related to this action.
 	ActionPassInjectJSONIntoResponse = "pass.injectJSONIntoResponse"
+
+	// ActionPassInjectJSONIntoRequest is an action that lets the request pass, but first adjusts its payload.
+	// See passInjectJSONIntoRequestActionHookDetails for fields related to this action.
+	ActionPassInjectJSONIntoRequest = "pass.injectJSONIntoRequest"
 )
 
 var knownActions = []string{
@@ -32,4 +36,5 @@ var knownActions = []string{
 	ActionReject,
 	ActionPassUnmodified,
 	ActionPassInjectJSONIntoResponse,
+	ActionPassInjectJSONIntoRequest,
 }
