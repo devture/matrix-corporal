@@ -61,7 +61,7 @@ func New(
 }
 
 func (me *Reconciler) Reconcile(policy *policy.Policy) error {
-	ctx := me.connector.CreateAccessTokenContext(deviceIdReconciler)
+	ctx := connector.NewAccessTokenContext(me.connector, deviceIdReconciler)
 	defer ctx.Release()
 
 	currentState, err := me.connector.DetermineCurrentState(ctx, policy.GetManagedUserIds(), me.reconciliatorUserId)

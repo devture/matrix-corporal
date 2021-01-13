@@ -6,9 +6,8 @@ import (
 )
 
 type MatrixConnector interface {
-	CreateAccessTokenContext(deviceId string) *AccessTokenContext
-
 	ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error)
+	VerifyAccessToken(userId, accessToken string) error
 	DestroyAccessToken(userId, accessToken string) error
 	LogoutAllAccessTokensForUser(ctx *AccessTokenContext, userId string) error
 

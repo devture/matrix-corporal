@@ -5,13 +5,13 @@ import (
 )
 
 type AccessTokenContext struct {
-	connector *ApiConnector
+	connector MatrixConnector
 	deviceId  string
 
 	userIdToAccessTokenMap *sync.Map
 }
 
-func NewAccessTokenContext(connector *ApiConnector, deviceId string) *AccessTokenContext {
+func NewAccessTokenContext(connector MatrixConnector, deviceId string) *AccessTokenContext {
 	return &AccessTokenContext{
 		connector: connector,
 		deviceId:  deviceId,
@@ -32,7 +32,7 @@ func (me *AccessTokenContext) GetAccessTokenForUserId(userId string) (string, er
 	}
 
 	// The first time we obtain a token, let's verify it works and belongs to the user we expect.
-	err = me.connector.verifyAccessToken(userId, accessToken)
+	err = me.connector.VerifyAccessToken(userId, accessToken)
 	if err != nil {
 		return "", err
 	}

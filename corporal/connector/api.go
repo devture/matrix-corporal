@@ -49,10 +49,6 @@ func NewApiConnector(
 	}
 }
 
-func (me *ApiConnector) CreateAccessTokenContext(deviceId string) *AccessTokenContext {
-	return NewAccessTokenContext(me, deviceId)
-}
-
 func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error) {
 	client, _ := gomatrix.NewClient(me.homeserverApiEndpoint, "", "")
 	me.prepareMatrixClient(client)
@@ -112,6 +108,15 @@ func (me *ApiConnector) LogoutAllAccessTokensForUser(ctx *AccessTokenContext, us
 	ctx.ClearAccessTokenForUserId(userId)
 
 	return nil
+}
+
+func (me *ApiConnector) DetermineCurrentState(
+	ctx *AccessTokenContext,
+	managedUserIds []string,
+	adminUserId string,
+) (*CurrentState, error) {
+	// This cannot be implemented using standard (implementation-agnostic) Client-Server APIs.
+	return nil, fmt.Errorf("Not implemented")
 }
 
 func (me *ApiConnector) getUserStateByUserId(
@@ -234,6 +239,11 @@ func (me *ApiConnector) determineAvatarSourceUriHashByUserAndMxcUri(
 	}
 
 	return valueAsString, nil
+}
+
+func (me *ApiConnector) EnsureUserAccountExists(userId, password string) error {
+	// This cannot be implemented using standard (implementation-agnostic) Client-Server APIs.
+	return fmt.Errorf("Not implemented")
 }
 
 func (me *ApiConnector) GetUserAccountDataContentByType(
@@ -675,9 +685,9 @@ func (me *ApiConnector) prepareMatrixClient(client *gomatrix.Client) {
 	client.Client = me.httpClient
 }
 
-// verifyAccessToken verifies that an access token works and belongs
+// VerifyAccessToken verifies that an access token works and belongs
 // to the user it's expected to belong to
-func (me *ApiConnector) verifyAccessToken(userId string, accessToken string) error {
+func (me *ApiConnector) VerifyAccessToken(userId string, accessToken string) error {
 	client, err := gomatrix.NewClient(me.homeserverApiEndpoint, userId, accessToken)
 	if err != nil {
 		return err
