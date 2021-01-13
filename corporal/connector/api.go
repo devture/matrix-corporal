@@ -62,6 +62,7 @@ func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (
 			User: userId,
 
 			Identifier: matrix.ApiLoginRequestIdentifier{
+				Type: matrix.LoginIdentifierTypeUser,
 				User: userId,
 			},
 
