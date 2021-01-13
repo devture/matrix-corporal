@@ -281,21 +281,32 @@ func (me *Server) createPolicyCheckingHandler(name string, policyCheckingCallbac
 }
 
 func (me *Server) createInterceptorHandler(name string, interceptor Interceptor) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		interceptorResult := interceptor.Intercept(r)
+	hooksToRun := []string{
+		hook.EventTypeBeforeAnyRequest,
+		hook.EventTypeBeforeUnauthenticatedRequest,
+		hook.EventTypeAfterAnyRequest,
+		hook.EventTypeAfterUnauthenticatedRequest,
+	}
 
+	return func(w http.ResponseWriter, r *http.Request) {
 		logger := me.logger.WithField("method", r.Method)
 		logger = logger.WithField("uri", r.RequestURI)
 		logger = logger.WithField("handler", name)
-		logger = logger.WithFields(interceptorResult.LoggingContextFields)
 
-		if interceptorResult.Result == InterceptorResultProxy {
-			logger.Infof("HTTP gateway (intercepted): proxying")
+		httpResponseModifierFuncs := make([]hook.HttpResponseModifierFunc, 0)
 
-			me.reverseProxy.ServeHTTP(w, r)
-
-			return
+		// This "runs" both before and after hooks.
+		// Before hooks run early on and may abort execution right here.
+		// After hooks just schedule HTTP response modifier functions and will actually run later on.
+		for _, eventType := range hooksToRun {
+			if !me.runHook(eventType, w, r, logger, &httpResponseModifierFuncs) {
+				return
+			}
 		}
+
+		interceptorResult := interceptor.Intercept(r)
+
+		logger = logger.WithFields(interceptorResult.LoggingContextFields)
 
 		if interceptorResult.Result == InterceptorResultDeny {
 			logger.Infof(
@@ -310,6 +321,24 @@ func (me *Server) createInterceptorHandler(name string, interceptor Interceptor)
 				interceptorResult.ErrorCode,
 				interceptorResult.ErrorMessage,
 			)
+
+			return
+		}
+
+		if interceptorResult.Result == InterceptorResultProxy {
+			reverseProxyToUse := me.reverseProxy
+
+			if len(httpResponseModifierFuncs) == 0 {
+				logger.Debugf("HTTP gateway (intercepted): proxying")
+			} else {
+				logger.Debugf("HTTP gateway (intercepted): proxying (with response modification)")
+
+				reverseProxyCopy := *reverseProxyToUse
+				reverseProxyCopy.ModifyResponse = hook.CreateChainedHttpResponseModifierFunc(httpResponseModifierFuncs)
+				reverseProxyToUse = &reverseProxyCopy
+			}
+
+			reverseProxyToUse.ServeHTTP(w, r)
 
 			return
 		}

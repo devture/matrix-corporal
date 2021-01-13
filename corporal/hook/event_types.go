@@ -55,6 +55,9 @@ var (
 	//
 	// If you only you're operating on policy-checked requests, you may be even more specific
 	// and use EventTypeAfterAuthenticatedPolicyCheckedRequest.
+	//
+	// This hook does not fire for the `/login` route, even if it's successful.
+	// Consider using EventTypeAfterUnauthenticatedRequest or EventTypeAfterAnyRequest.
 	EventTypeAfterAuthenticatedRequest = "afterAuthenticatedRequest"
 
 	// EventTypeAfterAuthenticatedPolicyCheckedRequest is a hook event type which gets executed after a request and only for policy-checked requests.
@@ -63,6 +66,9 @@ var (
 	// This gets triggered after the actual policy-checking and after the response
 	//
 	// This hook fires only for authenticated requests.
+	//
+	// This hook does not fire for the `/login` route, even if it's successful.
+	// Consider using EventTypeAfterUnauthenticatedRequest or EventTypeAfterAnyRequest.
 	EventTypeAfterAuthenticatedPolicyCheckedRequest = "afterAuthenticatedPolicyCheckedRequest"
 
 	// EventTypeAfterUnauthenticatedRequest is the same as EventTypeAfterAnyRequest, but only gets fired for unauthenticated requests.
