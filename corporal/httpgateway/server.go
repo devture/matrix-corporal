@@ -26,6 +26,7 @@ type Server struct {
 	hookRunner          *HookRunner
 	catchAllHandler     *CatchAllHandler
 	loginInterceptor    Interceptor
+	handlerRegistrators []httphelp.HandlerRegistrator
 	writeTimeout        time.Duration
 
 	server *http.Server
@@ -41,6 +42,7 @@ func NewServer(
 	hookRunner *HookRunner,
 	catchAllHandler *CatchAllHandler,
 	loginInterceptor Interceptor,
+	handlerRegistrators []httphelp.HandlerRegistrator,
 	writeTimeout time.Duration,
 ) *Server {
 	return &Server{
@@ -53,6 +55,7 @@ func NewServer(
 		hookRunner:          hookRunner,
 		catchAllHandler:     catchAllHandler,
 		loginInterceptor:    loginInterceptor,
+		handlerRegistrators: handlerRegistrators,
 		writeTimeout:        writeTimeout,
 
 		server: nil,
@@ -94,6 +97,10 @@ func (me *Server) createRouter() http.Handler {
 	r := mux.NewRouter()
 
 	r.Use(denyUnsupportedApiVersionsMiddleware)
+
+	for _, registrator := range me.handlerRegistrators {
+		registrator.RegisterRoutesWithRouter(r)
+	}
 
 	// To make it easy to detect if Matrix Corporal is properly fronting the Matrix Client-Server API,
 	// we add this custom non-standard route.

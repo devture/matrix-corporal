@@ -58,3 +58,12 @@ func RespondWithBytes(w http.ResponseWriter, httpStatusCode int, contentType str
 
 	w.Write(payload)
 }
+
+func RespondWithJSON(w http.ResponseWriter, httpStatusCode int, responsePayload interface{}) {
+	responsePayloadBytes, err := json.Marshal(responsePayload)
+	if err != nil {
+		panic(fmt.Errorf("Could not create JSON response for: %s", responsePayload))
+	}
+
+	RespondWithBytes(w, httpStatusCode, "application/json", responsePayloadBytes)
+}

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Configuration struct {
@@ -27,6 +29,12 @@ type HttpApi struct {
 type HttpGateway struct {
 	ListenAddress       string
 	TimeoutMilliseconds int
+	InternalRESTAuth        HttpGatewayInternalRESTAuth
+}
+
+type HttpGatewayInternalRESTAuth struct {
+	Enabled            *bool
+	IPNetworkWhitelist *[]string
 }
 
 type Matrix struct {
@@ -52,7 +60,7 @@ type Misc struct {
 
 type PolicyProvider map[string]interface{}
 
-func LoadConfiguration(filePath string) (*Configuration, error) {
+func LoadConfiguration(filePath string, logger *logrus.Logger) (*Configuration, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read configuration from %s: %s", filePath, err)
@@ -65,7 +73,7 @@ func LoadConfiguration(filePath string) (*Configuration, error) {
 		return nil, fmt.Errorf("Failed to decode JSON: %s", err)
 	}
 
-	err = validateConfiguration(&configuration)
+	err = validateConfiguration(&configuration, logger)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to validate configuration: %s", err)
 	}
@@ -73,7 +81,7 @@ func LoadConfiguration(filePath string) (*Configuration, error) {
 	return &configuration, nil
 }
 
-func validateConfiguration(configuration *Configuration) error {
+func validateConfiguration(configuration *Configuration, logger *logrus.Logger) error {
 	if !matrix.IsFullUserIdOfDomain(configuration.Corporal.UserId, configuration.Matrix.HomeserverDomainName) {
 		return fmt.Errorf(
 			"Reconciliation user `%s` (specified in Corporal.UserId) is not hosted on the managed homeserver domain (%s)",
@@ -99,6 +107,17 @@ func validateConfiguration(configuration *Configuration) error {
 			configuration.HttpGateway.TimeoutMilliseconds,
 			configuration.Matrix.TimeoutMilliseconds,
 		)
+	}
+	if configuration.HttpGateway.InternalRESTAuth.Enabled == nil || (*configuration.HttpGateway.InternalRESTAuth.Enabled) == false {
+		logger.Warn("HttpGateway.InternalRESTAuth.Enabled is neither explicitly enabled, nor disabled. Interactive Auth may not work without it. Define it as enabled or disabled to get rid of this warning")
+	} else {
+		if configuration.HttpGateway.InternalRESTAuth.IPNetworkWhitelist == nil {
+			logger.Debug("No whitelisted IP ranges are defined in `HttpGateway.InternalRESTAuth.IPNetworkWhitelist`. Will default to local/private networks")
+		} else {
+			if len(*configuration.HttpGateway.InternalRESTAuth.IPNetworkWhitelist) == 0 {
+				logger.Info("An empty IP range whitelist defined for HTTP Internal Auth. All IP addresses will be allowed")
+			}
+		}
 	}
 
 	if configuration.HttpApi.TimeoutMilliseconds <= 0 {

@@ -6,9 +6,11 @@
 
 - makes our [User access-token retrieval API endpoint](docs/http-api.md#user-access-token-retrieval-endpoint) also obtain access tokens without creating unnecessary devices for users. This API now takes an optional `validitySeconds` parameter allowing you to obtain time-limited tokens.
 
-- allows you to control whether users can create **encrypted** or **unencrypted** rooms via new policy flags. Using this, you can enforce E2EE (End-to-End encryption) or prevent E2EE from being used (locally). Learn more the [policy documentation](docs/policy.md).
+- allows you to control whether users can create **encrypted** or **unencrypted** rooms via new policy flags. Using this, you can enforce E2EE (End-to-End Encryption) or prevent E2EE from being used (locally). Learn more the [policy documentation](docs/policy.md).
 
 - fixes a user-creation bug that occurred with Synapse v1.24.0 due to the removal of `/_matrix/client/*/admin` API endpoints (they now live at `/_synapse/admin/*`)
+
+- no longer disturbs Interactive Authentication (required for managing devices, E2EE keys, etc.). When interactive authentication is to be performed, Synapse hits password providers in order. By enabling `HttpGateway.InternalRESTAuth.Enabled` and pointing [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider) to matrix-corporal's new Internal Auth gateway API (e.g. `http://matrix-corporal:41080/_matrix/corporal`), you make Interactive Authentication work for users normally authenticated within matrix-corporal.
 
 There's a **breaking change in our configuration**.
 The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.

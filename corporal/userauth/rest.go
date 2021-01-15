@@ -36,12 +36,7 @@ func (me *RestAuthenticator) Authenticate(userId, givenPassword, authCredential 
 	// This URL gets passed down to us from the user's policy.
 	restAuthApiUrl := authCredential
 
-	payload := restAuthRequest{
-		User: restAuthRequestUser{
-			Id:       userId,
-			Password: givenPassword,
-		},
-	}
+	payload := NewRestAuthRequest(userId, givenPassword)
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -62,7 +57,7 @@ func (me *RestAuthenticator) Authenticate(userId, givenPassword, authCredential 
 		return false, err
 	}
 
-	var authResult restAuthResponse
+	var authResult RestAuthResponse
 	err = json.Unmarshal(responseBytes, &authResult)
 	if err != nil {
 		return false, fmt.Errorf("Failed to decode JSON (%s) for %s: %s", err, restAuthApiUrl, responseBytes)
@@ -75,19 +70,36 @@ type restAuthRequest struct {
 	User restAuthRequestUser `json:"user"`
 }
 
+func NewRestAuthRequest(userId, password string) restAuthRequest {
+	return restAuthRequest{
+		User: restAuthRequestUser{
+			Id:       userId,
+			Password: password,
+		},
+	}
+}
+
 type restAuthRequestUser struct {
 	Id       string `json:"id"`
 	Password string `json:"password"`
 }
 
-type restAuthResponse struct {
-	Auth restAuthResponseAuth `json:"auth"`
+type RestAuthResponse struct {
+	Auth RestAuthResponseAuth `json:"auth"`
 }
 
-type restAuthResponseAuth struct {
+type RestAuthResponseAuth struct {
 	Success bool `json:"success"`
+
+	MatrixID string `json:"mxid"`
+
+	Profile RestAuthResponseAuthProfile `json:"profile"`
 
 	// As per the documentation for `matrix-synapse-rest-auth`,
 	// additional fields might appear here.
 	// We don't use or care about them, so we ignore everything else.
+}
+
+type RestAuthResponseAuthProfile struct {
+	DisplayName string `json:"display_name"`
 }

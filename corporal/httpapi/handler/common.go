@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -17,10 +15,6 @@ const (
 	ErrorInvalidUsername      = matrix.ErrorInvalidUsername
 	ErrorCodeMissingParameter = matrix.ErrorMissingParameter
 )
-
-type HandlerRegistrator interface {
-	RegisterRoutesWithRouter(router *mux.Router)
-}
 
 // ApiResponseError is a "standard error response" as per the Matrix Client-Server specification.
 // All Matrix Corporal HTTP API calls that trigger an error return a response like this.

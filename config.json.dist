@@ -14,7 +14,10 @@
 
 	"HttpGateway": {
 		"ListenAddress": "127.0.0.1:41080",
-		"TimeoutMilliseconds": 60000
+		"TimeoutMilliseconds": 60000,
+		"InternalRESTAuth": {
+			"Enabled": true
+		}
 	},
 
 	"HttpApi": {

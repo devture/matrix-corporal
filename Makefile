@@ -34,9 +34,21 @@ run-postgres-cli: ## Starts a Postgres CLI (psql)
 		/bin/sh -c 'PGUSER=synapse PGPASSWORD=synapse-password PGDATABASE=homeserver psql -h postgres'
 
 run-locally-quick: ## Builds and runs matrix-corporal locally (no containers, no govvv)
-	go run matrix-corporal.go
+	@echo "This doesn't work anymore."
+	@echo ""
+	@echo "Running matrix-corporal locally in this development environment means Synapse's REST auth provider won't be able to reach matrix-corporal."
+	@echo "This will cause Interactive Auth to not function as expected."
+	@echo ""
+	@echo "Switch to 'make run-in-container-quick' for a fully working environment."
+	@echo "Alternative, if you really insist on running locally, do: 'go run matrix-corporal.go'"
+	@echo ""
+
+	@exit 1
 
 run-locally: build-locally ## Builds and runs matrix-corporal locally (no containers)
+	@echo "Running locally is discouraged."
+	@echo "Switch to 'make run-in-container-quick' for a fully working environment."
+
 	./matrix-corporal
 
 build-locally: ## Builds the matrix-corporal code locally (no containers)
@@ -61,3 +73,23 @@ run-in-container: build-container-image ## Runs matrix-corporal in a container
 	--mount type=bind,src=`pwd`/policy.json,dst=/policy.json,ro \
 	--network=matrix-corporal_default \
 	devture/matrix-corporal:latest
+
+run-in-container-quick: var/go ## Runs matrix-corporal in a container
+	docker run \
+	-it \
+	--rm \
+	--name=matrix-corporal \
+	--user=`id -u`:`id -g` \
+	--workdir=/work \
+	-e GOPATH=/work/var/go/gopath \
+	-e GOCACHE=/work/var/go/build-cache \
+	-p 41080:41080 \
+	-p 41081:41081 \
+	--mount type=bind,src=`pwd`,dst=/work \
+	--network=matrix-corporal_default \
+	docker.io/golang:1.15.6-alpine3.12 \
+	go run matrix-corporal.go
+
+var/go:
+	mkdir -p var/go/gopath 2>/dev/null
+	mkdir -p var/go/build-cache 2>/dev/null

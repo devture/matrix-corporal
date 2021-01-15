@@ -6,8 +6,10 @@ import (
 	"devture-matrix-corporal/corporal/connector"
 	"devture-matrix-corporal/corporal/hook"
 	"devture-matrix-corporal/corporal/httpapi"
-	"devture-matrix-corporal/corporal/httpapi/handler"
+	httpApiHandler "devture-matrix-corporal/corporal/httpapi/handler"
 	"devture-matrix-corporal/corporal/httpgateway"
+	httpGatewayHandler "devture-matrix-corporal/corporal/httpgateway/handler"
+	"devture-matrix-corporal/corporal/httphelp"
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/policy"
 	"devture-matrix-corporal/corporal/policy/provider"
@@ -41,15 +43,10 @@ func (me *ContainerShutdownHandler) Shutdown() {
 
 func BuildContainer(
 	configuration configuration.Configuration,
+	logger *logrus.Logger,
 ) (service.Container, *ContainerShutdownHandler) {
 	container := service.New()
 	shutdownHandler := &ContainerShutdownHandler{}
-
-	// The logger is very crucial, so we're defining it outside
-	logger := logrus.New()
-	if configuration.Misc.Debug {
-		logger.Level = logrus.DebugLevel
-	}
 
 	container.Set("logger", func(c service.Container) interface{} {
 		return logger
@@ -136,6 +133,7 @@ func BuildContainer(
 			container.Get("httpgateway.hook_runner").(*httpgateway.HookRunner),
 			container.Get("httpgateway.catch_all_handler").(*httpgateway.CatchAllHandler),
 			container.Get("httpgateway.interceptor.login").(httpgateway.Interceptor),
+			container.Get("httpgateway.server.handler_registrators").([]httphelp.HandlerRegistrator),
 			time.Duration(configuration.HttpGateway.TimeoutMilliseconds)*time.Millisecond,
 		)
 
@@ -146,11 +144,27 @@ func BuildContainer(
 		return instance
 	})
 
+	container.Set("httpgateway.server.handler_registrators", func(c service.Container) interface{} {
+		return []httphelp.HandlerRegistrator{
+			container.Get("httpgateway.server.handler_registrator.internal_rest_auth").(httphelp.HandlerRegistrator),
+		}
+	})
+
+	container.Set("httpgateway.server.handler_registrator.internal_rest_auth", func(c service.Container) interface{} {
+		return httpGatewayHandler.NewInternalRESTAuthHandler(
+			container.Get("policy.store").(*policy.Store),
+			configuration.Matrix.HomeserverDomainName,
+			configuration.HttpGateway.InternalRESTAuth,
+			container.Get("policy.userauth.checker").(*userauth.Checker),
+			logger,
+		)
+	})
+
 	container.Set("httpapi.server", func(c service.Container) interface{} {
 		instance := httpapi.NewServer(
 			logger,
 			configuration.HttpApi,
-			container.Get("httpapi.server.handler_registrators").([]handler.HandlerRegistrator),
+			container.Get("httpapi.server.handler_registrators").([]httphelp.HandlerRegistrator),
 			time.Duration(configuration.HttpApi.TimeoutMilliseconds)*time.Millisecond,
 		)
 
@@ -162,21 +176,21 @@ func BuildContainer(
 	})
 
 	container.Set("httpapi.server.handler_registrators", func(c service.Container) interface{} {
-		return []handler.HandlerRegistrator{
-			container.Get("httpapi.server.handler_registrator.policy").(handler.HandlerRegistrator),
-			container.Get("httpapi.server.handler_registrator.user").(handler.HandlerRegistrator),
+		return []httphelp.HandlerRegistrator{
+			container.Get("httpapi.server.handler_registrator.policy").(httphelp.HandlerRegistrator),
+			container.Get("httpapi.server.handler_registrator.user").(httphelp.HandlerRegistrator),
 		}
 	})
 
 	container.Set("httpapi.server.handler_registrator.policy", func(c service.Container) interface{} {
-		return handler.NewPolicyApiHandlerRegistrator(
+		return httpApiHandler.NewPolicyApiHandlerRegistrator(
 			container.Get("policy.store").(*policy.Store),
 			container.Get("policy.provider").(provider.Provider),
 		)
 	})
 
 	container.Set("httpapi.server.handler_registrator.user", func(c service.Container) interface{} {
-		return handler.NewUserApiHandlerRegistrator(
+		return httpApiHandler.NewUserApiHandlerRegistrator(
 			configuration.Matrix.HomeserverDomainName,
 			container.Get("connector.synapse").(*connector.SynapseConnector),
 		)

@@ -22,7 +22,10 @@ The `matrix-corporal` configuration is a JSON document that looks like this:
 
 	"HttpGateway": {
 		"ListenAddress": "127.0.0.1:41080",
-		"TimeoutMilliseconds": 60000
+		"TimeoutMilliseconds": 60000,
+		"InternalRESTAuth": {
+			"Enabled": true
+		}
 	},
 
 	"HttpApi": {
@@ -74,6 +77,11 @@ The configuration contains the following fields:
 	- `ListenAddress` - the network address to listen on. It's most likely a local one, as there's usually a reverse proxy (like nginx) capturing all traffic first and forwarding it here later on. If you're running this inside a container, use something like `0.0.0.0:41080`.
 
 	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests are allowed to take before being timed out. Since clients often use long-polling for `/sync` (usually with a 30-second limit), setting this to a value of more than `30000` is recommended. For this same reason, making this value larger than `Matrix.TimeoutMilliseconds` is required.
+
+	- `InternalRESTAuth` - controls whether matrix-corporal's HTTP gateway will expose a `POST /_matrix/corporal/_matrix-internal/identity/v1/check_credentials` route, which can be used as a backend for [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider). Enabling this is useful for making Interactive Authentication work. [Regular user authentication](user-authentication.md) works even without this, but during Interactive Auth, it's the homeserver that needs to contact us.
+		- `Enabled` - whether this feature is enabled or not
+
+		- `IPNetworkWhitelist` - an optional list of network ranges (e.g. `1.1.1.1/24`) that are allowed to access this authentication API. We don't rate-limit it (yet), so exposing it to every IP address is not a good idea.  If you define this as an empty list, all IP addresses are allowed. If you don't define this at all (or define it as `null`), we default to local/private IP ranges only.
 
 
 - `HttpApi` - HTTP API-related configuration

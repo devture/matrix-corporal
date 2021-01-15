@@ -72,17 +72,23 @@ BuildDate: %s
 
 `, Version, GitCommit, GitBranch, GitState, GitSummary, BuildDate)
 
+	// Starting with a debug logger, but we may tone it down it below.
+	logger := logrus.New()
+	logger.Level = logrus.DebugLevel
+
 	configPath := flag.String("config", "config.json", "configuration file to use")
 	flag.Parse()
 
-	configuration, err := configuration.LoadConfiguration(*configPath)
+	configuration, err := configuration.LoadConfiguration(*configPath, logger)
 	if err != nil {
 		panic(err)
 	}
 
-	container, shutdownHandler := container.BuildContainer(*configuration)
+	if !configuration.Misc.Debug {
+		logger.Level = logrus.InfoLevel
+	}
 
-	logger := container.Get("logger").(*logrus.Logger)
+	container, shutdownHandler := container.BuildContainer(*configuration, logger)
 
 	httpGatewayServer := container.Get("httpgateway.server").(*httpgateway.Server)
 	err = httpGatewayServer.Start()

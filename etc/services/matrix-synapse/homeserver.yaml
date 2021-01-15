@@ -1204,6 +1204,9 @@ password_providers:
 - module: "shared_secret_authenticator.SharedSecretAuthenticator"
   config:
     sharedSecret: "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF"
+- module: "rest_auth_provider.RestAuthProvider"
+  config:
+    endpoint: "http://matrix-corporal:41080/_matrix/corporal"
 
 
 # Clients requesting push notifications can either have the body of

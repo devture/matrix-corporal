@@ -16,7 +16,7 @@ import (
 type Server struct {
 	logger              *logrus.Logger
 	configuration       configuration.HttpApi
-	handlerRegistrators []handler.HandlerRegistrator
+	handlerRegistrators []httphelp.HandlerRegistrator
 	writeTimeout        time.Duration
 
 	server *http.Server
@@ -25,7 +25,7 @@ type Server struct {
 func NewServer(
 	logger *logrus.Logger,
 	configuration configuration.HttpApi,
-	handlerRegistrators []handler.HandlerRegistrator,
+	handlerRegistrators []httphelp.HandlerRegistrator,
 	writeTimeout time.Duration,
 ) *Server {
 	return &Server{
