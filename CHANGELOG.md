@@ -6,6 +6,8 @@
 
 - makes our [User access-token retrieval API endpoint](docs/http-api.md#user-access-token-retrieval-endpoint) also obtain access tokens without creating unnecessary devices for users. This API now takes an optional `validitySeconds` parameter allowing you to obtain time-limited tokens.
 
+- allows you to control whether users can create **encrypted** or **unencrypted** rooms via new policy flags. Using this, you can enforce E2EE (End-to-End encryption) or prevent E2EE from being used (locally). Learn more the [policy documentation](docs/policy.md).
+
 There's a breaking change in our configuration.
 The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.
 

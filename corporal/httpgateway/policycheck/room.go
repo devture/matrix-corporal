@@ -19,7 +19,60 @@ func CheckRoomCreate(r *http.Request, ctx context.Context, policy policy.Policy,
 		return PolicyCheckResponse{
 			Allow:        false,
 			ErrorCode:    matrix.ErrorForbidden,
-			ErrorMessage: "Denied by policy",
+			ErrorMessage: "Denied by policy (cannot create rooms)",
+		}
+	}
+
+	var creationRequest gomatrix.ReqCreateRoom
+	err := httphelp.GetJsonFromRequestBody(r, &creationRequest)
+	if err != nil {
+		return PolicyCheckResponse{
+			Allow:        false,
+			ErrorCode:    matrix.ErrorBadJson,
+			ErrorMessage: err.Error(),
+		}
+	}
+
+	isEncrypted := false
+	for _, stateEvent := range creationRequest.InitialState {
+		if stateEvent.Type == "m.room.encryption" {
+			isEncrypted = true
+			break
+		}
+	}
+
+	if isEncrypted {
+		if !checker.CanUserCreateEncryptedRoom(policy, userId) {
+			return PolicyCheckResponse{
+				Allow:        false,
+				ErrorCode:    matrix.ErrorForbidden,
+				ErrorMessage: "Denied by policy (cannot create encrypted rooms)",
+			}
+		}
+	} else {
+		if !checker.CanUserCreateUnencryptedRoom(policy, userId) {
+			return PolicyCheckResponse{
+				Allow:        false,
+				ErrorCode:    matrix.ErrorForbidden,
+				ErrorMessage: "Denied by policy (cannot create unencrypted rooms)",
+			}
+		}
+	}
+
+	return PolicyCheckResponse{
+		Allow: true,
+	}
+}
+
+// CheckRoomEncryptionStateChange is a policy checker for: /_matrix/client/r0/rooms/{roomId}/state/m.room.encryption
+func CheckRoomEncryptionStateChange(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
+	userId := ctx.Value("userId").(string)
+
+	if !checker.CanUserCreateEncryptedRoom(policy, userId) {
+		return PolicyCheckResponse{
+			Allow:        false,
+			ErrorCode:    matrix.ErrorForbidden,
+			ErrorMessage: "Denied by policy (cannot create encrypted rooms)",
 		}
 	}
 

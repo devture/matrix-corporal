@@ -118,17 +118,23 @@ func (me *Server) createRouter() http.Handler {
 		me.createPolicyCheckingHandler("room.leave", policycheck.CheckRoomLeave),
 	).Methods("POST")
 
+	// Another way to leave a room is kick yourself out of it. It doesn't require any special permissions.
+	r.HandleFunc(
+		"/_matrix/client/r0/rooms/{roomId}/kick",
+		me.createPolicyCheckingHandler("room.kick", policycheck.CheckRoomKick),
+	).Methods("POST")
+
 	// Another way to leave a room is to PUT a "membership=leave" into your m.room.member state.
 	r.HandleFunc(
 		"/_matrix/client/r0/rooms/{roomId}/state/m.room.member/{memberId}",
 		me.createPolicyCheckingHandler("room.member.state.set", policycheck.CheckRoomMembershipStateChange),
 	).Methods("PUT")
 
-	// Another way to leave a room is kick yourself out of it. It doesn't require any special permissions.
+	// Another way to make a room encrypted is by enabling encryption subsequently.
 	r.HandleFunc(
-		"/_matrix/client/r0/rooms/{roomId}/kick",
-		me.createPolicyCheckingHandler("room.kick", policycheck.CheckRoomKick),
-	).Methods("POST")
+		"/_matrix/client/r0/rooms/{roomId}/state/m.room.encryption",
+		me.createPolicyCheckingHandler("room.subsequenly_enabling_encryption", policycheck.CheckRoomEncryptionStateChange),
+	).Methods("PUT")
 
 	r.HandleFunc(
 		"/_matrix/client/r0/createRoom",

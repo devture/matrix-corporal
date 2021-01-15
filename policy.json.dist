@@ -4,7 +4,9 @@
 		"allowCustomUserDisplayNames": false,
 		"allowCustomUserAvatars": false,
 		"allowCustomPassthroughUserPasswords": false,
-		"forbidRoomCreation": false
+		"forbidRoomCreation": false,
+		"forbidEncryptedRoomCreation": false,
+		"forbidUnencryptedRoomCreation": false
 	},
 
 	"managedCommunityIds": [
@@ -63,7 +65,8 @@
 			"displayName": "User A",
 			"joinedCommunityIds": [],
 			"joinedRoomIds": [],
-			"forbidRoomCreation": false
+			"forbidRoomCreation": false,
+			"forbidEncryptedRoomCreation": true
 		},
 		{
 			"id": "@b:matrix-corporal.127.0.0.1.xip.io",
@@ -83,7 +86,9 @@
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "User C",
 			"joinedCommunityIds": [],
-			"joinedRoomIds": []
+			"joinedRoomIds": [],
+			"forbidRoomCreation": false,
+			"forbidUnencryptedRoomCreation": true
 		}
 	]
 }

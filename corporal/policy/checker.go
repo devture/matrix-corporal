@@ -24,6 +24,32 @@ func (me *Checker) CanUserCreateRoom(policy Policy, userId string) bool {
 	return !policy.Flags.ForbidRoomCreation
 }
 
+func (me *Checker) CanUserCreateEncryptedRoom(policy Policy, userId string) bool {
+	userPolicy := policy.GetUserPolicyByUserId(userId)
+	if userPolicy != nil {
+		if userPolicy.ForbidEncryptedRoomCreation != nil {
+			return !*userPolicy.ForbidEncryptedRoomCreation
+		}
+	}
+
+	// No dedicated policy for this user (likely an unmanaged user) or undefined ForbidEncryptedRoomCreation policy field.
+	// Stick to the global defaults.
+	return !policy.Flags.ForbidEncryptedRoomCreation
+}
+
+func (me *Checker) CanUserCreateUnencryptedRoom(policy Policy, userId string) bool {
+	userPolicy := policy.GetUserPolicyByUserId(userId)
+	if userPolicy != nil {
+		if userPolicy.ForbidUnencryptedRoomCreation != nil {
+			return !*userPolicy.ForbidUnencryptedRoomCreation
+		}
+	}
+
+	// No dedicated policy for this user (likely an unmanaged user) or undefined ForbidUnencryptedRoomCreation policy field.
+	// Stick to the global defaults.
+	return !policy.Flags.ForbidUnencryptedRoomCreation
+}
+
 func (me *Checker) CanUserSendEventToRoom(policy Policy, userId string, eventType string, roomId string) bool {
 	// Everyone can send everything wherywhere now.
 	// We don't have policy rules that affect this.

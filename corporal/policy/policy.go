@@ -67,6 +67,14 @@ type PolicyFlags struct {
 	// When there's a dedicated `UserPolicy` for the user, that one takes precedence over this default.
 	ForbidRoomCreation bool `json:"forbidRoomCreation"`
 
+	// ForbidEncryptedRoomCreation tells whether users are forbidden from creating encrypted rooms, and from switching rooms from unencrypted to encrypted.
+	// When there's a dedicated `UserPolicy` for the user, that one takes precedence over this default.
+	ForbidEncryptedRoomCreation bool `json:"forbidEncryptedRoomCreation"`
+
+	// ForbidUnencryptedRoomCreation tells whether users are forbidden from creating unencrypted rooms.
+	// When there's a dedicated `UserPolicy` for the user, that one takes precedence over this default.
+	ForbidUnencryptedRoomCreation bool `json:"forbidUnencryptedRoomCreation"`
+
 	// Allow3pidLogin tells whether login requests using an email address or phone number will be allowed to go through unmodified.
 	// Enabling this may have security implications.
 	// With this setting enabled, you're completely skipping matrix-corporal's login checks (`active` flag in the user policy, etc).
@@ -95,8 +103,14 @@ type UserPolicy struct {
 	JoinedCommunityIds []string `json:"joinedCommunityIds"`
 	JoinedRoomIds      []string `json:"joinedRoomIds"`
 
-	// Tells whether this user is forbidden from creating rooms.
+	// ForbidRoomCreation tells whether this user is forbidden from creating rooms.
 	ForbidRoomCreation *bool `json:"forbidRoomCreation"`
+
+	// ForbidEncryptedRoomCreation tells whether this user is forbidden from creating encrypted rooms, and from switching rooms from unencrypted to encrypted.
+	ForbidEncryptedRoomCreation *bool `json:"forbidEncryptedRoomCreation"`
+
+	// ForbidUnencryptedRoomCreation tells whether this user is forbidden from creating unencrypted rooms.
+	ForbidUnencryptedRoomCreation *bool `json:"forbidUnencryptedRoomCreation"`
 }
 
 func (me UserPolicy) Validate() error {

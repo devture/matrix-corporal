@@ -19,7 +19,9 @@ The policy is a JSON document that looks like this:
 		"allowCustomUserDisplayNames": false,
 		"allowCustomUserAvatars": false,
 		"allowCustomPassthroughUserPasswords": false,
-		"forbidRoomCreation": false
+		"forbidRoomCreation": false,
+		"forbidEncryptedRoomCreation": false,
+		"forbidUnencryptedRoomCreation": false
 	},
 
 	"managedCommunityIds": [
@@ -94,7 +96,8 @@ The policy is a JSON document that looks like this:
 			"avatarUri": "",
 			"joinedCommunityIds": ["+b:example.com"],
 			"joinedRoomIds": ["!roomB:example.com"],
-			"forbidRoomCreation": false
+			"forbidRoomCreation": false,
+			"forbidEncryptedRoomCreation": true
 		},
 		{
 			"id": "@george:example.com",
@@ -104,7 +107,9 @@ The policy is a JSON document that looks like this:
 			"displayName": "Georgey",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
 			"joinedCommunityIds": ["+a:example.com", "+b:example.com"],
-			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
+			"forbidRoomCreation": false,
+			"forbidUnencryptedRoomCreation": true
 		}
 	]
 }
@@ -142,6 +147,10 @@ The following policy flags are supported:
 
 - `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether users are forbidden from creating rooms. The `forbidRoomCreation` [User policy field](#user-policy-fields) takes precedence over this. This is just a global default in case the user policy does not specify a value.
 
+- `forbidEncryptedRoomCreation` (`true` or `false`, defaults to `false`) - controls whether users are forbidden from creating encrypted rooms and from switching unencrypted rooms to encrypted subsequently. The `forbidEncryptedRoomCreation` [User policy field](#user-policy-fields) takes precedence over this. This is just a global default in case the user policy does not specify a value. Also, see the [note about encryption](#notes-about-controlling-room-encryption) below.
+
+- `forbidUnencryptedRoomCreation` (`true` or `false`, defaults to `false`) - controls whether users are forbidden from creating unencrypted rooms. The `forbidUnencryptedRoomCreation` [User policy field](#user-policy-fields) takes precedence over this. This is just a global default in case the user policy does not specify a value. Also, see the [note about encryption](#notes-about-controlling-room-encryption) below.
+
 - `allow3pidLogin` (`true` or `false`, defaults to `false`) - controls whether users would be able to log in with 3pid (third-party identifiers) associated with their user account (email address / phone number). If enabled, we let such login requests requests pass and go directly to the homeserver. This has some security implications - any checks matrix-corporal would have normally done (checking the `active` status in the user policy, etc.) are skipped.
 
 ## User policy fields
@@ -160,7 +169,9 @@ A user policy object looks like this:
 	"avatarUri": "https://example.com/john.jpg",
 	"joinedCommunityIds": ["+a:example.com"],
 	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
-	"forbidRoomCreation": false
+	"forbidRoomCreation": false,
+	"forbidEncryptedRoomCreation": false,
+	"forbidUnencryptedRoomCreation": false
 }
 ```
 
@@ -184,6 +195,17 @@ A user-policy contains the following fields:
 - `joinedRoomIds` - a list of room identifiers (e.g. `!room:server`) that the user is part of. The user will be auto-joined to any rooms listed here, unless already joined. If the user happens to be joined to a room which is not listed here, but appears in the top-level `managedRoomIds` field, the user will be kicked out of that room. The user can be part of any number of other room which are not listed in `joinedRoomIds`, as long as they are also not listed in `managedRoomIds`.
 
 - `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether this user is forbidden from creating rooms. If this field is omitted, the global `forbidRoomCreation` [flag](#flags) is used as a fallback.
+
+- `forbidEncryptedRoomCreation` (`true` or `false`, defaults to `false`) - controls whether this user is forbidden from creating encrypted rooms and from switching unencrypted rooms to encrypted subsequently. If this field is omitted, the global `forbidEncryptedRoomCreation` [flag](#flags) is used as a fallback. Also, see the [note about encryption](#notes-about-controlling-room-encryption) below.
+
+- `forbidUnencryptedRoomCreation` (`true` or `false`, defaults to `false`) - controls whether this user is forbidden from creating unencrypted rooms. If this field is omitted, the global `forbidUnencryptedRoomCreation` [flag](#flags) is used as a fallback. Also, see the [note about encryption](#notes-about-controlling-room-encryption) below.
+
+
+## Notes about controlling room encryption
+
+We support `forbidEncryptedRoomCreation` and `forbidUnencryptedRoomCreation` flags both as a [global level flag](#flags) and as a [user policy flag](#user-policy-fields).
+
+Preventing encrypted or unencrypted rooms from being created does not guarantee that users will not end up being part of such rooms. If your server is a federating one, your users may end up in rooms which don't respect these value.
 
 
 ## Generating the policy file

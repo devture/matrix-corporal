@@ -60,13 +60,6 @@ func NewSynapseConnector(
 	return me
 }
 
-func (me *SynapseConnector) getAccessTokenForCorporalUser() (string, error) {
-	me.corporalUserIDLock.Lock()
-	defer me.corporalUserIDLock.Unlock()
-
-	return me.corporalUserAccessTokenContext.GetAccessTokenForUserId(me.corporalUserID)
-}
-
 // ObtainNewAccessTokenForUserId is a reimplementation of ApiConnector.ObtainNewAccessTokenForUserId.
 //
 // ApiConnector.ObtainNewAccessTokenForUserId uses the regular `/_matrix/client/r0/login` endpoint
@@ -281,4 +274,11 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId, password string) err
 
 func (me *SynapseConnector) Release() {
 	me.corporalUserAccessTokenContext.Release()
+}
+
+func (me *SynapseConnector) getAccessTokenForCorporalUser() (string, error) {
+	me.corporalUserIDLock.Lock()
+	defer me.corporalUserIDLock.Unlock()
+
+	return me.corporalUserAccessTokenContext.GetAccessTokenForUserId(me.corporalUserID)
 }
