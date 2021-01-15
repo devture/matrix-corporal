@@ -1,4 +1,4 @@
-package httpgateway
+package interceptor
 
 import (
 	"net/http"

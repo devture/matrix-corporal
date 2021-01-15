@@ -1,38 +1,44 @@
-package httpgateway
+package handler
 
 import (
 	"context"
 	"devture-matrix-corporal/corporal/hook"
+	"devture-matrix-corporal/corporal/httpgateway/hookrunner"
 	"devture-matrix-corporal/corporal/httphelp"
 	"devture-matrix-corporal/corporal/matrix"
 	"net/http"
 	"net/http/httputil"
 
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
-type CatchAllHandler struct {
+type catchAllHandler struct {
 	reverseProxy        *httputil.ReverseProxy
 	logger              *logrus.Logger
 	userMappingResolver *matrix.UserMappingResolver
-	hookRunner          *HookRunner
+	hookRunner          *hookrunner.HookRunner
 }
 
 func NewCatchAllHandler(
 	reverseProxy *httputil.ReverseProxy,
-	logger *logrus.Logger,
 	userMappingResolver *matrix.UserMappingResolver,
-	hookRunner *HookRunner,
-) *CatchAllHandler {
-	return &CatchAllHandler{
+	hookRunner *hookrunner.HookRunner,
+	logger *logrus.Logger,
+) *catchAllHandler {
+	return &catchAllHandler{
 		reverseProxy:        reverseProxy,
-		logger:              logger,
 		userMappingResolver: userMappingResolver,
 		hookRunner:          hookRunner,
+		logger:              logger,
 	}
 }
 
-func (me *CatchAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (me *catchAllHandler) RegisterRoutesWithRouter(router *mux.Router) {
+	router.PathPrefix("/").HandlerFunc(me.actionCatchAll)
+}
+
+func (me *catchAllHandler) actionCatchAll(w http.ResponseWriter, r *http.Request) {
 	logger := me.logger.WithField("method", r.Method)
 	logger = logger.WithField("uri", r.RequestURI)
 
@@ -90,7 +96,7 @@ func (me *CatchAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // runHook runs the first matching hook of a given type, possibly injects a response modifier and returns false if we should stop execution
-func (me *CatchAllHandler) runHook(
+func (me *catchAllHandler) runHook(
 	eventType string,
 	w http.ResponseWriter,
 	r *http.Request,
@@ -116,7 +122,7 @@ func (me *CatchAllHandler) runHook(
 // Before hooks first, followed by after hooks.
 //
 // Before & after hooks get bundled together, but we execute/initialize them all at once.
-func (me *CatchAllHandler) orderedEventTypesByAuthStatus(isAuthenticated bool) []string {
+func (me *catchAllHandler) orderedEventTypesByAuthStatus(isAuthenticated bool) []string {
 	hooksToRun := []string{hook.EventTypeBeforeAnyRequest}
 
 	if isAuthenticated {
@@ -137,3 +143,6 @@ func (me *CatchAllHandler) orderedEventTypesByAuthStatus(isAuthenticated bool) [
 
 	return hooksToRun
 }
+
+// Ensure interface is implemented
+var _ httphelp.HandlerRegistrator = &catchAllHandler{}

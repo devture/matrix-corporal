@@ -1,4 +1,4 @@
-package httpgateway
+package hookrunner
 
 import (
 	"devture-matrix-corporal/corporal/hook"

@@ -59,7 +59,7 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 
 	logger := me.logger.WithField("method", r.Method)
 	logger = logger.WithField("uri", r.RequestURI)
-	logger.Info("HTTP gateway: internal authentication")
+	logger.Info("HTTP gateway: internal REST authentication")
 
 	err := me.checkIfRequestIsAllowed(r, logger)
 	if err != nil {
@@ -84,22 +84,22 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 
 	logger = logger.WithField("userId", requestPayload.User.Id)
 
-	userIdFull, err := matrix.DetermineFullUserId(requestPayload.User.Id, me.homeserverDomainName)
+	userIDFull, err := matrix.DetermineFullUserId(requestPayload.User.Id, me.homeserverDomainName)
 	if err != nil {
 		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Cannot construct user id")
 		return
 	}
 
 	// Replace the logging field with a (potentially) better one
-	logger = logger.WithField("userId", userIdFull)
+	logger = logger.WithField("userId", userIDFull)
 
-	if !matrix.IsFullUserIdOfDomain(userIdFull, me.homeserverDomainName) {
+	if !matrix.IsFullUserIdOfDomain(userIDFull, me.homeserverDomainName) {
 		logger.Debug("Refusing to authenticate foreign users")
 		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Refusing to authenticate foreign users")
 		return
 	}
 
-	userPolicy := policyObj.GetUserPolicyByUserId(userIdFull)
+	userPolicy := policyObj.GetUserPolicyByUserId(userIDFull)
 	if userPolicy == nil {
 		logger.Debug("Refusing to authenticate non-managed user")
 		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Refusing to authenticate non-managed user")
@@ -129,7 +129,7 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 	logger = logger.WithField("authType", userPolicy.AuthType)
 
 	isAuthenticated, err := me.userAuthChecker.Check(
-		userIdFull,
+		userIDFull,
 		requestPayload.User.Password,
 		userPolicy.AuthType,
 		userPolicy.AuthCredential,
@@ -149,7 +149,7 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 	responsePayload := userauth.RestAuthResponse{
 		Auth: userauth.RestAuthResponseAuth{
 			Success:  true,
-			MatrixID: userIdFull,
+			MatrixID: userIDFull,
 			Profile: userauth.RestAuthResponseAuthProfile{
 				DisplayName: userPolicy.DisplayName,
 			},
@@ -213,7 +213,7 @@ func determineWhitelistedIPBlocks(configuration configuration.HttpGatewayInterna
 	}
 
 	// And finally, a list with at least some entries will get utilized.
-	logger.Info("HTTP Internal Auth will only be accessible from: %s", *configuration.IPNetworkWhitelist)
+	logger.Info("HTTP Internal REST Auth will only be accessible from: %s", *configuration.IPNetworkWhitelist)
 
 	return cidrListToBlockList(*configuration.IPNetworkWhitelist)
 }

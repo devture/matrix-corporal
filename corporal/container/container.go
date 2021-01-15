@@ -9,6 +9,8 @@ import (
 	httpApiHandler "devture-matrix-corporal/corporal/httpapi/handler"
 	"devture-matrix-corporal/corporal/httpgateway"
 	httpGatewayHandler "devture-matrix-corporal/corporal/httpgateway/handler"
+	"devture-matrix-corporal/corporal/httpgateway/hookrunner"
+	"devture-matrix-corporal/corporal/httpgateway/interceptor"
 	"devture-matrix-corporal/corporal/httphelp"
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/policy"
@@ -98,7 +100,7 @@ func BuildContainer(
 	})
 
 	container.Set("httpgateway.interceptor.login", func(c service.Container) interface{} {
-		return httpgateway.NewLoginInterceptor(
+		return interceptor.NewLoginInterceptor(
 			container.Get("policy.store").(*policy.Store),
 			configuration.Matrix.HomeserverDomainName,
 			container.Get("policy.userauth.checker").(*userauth.Checker),
@@ -107,18 +109,9 @@ func BuildContainer(
 	})
 
 	container.Set("httpgateway.hook_runner", func(c service.Container) interface{} {
-		return httpgateway.NewHookRunner(
+		return hookrunner.NewHookRunner(
 			container.Get("policy.store").(*policy.Store),
 			container.Get("hook.executor").(*hook.Executor),
-		)
-	})
-
-	container.Set("httpgateway.catch_all_handler", func(c service.Container) interface{} {
-		return httpgateway.NewCatchAllHandler(
-			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
-			logger,
-			container.Get("matrix.user_mapping_resolver").(*matrix.UserMappingResolver),
-			container.Get("httpgateway.hook_runner").(*httpgateway.HookRunner),
 		)
 	})
 
@@ -126,13 +119,6 @@ func BuildContainer(
 		instance := httpgateway.NewServer(
 			logger,
 			configuration.HttpGateway,
-			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
-			container.Get("matrix.user_mapping_resolver").(*matrix.UserMappingResolver),
-			container.Get("policy.store").(*policy.Store),
-			container.Get("policy.checker").(*policy.Checker),
-			container.Get("httpgateway.hook_runner").(*httpgateway.HookRunner),
-			container.Get("httpgateway.catch_all_handler").(*httpgateway.CatchAllHandler),
-			container.Get("httpgateway.interceptor.login").(httpgateway.Interceptor),
 			container.Get("httpgateway.server.handler_registrators").([]httphelp.HandlerRegistrator),
 			time.Duration(configuration.HttpGateway.TimeoutMilliseconds)*time.Millisecond,
 		)
@@ -147,6 +133,10 @@ func BuildContainer(
 	container.Set("httpgateway.server.handler_registrators", func(c service.Container) interface{} {
 		return []httphelp.HandlerRegistrator{
 			container.Get("httpgateway.server.handler_registrator.internal_rest_auth").(httphelp.HandlerRegistrator),
+			container.Get("httpgateway.server.handler_registrator.policy_checked_routes").(httphelp.HandlerRegistrator),
+			container.Get("httpgateway.server.handler_registrator.login").(httphelp.HandlerRegistrator),
+			container.Get("httpgateway.server.handler_registrator.corporal").(httphelp.HandlerRegistrator),
+			container.Get("httpgateway.server.handler_registrator.catchall").(httphelp.HandlerRegistrator),
 		}
 	})
 
@@ -156,6 +146,41 @@ func BuildContainer(
 			configuration.Matrix.HomeserverDomainName,
 			configuration.HttpGateway.InternalRESTAuth,
 			container.Get("policy.userauth.checker").(*userauth.Checker),
+			logger,
+		)
+	})
+
+	container.Set("httpgateway.server.handler_registrator.policy_checked_routes", func(c service.Container) interface{} {
+		return httpGatewayHandler.NewPolicyCheckedRoutesHandler(
+			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
+			container.Get("policy.store").(*policy.Store),
+			container.Get("policy.checker").(*policy.Checker),
+			container.Get("httpgateway.hook_runner").(*hookrunner.HookRunner),
+			container.Get("matrix.user_mapping_resolver").(*matrix.UserMappingResolver),
+			logger,
+		)
+	})
+
+	container.Set("httpgateway.server.handler_registrator.login", func(c service.Container) interface{} {
+		return httpGatewayHandler.NewLoginHandler(
+			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
+			container.Get("httpgateway.hook_runner").(*hookrunner.HookRunner),
+			container.Get("httpgateway.interceptor.login").(interceptor.Interceptor),
+			logger,
+		)
+	})
+
+	container.Set("httpgateway.server.handler_registrator.corporal", func(c service.Container) interface{} {
+		return httpGatewayHandler.NewCorporalHandler(
+			logger,
+		)
+	})
+
+	container.Set("httpgateway.server.handler_registrator.catchall", func(c service.Container) interface{} {
+		return httpGatewayHandler.NewCatchAllHandler(
+			container.Get("matrix.http_reverse_proxy").(*httputil.ReverseProxy),
+			container.Get("matrix.user_mapping_resolver").(*matrix.UserMappingResolver),
+			container.Get("httpgateway.hook_runner").(*hookrunner.HookRunner),
 			logger,
 		)
 	})
