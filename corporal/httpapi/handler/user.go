@@ -147,3 +147,6 @@ func (me *UserApiHandlerRegistrator) actionAccessTokenRelease(w http.ResponseWri
 
 	Respond(w, http.StatusOK, map[string]interface{}{})
 }
+
+// Ensure interface is implemented
+var _ httphelp.HandlerRegistrator = &UserApiHandlerRegistrator{}

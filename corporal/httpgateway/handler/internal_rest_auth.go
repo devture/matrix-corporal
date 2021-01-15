@@ -248,3 +248,6 @@ func isWhitelistedIPAddress(ip net.IP, allowedNetworks []*net.IPNet) bool {
 
 	return false
 }
+
+// Ensure interface is implemented
+var _ httphelp.HandlerRegistrator = &internalRestAuthHandler{}

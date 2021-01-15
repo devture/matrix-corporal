@@ -69,3 +69,6 @@ func (me *PolicyApiHandlerRegistrator) actionPolicyProviderReload(w http.Respons
 
 	Respond(w, http.StatusOK, map[string]interface{}{})
 }
+
+// Ensure interface is implemented
+var _ httphelp.HandlerRegistrator = &PolicyApiHandlerRegistrator{}
