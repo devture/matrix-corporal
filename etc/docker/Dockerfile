@@ -10,3 +10,4 @@ WORKDIR /
 RUN apk --no-cache add ca-certificates
 COPY --from=0 /build/matrix-corporal .
 CMD ["./matrix-corporal"]
+HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:41080/_matrix/client/corporal || exit 1
