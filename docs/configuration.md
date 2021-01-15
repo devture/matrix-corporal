@@ -12,8 +12,11 @@ The `matrix-corporal` configuration is a JSON document that looks like this:
 		"TimeoutMilliseconds": 45000
 	},
 
+	"Corporal": {
+		"UserId": "@matrix-corporal:matrix-corporal.127.0.0.1.xip.io"
+	},
+
 	"Reconciliation": {
-		"UserId": "@matrix-corporal:matrix-corporal.127.0.0.1.xip.io",
 		"RetryIntervalMilliseconds": 30000
 	},
 
@@ -56,10 +59,12 @@ The configuration contains the following fields:
 
 	- `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to Matrix Synapse) are allowed to take before being timed out. Since clients often use long-polling for `/sync` (usually with a 30-second limit), setting this to a value of more than `30000` is recommended.
 
+- `Corporal` - corporal-related configuration
+
+	- `UserId` - a full Matrix user id of the system (needs to have admin privileges), which will be used to perform reconciliation and other tasks. This user account, with its admin privileges, will be used to find what users are available on the server, what their current state is, etc. This user account will also invite and kick users out of communities and rooms, so you need to make sure this user is joined to, and has the appropriate privileges, in all rooms and communities that you would like to manage.
+
 
 - `Reconciliation` - reconciliation-related configuration
-
-	- `UserId` - a full Matrix user id of the system (needs to have admin privileges), which will be used to perform reconciliation. This user account, with its admin privileges, will be used to find what users are available on the server, what their current state is, etc. This user account will also invite and kick users out of communities and rooms, so you need to make sure this user is joined to, and has the appropriate privileges, in all rooms and communities that you would like to manage.
 
 	- `RetryIntervalMilliseconds` - how long (in milliseconds) to wait before retrying reconciliation, in case the previous reconciliation attempt failed (due to Matrix Synapse being down, etc.).
 

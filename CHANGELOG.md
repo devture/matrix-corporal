@@ -1,3 +1,11 @@
+# Version 1.12.0 (unreleased)
+
+- adds `before*` and `after*` event hooks. You're now in control of Client-Server API requests hitting your server. You can reject them early, inspect/modify their request payload, observe/log the upstream response (coming from Synapse) or even modify the response completely.
+
+There's a breaking change in our configuration.
+The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.
+
+
 # Version 1.11.0 (2020-10-01)
 
 This version adds support for `authType=passthrough` user authentication.

@@ -273,7 +273,7 @@ func BuildContainer(
 			logger,
 			container.Get("connector.synapse").(*connector.SynapseConnector),
 			container.Get("reconciliation.computator").(*computator.ReconciliationStateComputator),
-			configuration.Reconciliation.UserId,
+			configuration.Corporal.UserId,
 			container.Get("avatar.avatar_reader").(*avatar.AvatarReader),
 		)
 	})

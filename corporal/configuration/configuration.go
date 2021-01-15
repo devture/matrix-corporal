@@ -9,6 +9,7 @@ import (
 
 type Configuration struct {
 	Matrix         Matrix
+	Corporal       Corporal
 	Reconciliation Reconciliation
 	HttpApi        HttpApi
 	HttpGateway    HttpGateway
@@ -37,8 +38,11 @@ type Matrix struct {
 	TimeoutMilliseconds      int
 }
 
+type Corporal struct {
+	UserId string
+}
+
 type Reconciliation struct {
-	UserId                    string
 	RetryIntervalMilliseconds int
 }
 
@@ -70,10 +74,10 @@ func LoadConfiguration(filePath string) (*Configuration, error) {
 }
 
 func validateConfiguration(configuration *Configuration) error {
-	if !matrix.IsFullUserIdOfDomain(configuration.Reconciliation.UserId, configuration.Matrix.HomeserverDomainName) {
+	if !matrix.IsFullUserIdOfDomain(configuration.Corporal.UserId, configuration.Matrix.HomeserverDomainName) {
 		return fmt.Errorf(
-			"Reconciliation user `%s` is not hosted on the managed homeserver domain (%s)",
-			configuration.Reconciliation.UserId,
+			"Reconciliation user `%s` (specified in Corporal.UserId) is not hosted on the managed homeserver domain (%s)",
+			configuration.Corporal.UserId,
 			configuration.Matrix.HomeserverDomainName,
 		)
 	}
