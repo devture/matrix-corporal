@@ -28,6 +28,11 @@ create-sample-system-user: _prepare_services ## Creates a system user, used for 
 		-c /data/homeserver.yaml \
 		http://localhost:8008
 
+run-postgres-cli: ## Starts a Postgres CLI (psql)
+	docker-compose --project-directory var -f etc/services/docker-compose.yaml -p matrix-corporal \
+		exec postgres \
+		/bin/sh -c 'PGUSER=synapse PGPASSWORD=synapse-password PGDATABASE=homeserver psql -h postgres'
+
 run-locally-quick: ## Builds and runs matrix-corporal locally (no containers, no govvv)
 	go run matrix-corporal.go
 
