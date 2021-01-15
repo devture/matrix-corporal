@@ -35,7 +35,7 @@ func NewApiConnector(
 ) *ApiConnector {
 	// We've had certain versions of Synapse (like 0.33.2) get stuck forever while processing requests.
 	// It's hard to debug when it happens, because we get stuck too.
-	// We never want to get stuck, so we'll use our own http client for gomatrix (set in prepareMatrixClient()).
+	// We never want to get stuck, so we'll use our own http client for gomatrix (set in createMatrixClientForUserIdAndToken()).
 	httpClient := &http.Client{
 		Timeout: time.Duration(timeoutMilliseconds) * time.Millisecond,
 	}
@@ -50,8 +50,7 @@ func NewApiConnector(
 }
 
 func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error) {
-	client, _ := gomatrix.NewClient(me.homeserverApiEndpoint, "", "")
-	me.prepareMatrixClient(client)
+	client, _ := me.createMatrixClientForUserIdAndToken("", "")
 
 	var resp *gomatrix.RespLogin
 	err := matrix.ExecuteWithRateLimitRetries(me.logger, "user.obtain_access_token", func() error {
@@ -667,23 +666,26 @@ func (me *ApiConnector) createMatrixClientForUserId(
 	ctx *AccessTokenContext,
 	userId string,
 ) (*gomatrix.Client, error) {
-	userToken, err := ctx.GetAccessTokenForUserId(userId)
+	accessToken, err := ctx.GetAccessTokenForUserId(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := gomatrix.NewClient(me.homeserverApiEndpoint, userId, userToken)
+	return me.createMatrixClientForUserIdAndToken(userId, accessToken)
+}
+
+func (me *ApiConnector) createMatrixClientForUserIdAndToken(
+	userId string,
+	accessToken string,
+) (*gomatrix.Client, error) {
+	client, err := gomatrix.NewClient(me.homeserverApiEndpoint, userId, accessToken)
 	if err != nil {
 		err = fmt.Errorf("Failed creating client for %s: %s", userId, err)
 	}
 
-	me.prepareMatrixClient(client)
+	client.Client = me.httpClient
 
 	return client, err
-}
-
-func (me *ApiConnector) prepareMatrixClient(client *gomatrix.Client) {
-	client.Client = me.httpClient
 }
 
 // VerifyAccessToken verifies that an access token works and belongs

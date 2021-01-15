@@ -2,6 +2,8 @@
 
 - adds `before*` and `after*` event hooks. You're now in control of Client-Server API requests hitting your server. You can reject them early, inspect/modify their request payload, observe/log the upstream response (coming from Synapse) or even modify the response completely.
 
+- switches to using a Synapse [admin API for logging in as a user](https://github.com/matrix-org/synapse/pull/8617). Until now we were relying on the [shared secret auth](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider for impersonating users.
+
 There's a breaking change in our configuration.
 The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.
 

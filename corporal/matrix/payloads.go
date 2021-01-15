@@ -28,6 +28,12 @@ type ApiLoginRequestIdentifier struct {
 	User string `json:"user"`
 }
 
+// ApiAdminResponseUserLogin represents a login response payload
+// at: POST /_synapse/admin/v1/users/<user_id>/login
+type ApiAdminResponseUserLogin struct {
+	AccessToken string `json:"access_token"`
+}
+
 // ApiAdminEntityUser represents a user entity that is part of the list response
 // at: GET /_synapse/admin/v2/users
 type ApiAdminResponseUsers struct {

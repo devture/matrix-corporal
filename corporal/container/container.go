@@ -303,10 +303,17 @@ func BuildContainer(
 	})
 
 	container.Set("connector.synapse", func(c service.Container) interface{} {
-		return connector.NewSynapseConnector(
+		instance := connector.NewSynapseConnector(
 			container.Get("connector.api").(*connector.ApiConnector),
 			configuration.Matrix.RegistrationSharedSecret,
+			configuration.Corporal.UserId,
 		)
+
+		shutdownHandler.Add(func() {
+			instance.Release()
+		})
+
+		return instance
 	})
 
 	return container, shutdownHandler
