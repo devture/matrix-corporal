@@ -8,7 +8,9 @@
 
 - allows you to control whether users can create **encrypted** or **unencrypted** rooms via new policy flags. Using this, you can enforce E2EE (End-to-End encryption) or prevent E2EE from being used (locally). Learn more the [policy documentation](docs/policy.md).
 
-There's a breaking change in our configuration.
+- fixes a user-creation bug that occurred with Synapse v1.24.0 due to the removal of `/_matrix/client/*/admin` API endpoints (they now live at `/_synapse/admin/*`)
+
+There's a **breaking change in our configuration**.
 The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.
 
 We now **require** Synapse `>= v1.24.0`.
