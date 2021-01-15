@@ -1,13 +1,15 @@
 # Version 1.12.0 (unreleased)
 
-- adds `before*` and `after*` event hooks. You're now in control of Client-Server API requests hitting your server. You can reject them early, inspect/modify their request payload, observe/log the upstream response (coming from Synapse) or even modify the response completely.
+- adds `before*` and `after*` event hooks. You're now in control of all Client-Server API requests hitting your server. You can reject them early, inspect/modify their request payload, observe/log the upstream response (coming from Synapse) or even modify the response completely.
 
-- switches to using a Synapse [admin API for logging in as a user](https://github.com/matrix-org/synapse/pull/8617). Until now we were relying on the [shared secret auth](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider for impersonating users. This is Synapse specific, but leads to better performance (not creating useless devices that potentially get advertised over federation) and resilience (users can no longer destroy access tokens used for impersonation).
+- switches to using a Synapse [admin API for logging in as a user](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.rst#login-as-a-user) (implemented in Synapse v1.24.0, [here](https://github.com/matrix-org/synapse/pull/8617)). Until now we were relying on the [matrix-synapse-shared-secret-auth](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider for impersonating users. This new API is Synapse specific, but leads to better performance (not creating useless devices that potentially get advertised over federation) and resilience (users can no longer destroy access tokens used for impersonation).
+
+- makes our [User access-token retrieval API endpoint](docs/http-api.md#user-access-token-retrieval-endpoint) also obtain access tokens without creating unnecessary devices for users. This API now takes an optional `validitySeconds` parameter allowing you to obtain time-limited tokens.
 
 There's a breaking change in our configuration.
 The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.
 
-We now **require** at least Synapse v1.24.0.
+We now **require** Synapse `>= v1.24.0`.
 
 
 # Version 1.11.0 (2020-10-01)

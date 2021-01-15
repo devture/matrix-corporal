@@ -3,10 +3,11 @@ package connector
 import (
 	"devture-matrix-corporal/corporal/avatar"
 	"devture-matrix-corporal/corporal/matrix"
+	"time"
 )
 
 type MatrixConnector interface {
-	ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error)
+	ObtainNewAccessTokenForUserId(userId, deviceId string, validUntil *time.Time) (string, error)
 	VerifyAccessToken(userId, accessToken string) error
 	DestroyAccessToken(userId, accessToken string) error
 	LogoutAllAccessTokensForUser(ctx *AccessTokenContext, userId string) error

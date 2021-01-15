@@ -49,7 +49,9 @@ func NewApiConnector(
 	}
 }
 
-func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error) {
+func (me *ApiConnector) ObtainNewAccessTokenForUserId(userId, deviceId string, validUntil *time.Time) (string, error) {
+	// We ignore validUntil, because the specced /login API does not support token expiration (yet).
+
 	client, _ := me.createMatrixClientForUserIdAndToken("", "")
 
 	var resp *gomatrix.RespLogin

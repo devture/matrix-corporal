@@ -95,11 +95,19 @@ This API endpoint lets you obtain an access token for a specific user.
 You can use this access token to access the Matrix API however you see fit.
 When done, you can dispose of the access token by calling the [user access-token release API endpoint](#user-access-token-release-endpoint).
 
-You are required to submit a device id in the body payload:
+Example body payload:
 
 ```json
-{"deviceId": "device id goes here"}
+{
+	"deviceId": "device id goes here",
+	"validitySeconds": 300
+}
 ```
+
+`deviceId` is a required parameter, but may go unused. We attempt to obtain access tokens using an [Admin user login API](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.rst#login-as-a-user), which doesn't polute the user's device list.
+
+`validitySeconds` specifies how long the token can be used for. You can omit this parameter to obtain a token which never expires.
+Even when using an expiring token (obtained with `validitySeconds`), you're still encouraged to [release it](#user-access-token-release-endpoint).
 
 Example (using [curl](https://curl.haxx.se/)):
 
@@ -108,7 +116,7 @@ curl \
 -XPOST \
 -H 'Authorization: Bearer HTTP_API_TOKEN' \
 -H 'Content-Type: application/json' \
---data '{"deviceId": "device id goes here"}' \
+--data '{"deviceId": "device id goes here", "validitySeconds": 300}' \
 http://matrix.example.com/_matrix/corporal/user/@user:example.com/access-token/new
 ```
 

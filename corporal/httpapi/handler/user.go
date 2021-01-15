@@ -6,13 +6,15 @@ import (
 	"devture-matrix-corporal/corporal/matrix"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
 // apiAccessTokenObtainRequestPayload is a request payload for: POST /_matrix/corporal/user/{userId}/access-token/obtain
 type apiAccessTokenObtainRequestPayload struct {
-	DeviceId string `json:"deviceId"`
+	DeviceId        string `json:"deviceId"`
+	ValiditySeconds int    `json:"validitySeconds"`
 }
 
 // apiAccessTokenObtainRequestPayload is a response for: POST /_matrix/corporal/user/{userId}/access-token/obtain
@@ -79,7 +81,13 @@ func (me *UserApiHandlerRegistrator) actionAccessTokenObtain(w http.ResponseWrit
 		return
 	}
 
-	accessToken, err := me.connector.ObtainNewAccessTokenForUserId(userId, payload.DeviceId)
+	var validUntil *time.Time
+	if payload.ValiditySeconds != 0 {
+		validUntilT := time.Now().Add(time.Duration(payload.ValiditySeconds) * time.Second)
+		validUntil = &validUntilT
+	}
+
+	accessToken, err := me.connector.ObtainNewAccessTokenForUserId(userId, payload.DeviceId, validUntil)
 	if err != nil {
 		Respond(w, http.StatusOK, ApiResponseError{
 			ErrorCode:    ErrorCodeUnknown,

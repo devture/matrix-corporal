@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"crypto/hmac"
 	"crypto/sha1"
@@ -48,7 +49,13 @@ func NewSynapseConnector(
 	// This is a special access token context that we only use for the matrix-corporal user.
 	// We force it to use the ApiConnector (and not this SynapseConnector),
 	// because we wish to obtain a token for that user directly and not via the custom admin APIs in `ObtainNewAccessTokenForUserId()` below.
-	me.corporalUserAccessTokenContext = NewAccessTokenContext(me.ApiConnector, deviceIdCorporal)
+	me.corporalUserAccessTokenContext = NewAccessTokenContext(
+		me.ApiConnector,
+		deviceIdCorporal,
+		// Using a validity of 0, because we never want this token to expire.
+		// We release it manually from `Release()`.
+		0,
+	)
 
 	return me
 }
@@ -70,7 +77,7 @@ func (me *SynapseConnector) getAccessTokenForCorporalUser() (string, error) {
 //
 // Not creating devices leads to better performance and UX (no need to notify others via federation; the user's device list does not get poluted).
 // This is Synapse-specific though.
-func (me *SynapseConnector) ObtainNewAccessTokenForUserId(userId, deviceId string) (string, error) {
+func (me *SynapseConnector) ObtainNewAccessTokenForUserId(userId, deviceId string, validUntil *time.Time) (string, error) {
 	if userId == me.corporalUserID {
 		// Someone explicitly requested a token for the matrix-corporal user.
 		// If we try to proceed below (using the Admin user login API to log in as matrix-corporal),
@@ -85,7 +92,7 @@ func (me *SynapseConnector) ObtainNewAccessTokenForUserId(userId, deviceId strin
 		// Having this token end up destroyed will break all future invocations of this function.
 		//
 		// So.. we don't reuse an existing token, but always obtain a fresh one.
-		return me.ApiConnector.ObtainNewAccessTokenForUserId(userId, deviceId)
+		return me.ApiConnector.ObtainNewAccessTokenForUserId(userId, deviceId, validUntil)
 	}
 
 	corporalUserAccessToken, err := me.getAccessTokenForCorporalUser()
@@ -108,12 +115,10 @@ func (me *SynapseConnector) ObtainNewAccessTokenForUserId(userId, deviceId strin
 		userId,
 	)
 
-	// TODO - using `valid_until_ms` may be a great idea.
-	// However, we shouldn't do it for every token obtain, but rather only if the caller asks us to.
-	//
-	// Reconciliation should use some generous validity (but expire nevertheless),
-	// while our own HTTP APIs for obtaining/releasing tokens may do something else.
-	requestPayload := map[string]string{}
+	requestPayload := map[string]interface{}{}
+	if validUntil != nil {
+		requestPayload["valid_until_ms"] = validUntil.Unix() * 1000
+	}
 
 	url := client.BuildURLWithQuery([]string{loginEndpoint}, map[string]string{})
 	// The URL-building function above forces us under the `/_matrix/client/r0/` prefix.

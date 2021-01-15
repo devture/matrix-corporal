@@ -61,7 +61,14 @@ func New(
 }
 
 func (me *Reconciler) Reconcile(policy *policy.Policy) error {
-	ctx := connector.NewAccessTokenContext(me.connector, deviceIdReconciler)
+	// We clean up tokens after ourselves, but it's good to specify some validity anyway.
+	// Even if reconciliation takes longer than the validity, it likely wouldn't be a problem,
+	// because the token context checks validity times and gives us a fresh token if it encounters an expired one.
+	//
+	// Still, it's good to use a larger validity time to avoid obtaining too many tokens.
+	tokenValiditySeconds := 12 * 60
+
+	ctx := connector.NewAccessTokenContext(me.connector, deviceIdReconciler, tokenValiditySeconds)
 	defer ctx.Release()
 
 	currentState, err := me.connector.DetermineCurrentState(ctx, policy.GetManagedUserIds(), me.reconciliatorUserId)
