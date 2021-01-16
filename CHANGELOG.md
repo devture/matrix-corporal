@@ -1,21 +1,52 @@
-# Version 1.12.0 (unreleased)
+# Version 2.0.0 (unreleased)
 
-- adds `before*` and `after*` event hooks. You're now in control of all Client-Server API requests hitting your server. You can reject them early, inspect/modify their request payload, observe/log the upstream response (coming from Synapse) or even modify the response completely.
+This is a very large release (hence the version bump) with the following **small breaking changes**:
 
-- switches to using a Synapse [admin API for logging in as a user](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.rst#login-as-a-user) (implemented in Synapse v1.24.0, [here](https://github.com/matrix-org/synapse/pull/8617)). Until now we were relying on the [matrix-synapse-shared-secret-auth](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider for impersonating users. This new API is Synapse specific, but leads to better performance (not creating useless devices that potentially get advertised over federation) and resilience (users can no longer destroy access tokens used for impersonation).
+- `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`
+- we now **require** Synapse `>= v1.24.0`
+- you're not required to, but may wish to install [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider) and point it at `matrix-corporal`. See why below.
 
-- makes our [User access-token retrieval API endpoint](docs/http-api.md#user-access-token-retrieval-endpoint) also obtain access tokens without creating unnecessary devices for users. This API now takes an optional `validitySeconds` parameter allowing you to obtain time-limited tokens.
+The major changes are described below.
 
-- allows you to control whether users can create **encrypted** or **unencrypted** rooms via new policy flags. Using this, you can enforce E2EE (End-to-End Encryption) or prevent E2EE from being used (locally). Learn more the [policy documentation](docs/policy.md).
+## Event Hooks system
+
+We now have `before*` and `after*` event hooks, so `matrix-corporal` can act like [mxgwd](https://github.com/kamax-matrix/mxgwd) - inspecting, modifying and blocking any kind of Matrix Client-Server API request.
+
+Learn more on the [Event Hooks](docs/event-hooks.md) documentation page.
+
+## Going device-free
+
+We now use a [Synapse-specific admin API for logging in as a user](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.rst#login-as-a-user) (implemented in Synapse v1.24.0, [here](https://github.com/matrix-org/synapse/pull/8617)).
+
+Until now we were relying on the [matrix-synapse-shared-secret-auth](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider for impersonating users. With that, we were creating login sessions (and devices) that were publicly visible to the user itself and to other users. This could even become slow over federation, because new devices are advertised to everyone you're in contact with.
+
+The new API we use for impersonating users is Synapse specific, but leads to better performance (not creating useless devices that potentially get advertised over federation), better resilience and better UX.
+
+Our [User access-token retrieval HTTP API endpoint](docs/http-api.md#user-access-token-retrieval-endpoint) now also obtains access tokens without creating unnecessary devices for users. The API also takes an optional `validitySeconds` parameter allowing you to obtain time-limited tokens.
+
+## Support for Interactive Auth (E2EE-friendly, etc.)
+
+Because of the way we were doing authentication before (capturing `/login` requests and handling it all inside of `matrix-corporal`), we couldn't support Interactive Authentication (initiated by Synapse).
+
+Thanks to `matrix-corporal`'s new "Internal REST Auth" feature, combined with [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider), Interactive Authentication now works.
+
+To enable it, set `HttpGateway.InternalRESTAuth.Enabled` to `true` and install the REST auth password provider in Synapse, pointing it to `matrix-corporal`(e.g. `http://matrix-corporal:41080/_matrix/corporal`).
+
+Interactive Authentication is required for certain actions that the user performs, such as setting up End-to-End-Encryption (E2EE) keys, managing devices, etc.
+
+Now that we've made it work, `matrix-corporal` is finally E2EE-friendly.
+
+## In control of E2EE
+
+Not only is `matrix-corporal` now E2EE-friendly, it can also **enforce** whether rooms that users create are **encrypted or unencrypted**.
+
+That is, if you'd like to force users to only create encrypted rooms, you can. If you'd like to force them to only create unencrypted rooms, you also can. It's up to you.
+
+This is controlled by [global and user-policy flags](docs/policy.md).
+
+## Other minor changes
 
 - fixes a user-creation bug that occurred with Synapse v1.24.0 due to the removal of `/_matrix/client/*/admin` API endpoints (they now live at `/_synapse/admin/*`)
-
-- no longer disturbs Interactive Authentication (required for managing devices, E2EE keys, etc.). When interactive authentication is to be performed, Synapse hits password providers in order. By enabling `HttpGateway.InternalRESTAuth.Enabled` and pointing [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider) to matrix-corporal's new Internal Auth gateway API (e.g. `http://matrix-corporal:41080/_matrix/corporal`), you make Interactive Authentication work for users normally authenticated within matrix-corporal.
-
-There's a **breaking change in our configuration**.
-The `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`.
-
-We now **require** Synapse `>= v1.24.0`.
 
 
 # Version 1.11.0 (2020-10-01)

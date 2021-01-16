@@ -21,13 +21,13 @@ var (
 	// ActionPassUnmodified is an action that lets the request pass and returns the response as-is.
 	ActionPassUnmodified = "pass.unmodified"
 
-	// ActionPassModifiedResponse is an action that lets the request pass and then adjusts the JSON response.
-	// See passModifiedResponseActionHookDetails for fields related to this action.
-	ActionPassModifiedResponse = "pass.modifiedResponse"
-
 	// ActionPassModifiedRequest is an action that lets the request pass, but first modifies its payload.
 	// See passInjectJSONIntoRequestActionHookDetails for fields related to this action.
 	ActionPassModifiedRequest = "pass.modifiedRequest"
+
+	// ActionPassModifiedResponse is an action that lets the request pass and then adjusts the JSON response.
+	// See passModifiedResponseActionHookDetails for fields related to this action.
+	ActionPassModifiedResponse = "pass.modifiedResponse"
 )
 
 var knownActions = []string{

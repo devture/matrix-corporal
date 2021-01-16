@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 // restActionHookDetails contains some fields which are useful when Hook.Action is something like ActionConsultRESTServiceURL
@@ -16,6 +17,14 @@ type restActionHookDetails struct {
 	// RESTServiceRequestMethod specifies the request method to use when making the HTTP request RESTServiceURL
 	// If not specified, a "POST" request will be used.
 	RESTServiceRequestMethod *string `json:"RESTServiceRequestMethod,omitempty"`
+
+	// RESTServiceRequestHeaders specifies any request headers that should be sent to the RESTServiceURL when making requests.
+	//
+	// Example:
+	//	RESTServiceRequestHeaders = map[string]string{
+	//		"Authorization": "Bearer: SOME_TOKEN",
+	//	}
+	RESTServiceRequestHeaders *map[string]string `json:"RESTServiceRequestHeaders,omitempty"`
 
 	// RESTServiceRequestTimeoutMilliseconds specifies how long the HTTP request to RESTServiceURL is allowed to take.
 	// If this is not defined, a default timeout value is used (30 seconds at the time of this writing).
@@ -36,7 +45,7 @@ type restActionHookDetails struct {
 	// If this is set to true, we'll simply fire the request and not care about what the response is.
 	// We'll still retry (obeying RESTServiceRetryAttempts and RESTServiceRetryWaitTimeMilliseconds) and expect an OK (200) response,
 	// but it will no longer block the request, nor can it influence it.
-	// The result of async REST hooks can be specified in RESTServiceAsync.
+	// The result of async REST hooks can be specified in RESTServiceAsyncResultHook.
 	// By default (if not specified), we let the original request/response pass through unmodified.
 	RESTServiceAsync bool `json:"RESTServiceAsync,omitempty"`
 
@@ -44,14 +53,6 @@ type restActionHookDetails struct {
 	//
 	// If not specified, RESTServiceAsync = true hooks's result is a new hook with Action = ActionPassUnmodified.
 	RESTServiceAsyncResultHook *Hook `json:"RESTServiceAsyncResultHook,omitempty"`
-
-	// RESTServiceRequestHeaders specifies any request headers that should be sent to the RESTServiceURL when making requests.
-	//
-	// Example:
-	//	RESTServiceRequestHeaders = map[string]string{
-	//		"Authorization": "Bearer: SOME_TOKEN",
-	//	}
-	RESTServiceRequestHeaders *map[string]string `json:"RESTServiceRequestHeaders,omitempty"`
 
 	// RESTServiceContingencyHook contains a fallback hook to return as a result if the REST service fails.
 	//
@@ -93,16 +94,6 @@ type rejectActionHookDetails struct {
 	RejectionErrorMessage *string `json:"rejectionErrorMessage,omitempty"`
 }
 
-// passModifiedResponseActionHookDetails contains some fields which are useful when Hook.Action = ActionPassModifiedResponse
-type passModifiedResponseActionHookDetails struct {
-	// InjectJSONIntoResponse contains some JSON fields to inject into the upstream's response
-	// Required field.
-	InjectJSONIntoResponse *map[string]interface{} `json:"injectJSONIntoResponse,omitempty"`
-
-	// InjectHeadersIntoResponse contains a list of headers that will be injected into the upstream's response
-	InjectHeadersIntoResponse *map[string]string `json:"injectHeadersIntoResponse,omitempty"`
-}
-
 // passModifiedRequestActionHookDetails contains some fields which are useful when Hook.Action = ActionPassModifiedRequest
 type passModifiedRequestActionHookDetails struct {
 	// InjectJSONIntoResponse contains some JSON fields to inject into the original request
@@ -111,6 +102,16 @@ type passModifiedRequestActionHookDetails struct {
 
 	// InjectHeadersIntoRequest contains a list of headers that will be injected into the original request
 	InjectHeadersIntoRequest *map[string]string `json:"injectHeadersIntoRequest,omitempty"`
+}
+
+// passModifiedResponseActionHookDetails contains some fields which are useful when Hook.Action = ActionPassModifiedResponse
+type passModifiedResponseActionHookDetails struct {
+	// InjectJSONIntoResponse contains some JSON fields to inject into the upstream's response
+	// Required field.
+	InjectJSONIntoResponse *map[string]interface{} `json:"injectJSONIntoResponse,omitempty"`
+
+	// InjectHeadersIntoResponse contains a list of headers that will be injected into the upstream's response
+	InjectHeadersIntoResponse *map[string]string `json:"injectHeadersIntoResponse,omitempty"`
 }
 
 type Hook struct {
@@ -148,9 +149,9 @@ type Hook struct {
 
 	rejectActionHookDetails
 
-	passModifiedResponseActionHookDetails
-
 	passModifiedRequestActionHookDetails
+
+	passModifiedResponseActionHookDetails
 }
 
 func (me Hook) Validate() error {
@@ -164,6 +165,13 @@ func (me Hook) Validate() error {
 
 	if !util.IsStringInArray(me.Action, knownActions) {
 		return fmt.Errorf("%s is an invalid action for hook #%s", me.Action, me.ID)
+	}
+
+	// We can allow this and it will work (response modification is scheduled to run later on anyway).
+	// But it's confusing to define a before hook, which actually runs as an after hook.
+	// Better ask people to define it correctly.
+	if strings.HasPrefix(me.EventType, "before") && me.Action == ActionPassModifiedResponse {
+		return fmt.Errorf("action=%s cannot be combined with eventType=%s, found in hook #%s ", me.Action, me.EventType, me.ID)
 	}
 
 	err := me.ensureInitialized()

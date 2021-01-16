@@ -44,7 +44,7 @@ var (
 	// It allows you to capture (and potentially overwrite) the response coming from the upstream.
 	//
 	// Say you wish to do something with every room that ever gets created (`/createRoom`).
-	// You can set up an EventTypeAfterAnyRequest hook and receive the request and response payloads for `/creatRoom` API call.
+	// You can set up an EventTypeAfterAnyRequest hook and receive the request and response payloads for `/creatRoom` API calls.
 	// From there, you can extract the room id, user who did it, etc., and run your own custom logic
 	// (e.g. logging, auto-joining others that need to be in that room, etc.)
 	//
@@ -56,7 +56,7 @@ var (
 	// If you only you're operating on policy-checked requests, you may be even more specific
 	// and use EventTypeAfterAuthenticatedPolicyCheckedRequest.
 	//
-	// This hook does not fire for the `/login` route, even if it's successful.
+	// This hook does not fire for the `/login` route, even if authentication passes successfully.
 	// Consider using EventTypeAfterUnauthenticatedRequest or EventTypeAfterAnyRequest.
 	EventTypeAfterAuthenticatedRequest = "afterAuthenticatedRequest"
 
@@ -67,7 +67,7 @@ var (
 	//
 	// This hook fires only for authenticated requests.
 	//
-	// This hook does not fire for the `/login` route, even if it's successful.
+	// This hook does not fire for the `/login` route, even if authentication passes successfully.
 	// Consider using EventTypeAfterUnauthenticatedRequest or EventTypeAfterAnyRequest.
 	EventTypeAfterAuthenticatedPolicyCheckedRequest = "afterAuthenticatedPolicyCheckedRequest"
 

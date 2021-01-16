@@ -130,7 +130,7 @@ A policy contains the following fields:
 
 - `managedRoomIds` - a list of room identifiers (like `!room:server`) that `matrix-corporal` is allowed to manage for `users`. Any room that is not listed here will be left untouched.
 
-- `hooks` - a list of hooks and their configuration. This is a new feature, which hasn't been documented yet. The details around it may also change in the near future.
+- `hooks` - a list of [event hooks](event-hooks.md) and their configuration.
 
 - `users` - a list of users and their configuration (see [user policy fields](#user-policy-fields) below). Any server user that is not listed here will be left untouched.
 

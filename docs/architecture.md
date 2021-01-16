@@ -14,26 +14,33 @@
    |          |---------------------| TCP 41080  |----------------------|
    |          |  /_matrix/*         | ---------> | HTTP Gateway server  |----+
    |          |---------------------|            |----------------------|    |
-   |          |                     |            |                      |    |
-   |          |---------------------| TCP 41081  |----------------------|    |
-   |          |  /_matrix/corporal  | ---------> | HTTP API server      |    |
-   |          |---------------------|            |----------------------|    |
-   |          |                     |            |                      |    |
-   |          |  /_matrix/identity  |            |----------------------|    |
-   |          |  and others may go  |            | Reconciliation       |----+
-   |          |  elsewhere          |            |----------------------|    |
-   |          |                     |            |                      |    |
-   |          +---------------------+            +----------------------+    |
-   |                                                                         |
-   |                                                                         |
-   |                            +--------------------+                       |
-   | TCP 8448 (federation API)  |                    | TCP 8008 (client API) |
-   +--------------------------> |   Matrix Synapse   | <---------------------+
-                                |                    |
-                                |                    |
-                                |--------------------|
-                                | Shared Secret Auth |
-                                | password provider  |
+   |          |                     |            |  Internal REST Auth  | <--|-----+
+   |          |                     |            |       handler        |    |     |
+   |          |                     |            |----------------------|    |     |
+   |          |                     |            |                      |    |     |
+   |          |---------------------| TCP 41081  |----------------------|    |     |
+   |          |  /_matrix/corporal  | ---------> | HTTP API server      |    |     |
+   |          |---------------------|            |----------------------|    |     |
+   |          |                     |            |                      |    |     |
+   |          |  /_matrix/identity  |            |----------------------|    |     |
+   |          |  and others may go  |            | Reconciliation       |----+     |
+   |          |  elsewhere          |            |----------------------|    |     |
+   |          |                     |            |                      |    |     |
+   |          +---------------------+            +----------------------+    |     |
+   |                                                                         |     |
+   |                                                                         |     |
+   |                            +--------------------+                       |     |
+   | TCP 8448 (federation API)  |                    | TCP 8008 (client API) |     |
+   +--------------------------> |   Matrix Synapse   | <---------------------+     |
+                                |                    |                             |
+                                |                    |                             |
+                                |--------------------|                             |
+                                | Shared Secret Auth |                             |
+                                | password provider  |                             |
+                                |       module       |                             |
+                                |--------------------|                             |
+                                |      REST Auth     |                             |
+                                | password provider  | ----------------------------+
                                 |       module       |
                                 |--------------------|
                                 |                    |
@@ -48,4 +55,8 @@ Things to note:
 
 - you can have other routes (like `/_matrix/identity`) that are forwarded to other servers (like [ma1sd](https://github.com/ma1uta/ma1sd), etc.). With the proper DNS override configuration in ma1sd, some of these routes can be forwarded back to matrix-corporal (and not to the upstream Synapse server).
 
-- for `matrix-corporal` to work, Matrix Synapse needs to be running with the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider module installed and configured correctly. This is how `matrix-corporal` manages to obtain access tokens for any user in the system and to make [user authentication](user-authentication.md) work.
+- for `matrix-corporal` to work, Matrix Synapse needs to be running with:
+
+  - the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider module installed and configured correctly. This is how `matrix-corporal` obtains an access tokens for its own admin user, which is then used for impersonating other users via the [Synapse-specific admin API for logging in as a user](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.rst#login-as-a-user)
+
+  - the [REST Auth](https://github.com/ma1uta/matrix-synapse-rest-password-provider) password provider modue installed and configured correctly. This is how Interactive Authentication (initiated by Synapse) manages to get forwarded to `matrix-corporal` so it can perform authentication according to the rules in the policy (see [User Authentication](user-authentication.md)).
