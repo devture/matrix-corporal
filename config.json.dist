@@ -7,8 +7,11 @@
 		"TimeoutMilliseconds": 45000
 	},
 
+	"Corporal": {
+		"UserID": "@matrix-corporal:matrix-corporal.127.0.0.1.xip.io"
+	},
+
 	"Reconciliation": {
-		"UserId": "@matrix-corporal:matrix-corporal.127.0.0.1.xip.io",
 		"RetryIntervalMilliseconds": 30000
 	},
 

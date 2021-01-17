@@ -12,11 +12,9 @@ If you'd like to contribute code to this project or give it a try locally (befor
 
 - copy the sample configuration: `cp config.json.dist config.json`
 
-- change the `ListenAddress` from `127.0.0.1` to `0.0.0.0` in `config.json`, as that's necessary for running matrix-corporal in a container (something we instruct you of doing below)
-
 - copy the sample policy: `cp policy.json.dist policy.json`
 
-- build and run the `matrix-corporal` program by executing: `make run-in-container`
+- build and run the `matrix-corporal` program by executing: `make run-in-container-quick`
 
 - you should now be able to log in with user `a` and password `test` (as per the policy) to the [element-web instance](http://matrix-corporal.127.0.0.1.xip.io:41465)
 
