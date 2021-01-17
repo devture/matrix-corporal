@@ -4,7 +4,6 @@ import (
 	"devture-matrix-corporal/corporal/util"
 	"fmt"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -120,27 +119,9 @@ type Hook struct {
 
 	EventType string `json:"eventType,omitempty"`
 
-	// RouteMatchesRegex specifies a regular expression that needs to match against the incoming HTTP request's URI.
-	//
-	// If not specified, the Hook has a chance to run (provided it satisfies the rest of the matching criteria).
-	//
-	// If specified, matching is done against the parsed path of the request URI (no query string).
-	// Example:
-	// - original request URI: `/_matrix/client/r0/rooms/!AbCdEF%3Aexample.com/invite?something=here`
-	// - parsed path: `/_matrix/client/r0/rooms/!AbCdEF:example.com/invite`
-	RouteMatchesRegex         *string `json:"routeMatchesRegex,omitempty"`
-	routeMatchesRegexCompiled *regexp.Regexp
-
-	// MethodMatchesRegex specifies a regular expression that needs to match against the incoming HTTP request's method (GET, POST, etc.).
-	//
-	// If not specified, the Hook has a chance to run (provided it satisfies the rest of the matching criteria).
-	//
-	// Examples: `^POST$`, `POST`, `GET|POST`
-	MethodMatchesRegex         *string `json:"methodMatchesRegex,omitempty"`
-	methodMatchesRegexCompiled *regexp.Regexp
-
-	MatrixUserIDMatchesRegex         *string `json:"matrixUserIDMatchesRegex"`
-	matrixUserIDMatchesRegexCompiled *regexp.Regexp
+	// MatchRules contains a list of rules that need to match for this hook to be eligible for execution.
+	// Of course, the EventType needs to match as well.
+	MatchRules []*HookMatchRule `json:"matchRules"`
 
 	// Action specifies what should happen when the hook matches.
 	// See the various `Action*` constants.
@@ -189,9 +170,11 @@ func (me Hook) Validate() error {
 		return fmt.Errorf("action=%s cannot be combined with eventType=%s, found in hook #%s", me.Action, me.EventType, me.ID)
 	}
 
-	err := me.ensureInitialized()
-	if err != nil {
-		return fmt.Errorf("Error when initializing hook #%s: %s", me.ID, err)
+	for idx, matchRule := range me.MatchRules {
+		err := matchRule.validate()
+		if err != nil {
+			return fmt.Errorf("Error when validating hook #%s's match rule #%d: %s", me.ID, idx, err)
+		}
 	}
 
 	// TODO - additional validation logic would be nice to have.
@@ -202,64 +185,12 @@ func (me Hook) Validate() error {
 }
 
 func (me Hook) MatchesRequest(request *http.Request) bool {
-	// This would have probably already been executed before,
-	// because it's also done as part of hook validation. See Validate().
-	err := me.ensureInitialized()
-	if err != nil {
-		panic(err)
-	}
-
-	if me.methodMatchesRegexCompiled != nil {
-		if !me.methodMatchesRegexCompiled.MatchString(request.Method) {
+	for _, matchRule := range me.MatchRules {
+		if !matchRule.MatchesRequest(request) {
 			return false
 		}
 	}
-
-	if me.routeMatchesRegexCompiled != nil {
-		if !me.routeMatchesRegexCompiled.MatchString(request.URL.Path) {
-			return false
-		}
-	}
-
-	if me.matrixUserIDMatchesRegexCompiled != nil {
-		matrixUserIDInterface := request.Context().Value("userId")
-		if matrixUserIDInterface != nil {
-			matrixUserIDString := matrixUserIDInterface.(string)
-			if !me.matrixUserIDMatchesRegexCompiled.MatchString(matrixUserIDString) {
-				return false
-			}
-		}
-	}
-
 	return true
-}
-
-func (me *Hook) ensureInitialized() error {
-	if me.RouteMatchesRegex != nil && me.routeMatchesRegexCompiled == nil {
-		regex, err := regexp.Compile(*me.RouteMatchesRegex)
-		if err != nil {
-			return err
-		}
-		me.routeMatchesRegexCompiled = regex
-	}
-
-	if me.MethodMatchesRegex != nil && me.methodMatchesRegexCompiled == nil {
-		regex, err := regexp.Compile(*me.MethodMatchesRegex)
-		if err != nil {
-			return err
-		}
-		me.methodMatchesRegexCompiled = regex
-	}
-
-	if me.MatrixUserIDMatchesRegex != nil && me.matrixUserIDMatchesRegexCompiled == nil {
-		regex, err := regexp.Compile(*me.MatrixUserIDMatchesRegex)
-		if err != nil {
-			return err
-		}
-		me.matrixUserIDMatchesRegexCompiled = regex
-	}
-
-	return nil
 }
 
 func (me Hook) String() string {

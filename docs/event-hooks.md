@@ -25,25 +25,15 @@ With hooks, you can:
 {
 	"hooks": [
 		{
-			"id": "whitelist-banning-in-some-specific-room-by-skipping-hooks-below",
+			"id": "custom-hook-to-prevent-banning-in-all-rooms-except-one",
 
-			"eventType": "beforeAnyRequest",
+			"eventType": "beforeAuthenticatedRequest",
 
-			"routeMatchesRegex": "^/_matrix/client/r0/rooms/!some-room:server/ban",
-			"methodMatchesRegex": "POST",
-
-			"action": "pass.unmodified",
-
-			"skipNextHooksInChain": true
-		},
-
-		{
-			"id": "custom-hook-to-prevent-banning-in-all-other-rooms",
-
-			"eventType": "beforeAnyRequest",
-
-			"routeMatchesRegex": "^/_matrix/client/r0/rooms/([^/]+)/ban",
-			"methodMatchesRegex": "POST",
+			"matchRules": [
+				{"type": "method", "regex": "POST"}
+				{"type": "route", "regex": "^/_matrix/client/r0/rooms/!some-room-exception:server/ban", "invert": true},
+				{"type": "route", "regex": "^/_matrix/client/r0/rooms/!some-room:server/ban"}
+			],
 
 			"action": "reject",
 
@@ -57,7 +47,9 @@ With hooks, you can:
 
 			"eventType": "beforeAnyRequest",
 
-			"routeMatchesRegex": "^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$"}
+			],
 
 			"action": "pass.modifiedRequest",
 
@@ -71,7 +63,9 @@ With hooks, you can:
 
 			"eventType": "beforeAuthenticatedRequest",
 
-			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/createRoom"}
+			],
 
 			"action": "consult.RESTServiceURL",
 
@@ -89,17 +83,27 @@ With hooks, you can:
 		},
 
 		{
-			"id": "custom-hook-to-capture-room-creation-details",
+			"id": "custom-hook-to-capture-and-log-room-creation-details",
 
 			"eventType": "afterAnyRequest",
 
-			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/createRoom"}
+			],
 
 			"action": "consult.RESTServiceURL",
 
 			"RESTServiceURL": "http://hook-rest-service:8080/dump",
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
+			},
+			"RESTServiceAsync": true,
+			"RESTServiceAsyncResultHook": {
+				"action": "pass.modifiedResponse",
+
+				"injectJSONIntoResponse": {
+					"info": "We're asynchronously logging this /createRoom call and telling you about it here."
+				}
 			}
 		},
 
@@ -108,8 +112,10 @@ With hooks, you can:
 
 			"eventType": "beforeAnyRequest",
 
-			"routeMatchesRegex": "^/_matrix/client/r0/user_directory/search",
-			"matrixUserIDMatchesRegex": "^@(george|peter|admin):",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/user_directory/search"},
+				{"type": "matrixUserID", "regex": "^@(george|peter|admin):", "invert": true}
+			],
 
 			"action": "pass.unmodified",
 
@@ -120,13 +126,15 @@ With hooks, you can:
 
 			"eventType": "beforeAnyRequest",
 
-			"routeMatchesRegex": "^/_matrix/client/r0/user_directory/search",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/user_directory/search"},
+			],
 
 			"action": "reject",
 
 			"responseStatusCode": 403,
 			"rejectionErrorCode": "M_FORBIDDEN",
-			"rejectionErrorMessage": "Only @george, @peter and @admin can search the user directory.Sorry!"
+			"rejectionErrorMessage": "Only @george, @peter and @admin can search the user directory. Sorry!"
 		}
 	],
 }
@@ -157,39 +165,75 @@ The `eventType` field for a given hook can take these values:
 
 ## Matching rules
 
-Besides matching on **event type**, whether a hook is eligible for running or not depends on other (optional) matching rules.
+Besides matching on **event type**, whether a hook is eligible for running or not depends on a list of matching rules defined in `matchRules`.
 
 You'll most likely wish to perform actions for some URLs (and not for others) and for some HTTP method types (and not for others).
 
-The following fields can be used:
+`matchRules` is a list of objects, each of which has a `type` and some more fiels (`regex`, `invert`, etc.)
 
-- `routeMatchesRegex` - specifies a regular expression that needs to match against the incoming HTTP request's URI. If not specified, we don't do matching against this.
+For a hook to match, all of its match rules need to match (a logical `AND` is applied).
 
-	If specified, matching is done against the parsed path of the request URI (no query string). Example:
+Whether an individual match rule can be inverted by setting `invert` to `true` on it.
+
+Below are the `type` values that we support:
+
+
+- `type = method` - specifies a regular expression (in the `regex` field) needs to match against the incoming HTTP request's method (GET, POST, etc.).
+
+	Example (matches all `POST` requests, regardless of URL, etc.):
+
+	```json
+	{
+		"id": "some-hook-id",
+		"matchRules": [
+			{"type": "method", "regex": "POST"},
+		]
+	}
+	```
+
+- `type = route` - specifies that a regular expression (in the `regex` field) needs to match against the incoming HTTP request's URI.
+
+	Matching with the value found in `regex` is done against the parsed path of the request URI (no query string). Example:
     - original request URI: `/_matrix/client/r0/rooms/!AbCdEF%3Aexample.com/invite?something=here`
     - parsed path: `/_matrix/client/r0/rooms/!AbCdEF:example.com/invite` (this is what matching happens against)
 
-	Example values:
-	- `^/_matrix/client/r0/createRoom`
-	- `^/_matrix/client/r0/rooms/([^/]+)/ban`
-	- `^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$`
+	Example (matches `POST /_matrix/client/r0/createRoom` calls):
 
-- `methodMatchesRegex` - specifies a regular expression that needs to match against the incoming HTTP request's method (GET, POST, etc.). If not specified, we don't do matching against this.
+	```json
+	{
+		"id": "some-hook-id",
+		"matchRules": [
+			{"type": "method", "regex": "POST"},
+			{"type": "route", "regex": "^/_matrix/client/r0/createRoom"}
+		]
+	}
+	```
 
-	Example values:
-	- `^POST$`
-	- `POST`
-	- `GET|POST`
+	Example (matches `POST ^/_matrix/client/r0/rooms/../ban` calls, except for one specific room):
+	```json
+	{
+		"id": "some-hook-id",
+		"matchRules": [
+			{"type": "method", "regex": "POST"},
+			{"type": "route", "regex": "^/_matrix/client/r0/rooms/!some-room:example.com/ban", "invert": true},
+			{"type": "route", "regex": "^/_matrix/client/r0/rooms/([^/]+)/ban"}
+		]
+	}
+	```
 
-- `matrixUserIDMatchesRegex` - specifies a regular expression that needs to match against the full Matrix ID of the user making the request (e.g. `@user:example.com`). If not specified, we don't do matching against this.
+- `type = matrixUserID` - specifies a regular expression (in the `regex` field) needs to match against the full Matrix ID of the user making the request (e.g. `@user:example.com`).
 
-	Example values:
-	- `^@user:example\.com`
-	- `^@(george|peter|admin):example\.com`
-    - `^@(george|peter|admin):`
-
-	It's nice being explicit, but you can also safely skip the server name from this definition.
-	Each instance of current homeservers (Synapse, etc.) only handle 1 server name. You can't encounter foreign users authenticated against your server.
+	Example (matches `POST /_matrix/client/r0/createRoom` calls, **not** made by the specified users):
+	```json
+	{
+		"id": "some-hook-id",
+		"matchRules": [
+			{"type": "method", "regex": "POST"},
+			{"type": "route", "regex": "^/_matrix/client/r0/createRoom"},
+			{"type": "matrixUserID", "regex": "^@(george|peter|admin):example\.com", "invert": true}
+		]
+	}
+	```
 
 ## Actions
 
