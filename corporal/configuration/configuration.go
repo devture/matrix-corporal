@@ -29,7 +29,7 @@ type HttpApi struct {
 type HttpGateway struct {
 	ListenAddress       string
 	TimeoutMilliseconds int
-	InternalRESTAuth        HttpGatewayInternalRESTAuth
+	InternalRESTAuth    HttpGatewayInternalRESTAuth
 }
 
 type HttpGatewayInternalRESTAuth struct {

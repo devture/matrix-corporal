@@ -51,7 +51,7 @@ Things to note:
 
 - `matrix-corporal` captures all `/_matrix` traffic of the Client-Server API (not the federation port and the Server-Server API), so it can allow/deny or change it
 
-- the federation port (8448) must not serve the `client` Matrix APIs. If it does, it would be a way to circumvent `matrix-corporal`'s firewalling. Make sure the federation port only serves the federation API. You can make all that traffic go straight to Matrix Synapse, as `matrix-corporal` doesn't care about it.
+- the federation port (`8448`) must not serve the `client` Matrix APIs. If it does, it would be a way to circumvent `matrix-corporal`'s firewalling. Make sure the federation port only serves the federation API. You can make all that traffic go straight to Matrix Synapse, as `matrix-corporal` doesn't care about it.
 
 - you can have other routes (like `/_matrix/identity`) that are forwarded to other servers (like [ma1sd](https://github.com/ma1uta/ma1sd), etc.). With the proper DNS override configuration in ma1sd, some of these routes can be forwarded back to matrix-corporal (and not to the upstream Synapse server).
 
@@ -59,4 +59,4 @@ Things to note:
 
   - the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider module installed and configured correctly. This is how `matrix-corporal` obtains an access tokens for its own admin user, which is then used for impersonating other users via the [Synapse-specific admin API for logging in as a user](https://github.com/matrix-org/synapse/blob/develop/docs/admin_api/user_admin_api.rst#login-as-a-user)
 
-  - the [REST Auth](https://github.com/ma1uta/matrix-synapse-rest-password-provider) password provider modue installed and configured correctly. This is how Interactive Authentication (initiated by Synapse) manages to get forwarded to `matrix-corporal` so it can perform authentication according to the rules in the policy (see [User Authentication](user-authentication.md)).
+  - the [REST Auth](https://github.com/ma1uta/matrix-synapse-rest-password-provider) password provider module installed and configured correctly. This is how Interactive Authentication (initiated by Synapse) manages to get forwarded to `matrix-corporal` so it can perform authentication according to the rules in the policy (see [User Authentication](user-authentication.md)).

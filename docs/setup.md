@@ -22,7 +22,7 @@ Building the program can be done manually (see the [development](development.md)
 Alternatively, you can pull the [devture/matrix-corporal](https://hub.docker.com/r/devture/matrix-corporal) Docker image.
 
 
-## Configurng Matrix Corporal
+## Configuring Matrix Corporal
 
 You can refer to the [configuration](configuration.md) document to learn about configuring `matrix-corporal`.
 
@@ -33,7 +33,9 @@ A lot of the other values that go into the configuration file are either shared 
 
 ## Matrix Synapse configuration
 
-You need to set up the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider module for Matrix Synapse.
+You need to set up the [Shared Secret Authenticator](https://github.com/devture/matrix-synapse-shared-secret-auth) password provider module for Matrix Synapse. This is necessary, so that the `matrix-corporal` user (defined in `Corporal.UserId` in the [configuration](configuration.md)) can log in and obtain an access token.
+
+You also need to set up the [REST Auth](https://github.com/ma1uta/matrix-synapse-rest-password-provider) password provider module and point it to `matrix-corporal`'s HTTP gateway server's `/_matrix/corporal` endpoint (e.g. `http://matrix-corporal:41080/_matrix/corporal`). This is necessary for making Interactive Authentication (initiated by the homeserver) work when it's `matrix-corporal` that handles [user authentication](user-authentication.md).
 
 You should also make sure that the federation port (8448) of Matrix Synapse only handles federation traffic (not `client` API traffic). By default, it doesn't, so you need to disable that.
 

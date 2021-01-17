@@ -30,7 +30,7 @@ Because of the way we were doing authentication before (capturing `/login` reque
 
 Thanks to `matrix-corporal`'s new "Internal REST Auth" feature, combined with [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider), **Interactive Authentication now works**.
 
-To enable it, set `HttpGateway.InternalRESTAuth.Enabled` to `true` and install the REST auth password provider in Synapse, pointing it to `matrix-corporal`(e.g. `http://matrix-corporal:41080/_matrix/corporal`).
+To enable it, set `HttpGateway.InternalRESTAuth.Enabled` to `true` and install the REST auth password provider in Synapse, pointing it to `matrix-corporal` (e.g. `http://matrix-corporal:41080/_matrix/corporal`).
 
 Interactive Authentication is required for certain actions that the user performs, such as setting up End-to-End-Encryption (E2EE) keys, managing devices, etc.
 
