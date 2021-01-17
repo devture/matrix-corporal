@@ -139,6 +139,9 @@ type Hook struct {
 	MethodMatchesRegex         *string `json:"methodMatchesRegex,omitempty"`
 	methodMatchesRegexCompiled *regexp.Regexp
 
+	MatrixUserIDMatchesRegex         *string `json:"matrixUserIDMatchesRegex"`
+	matrixUserIDMatchesRegexCompiled *regexp.Regexp
+
 	// Action specifies what should happen when the hook matches.
 	// See the various `Action*` constants.
 	Action string `json:"action"`
@@ -218,6 +221,16 @@ func (me Hook) MatchesRequest(request *http.Request) bool {
 		}
 	}
 
+	if me.matrixUserIDMatchesRegexCompiled != nil {
+		matrixUserIDInterface := request.Context().Value("userId")
+		if matrixUserIDInterface != nil {
+			matrixUserIDString := matrixUserIDInterface.(string)
+			if !me.matrixUserIDMatchesRegexCompiled.MatchString(matrixUserIDString) {
+				return false
+			}
+		}
+	}
+
 	return true
 }
 
@@ -236,6 +249,14 @@ func (me *Hook) ensureInitialized() error {
 			return err
 		}
 		me.methodMatchesRegexCompiled = regex
+	}
+
+	if me.MatrixUserIDMatchesRegex != nil && me.matrixUserIDMatchesRegexCompiled == nil {
+		regex, err := regexp.Compile(*me.MatrixUserIDMatchesRegex)
+		if err != nil {
+			return err
+		}
+		me.matrixUserIDMatchesRegexCompiled = regex
 	}
 
 	return nil

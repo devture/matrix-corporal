@@ -101,6 +101,32 @@ With hooks, you can:
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
 			}
+		},
+
+		{
+			"id": "allow-a-few-users-to-search-the-user-directory",
+
+			"eventType": "beforeAnyRequest",
+
+			"routeMatchesRegex": "^/_matrix/client/r0/user_directory/search",
+			"matrixUserIDMatchesRegex": "^@(george|peter|admin):",
+
+			"action": "pass.unmodified",
+
+			"skipNextHooksInChain": true
+		},
+		{
+			"id": "block-user-directory-searching-for-everyone-else",
+
+			"eventType": "beforeAnyRequest",
+
+			"routeMatchesRegex": "^/_matrix/client/r0/user_directory/search",
+
+			"action": "reject",
+
+			"responseStatusCode": 403,
+			"rejectionErrorCode": "M_FORBIDDEN",
+			"rejectionErrorMessage": "Only @george, @peter and @admin can search the user directory.Sorry!"
 		}
 	],
 }
