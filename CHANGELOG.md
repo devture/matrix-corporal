@@ -1,3 +1,8 @@
+# Version 2.0.1 (2021-01-17)
+
+Bugfix release for the "Internal REST Auth" feature used for supporting Interactive Authentication, in coordination with [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider).
+
+
 # Version 2.0.0 (2021-01-17)
 
 This is a very large release (hence the version bump) with the following **small breaking changes**:
