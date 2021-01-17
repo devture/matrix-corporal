@@ -88,12 +88,20 @@ type RestAuthResponse struct {
 	Auth RestAuthResponseAuth `json:"auth"`
 }
 
+func NewUnsuccessfulRestAuthResponse() RestAuthResponse {
+	return RestAuthResponse{
+		Auth: RestAuthResponseAuth{
+			Success: false,
+		},
+	}
+}
+
 type RestAuthResponseAuth struct {
 	Success bool `json:"success"`
 
-	MatrixID string `json:"mxid"`
+	MatrixID string `json:"mxid,omitempty"`
 
-	Profile RestAuthResponseAuthProfile `json:"profile"`
+	Profile *RestAuthResponseAuthProfile `json:"profile,omitempty"`
 
 	// As per the documentation for `matrix-synapse-rest-auth`,
 	// additional fields might appear here.

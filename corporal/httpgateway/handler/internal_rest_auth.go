@@ -86,7 +86,8 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 
 	userIDFull, err := matrix.DetermineFullUserId(requestPayload.User.Id, me.homeserverDomainName)
 	if err != nil {
-		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Cannot construct user id")
+		logger.Debug("Cannot construct user id")
+		httphelp.RespondWithJSON(w, http.StatusOK, userauth.NewUnsuccessfulRestAuthResponse())
 		return
 	}
 
@@ -95,20 +96,20 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 
 	if !matrix.IsFullUserIdOfDomain(userIDFull, me.homeserverDomainName) {
 		logger.Debug("Refusing to authenticate foreign users")
-		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Refusing to authenticate foreign users")
+		httphelp.RespondWithJSON(w, http.StatusOK, userauth.NewUnsuccessfulRestAuthResponse())
 		return
 	}
 
 	userPolicy := policyObj.GetUserPolicyByUserId(userIDFull)
 	if userPolicy == nil {
 		logger.Debug("Refusing to authenticate non-managed user")
-		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Refusing to authenticate non-managed user")
+		httphelp.RespondWithJSON(w, http.StatusOK, userauth.NewUnsuccessfulRestAuthResponse())
 		return
 	}
 
 	if !userPolicy.Active {
 		logger.Debug("Refusing to authenticate deactivated user")
-		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorUserDeactivated, "Refusing to authenticate deactivated user")
+		httphelp.RespondWithJSON(w, http.StatusOK, userauth.NewUnsuccessfulRestAuthResponse())
 		return
 	}
 
@@ -119,8 +120,8 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 		// Authentication always happens at the homeserver.
 		//
 		// Thus, we reject it here.
-		logger.Debug(err)
-		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorUserDeactivated, "Refusing to authenticate passthrough users")
+		logger.Debug("Refusing to authenticate passthrough users")
+		httphelp.RespondWithJSON(w, http.StatusOK, userauth.NewUnsuccessfulRestAuthResponse())
 		return
 	}
 
@@ -142,21 +143,19 @@ func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter,
 
 	if !isAuthenticated {
 		logger.Debug("Authentication failed")
-		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Authentication failed")
+		httphelp.RespondWithJSON(w, http.StatusOK, userauth.NewUnsuccessfulRestAuthResponse())
 		return
 	}
 
-	responsePayload := userauth.RestAuthResponse{
+	httphelp.RespondWithJSON(w, http.StatusOK, userauth.RestAuthResponse{
 		Auth: userauth.RestAuthResponseAuth{
 			Success:  true,
 			MatrixID: userIDFull,
-			Profile: userauth.RestAuthResponseAuthProfile{
+			Profile: &userauth.RestAuthResponseAuthProfile{
 				DisplayName: userPolicy.DisplayName,
 			},
 		},
-	}
-
-	httphelp.RespondWithJSON(w, http.StatusOK, responsePayload)
+	})
 }
 
 func (me *internalRestAuthHandler) checkIfRequestIsAllowed(r *http.Request, logger *logrus.Entry) error {
