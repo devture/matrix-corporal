@@ -1,4 +1,4 @@
-# Version 1.12.0 (2020-01-17)
+# Version 1.12.0 (2021-01-17)
 
 This version fixes a user-creation bug that occurred with Synapse v1.24.0 due to the removal of `/_matrix/client/*/admin` API endpoints (they now live at `/_synapse/admin/*`).
 
