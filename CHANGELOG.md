@@ -51,6 +51,11 @@ This is controlled by [global and user-policy flags](docs/policy.md).
 - ability to control how often access tokens are mapped to user IDs (see the `UserMappingResolver` [configuration](docs/configuration.md)). By default, we expire resolver results after 5 minutes (previously never).
 
 
+# Version 1.12.0 (2021-01-17)
+
+This version fixes a user-creation bug that occurred with Synapse v1.24.0 due to the removal of `/_matrix/client/*/admin` API endpoints (they now live at `/_synapse/admin/*`).
+
+
 # Version 1.11.0 (2020-10-01)
 
 This version adds support for `authType=passthrough` user authentication.
