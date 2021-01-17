@@ -23,11 +23,23 @@ type httpRequestFactory func() (*http.Request, error)
 //
 // See RESTServiceConsultor.
 type restServiceConsultingRequest struct {
+	Meta restServiceConsultingRequestMetaInformation `json:"meta"`
+
 	Request restServiceConsultingRequestRequestInformation `json:"request"`
 
 	// Response contains the upstream response information (if available).
 	// This is only available for `after*` hooks.
 	Response *restServiceConsultingRequestResponseInformation `json:"response"`
+}
+
+// restServiceConsultingRequestMetaInformation represents the meta information about an HTTP request we're consulting about.
+type restServiceConsultingRequestMetaInformation struct {
+	// HookID contains the name of the hook that provoked this consultation.
+	HookID string `json:"hookId"`
+
+	// AuthenticatedMatrixUserID contains the full Matrix User ID (MXID) of the user that made the request.
+	// It might be null for unauthenticated requests.
+	AuthenticatedMatrixUserID *string `json:"authenticatedMatrixUserId"`
 }
 
 // restServiceConsultingRequestRequestInformation represents the information about an HTTP request we're consulting about
@@ -46,9 +58,6 @@ type restServiceConsultingRequestRequestInformation struct {
 	Headers map[string]string `json:"headers"`
 
 	Payload string `json:"payload"`
-
-	// If the Matrix Client-Server API request is for an authenticated user, this holds the full MXID of the user.
-	AuthenticatedMatrixUserID *string `json:"authenticatedMatrixUserId"`
 }
 
 // restServiceConsultingRequestResponseInformation represents the information about an upstream HTTP response we're consulting about
@@ -284,10 +293,11 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 	}
 	consultingRequest.Request.Payload = string(payloadBytes)
 
+	consultingRequest.Meta.HookID = hook.ID
 	matrixUserIDInterface := request.Context().Value("userId")
 	if matrixUserIDInterface != nil {
 		matrixUserIDString := matrixUserIDInterface.(string)
-		consultingRequest.Request.AuthenticatedMatrixUserID = &matrixUserIDString
+		consultingRequest.Meta.AuthenticatedMatrixUserID = &matrixUserIDString
 	}
 
 	if response != nil {

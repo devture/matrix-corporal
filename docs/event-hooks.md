@@ -368,6 +368,11 @@ Example JSON payload that hits your REST service:
 
 ```json
 {
+	"meta": {
+		"hookId": "custom-hook-to-reject-room-creation-once-in-a-while",
+		"authenticatedMatrixUserId":"@a:matrix-corporal.127.0.0.1.xip.io"
+	},
+
 	"request": {
 		"URI": "/_matrix/client/r0/createRoom",
 		"path": "/_matrix/client/r0/createRoom",
@@ -382,8 +387,7 @@ Example JSON payload that hits your REST service:
 			"Content-Type": "application/json",
 			"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
 		},
-		"payload": "{\"name\":\"Room name\",\"preset\":\"private_chat\",\"visibility\":\"private\",\"initial_state\":[{\"type\":\"m.room.guest_access\",\"state_key\":\"\",\"content\":{\"guest_access\":\"can_join\"}}]}",
-		"authenticatedMatrixUserId":"@a:matrix-corporal.127.0.0.1.xip.io"
+		"payload": "{\"name\":\"Room name\",\"preset\":\"private_chat\",\"visibility\":\"private\",\"initial_state\":[{\"type\":\"m.room.guest_access\",\"state_key\":\"\",\"content\":{\"guest_access\":\"can_join\"}}]}"
 	},
 
 	"response": {
