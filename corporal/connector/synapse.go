@@ -4,7 +4,6 @@ import (
 	"devture-matrix-corporal/corporal/matrix"
 	"devture-matrix-corporal/corporal/util"
 	"fmt"
-	"strings"
 
 	"crypto/hmac"
 	"crypto/sha1"
@@ -53,15 +52,12 @@ func (me *SynapseConnector) DetermineCurrentState(
 	// On a server where pretty much all users are managed users and there are lots of them,
 	// it's better to avoid doing an individual query for each managed
 
-	url := client.BuildURLWithQuery([]string{"/_synapse/admin/v2/users"}, map[string]string{
+	url := buildPrefixlessURL(client, "/_synapse/admin/v2/users", map[string]string{
 		// We don't support pagination yet
 		"limit":       "100000000000",
 		"guests":      "false",
 		"deactivated": "true",
 	})
-	// The URL-building function above forces us under the `/_matrix/client/r0/` prefix.
-	// We'd like to work at the top-level though, hence this hack.
-	url = strings.Replace(url, "/_matrix/client/r0/", "/", 1)
 
 	var response matrix.ApiAdminResponseUsers
 	err = client.MakeRequest("GET", url, nil, &response)
@@ -108,14 +104,9 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId, password string) err
 
 	var nonceResponse matrix.ApiUserAccountRegisterNonceResponse
 	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register.nonce", func() error {
-		// The canonical admin/register API is available at `/_synapse/admin/v1/register`.
-		// What we hit below is an alias, which might stop working some time in the future.
-		//
-		// We can't hit the canonical URL easily, because gomatrix insists on pre-pending
-		// `/_matrix/client/r0` to URLs built via `BuildURL()`.
 		return client.MakeRequest(
 			"GET",
-			client.BuildURL("admin/register"),
+			buildPrefixlessURL(client, "/_synapse/admin/v1/register", map[string]string{}),
 			nil,
 			&nonceResponse,
 		)
@@ -146,12 +137,9 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId, password string) err
 	var registerResponse matrix.ApiUserAccountRegisterResponse
 
 	err = matrix.ExecuteWithRateLimitRetries(me.logger, "user.register.actual", func() error {
-		// The canonical admin/register API is available at `/_synapse/admin/v1/register`.
-		// What we hit below is an alias, which might stop working some time in the future.
-		// See above for why we can't easily use it.
 		return client.MakeRequest(
 			"POST",
-			client.BuildURL("admin/register"),
+			buildPrefixlessURL(client, "/_synapse/admin/v1/register", map[string]string{}),
 			payload,
 			&registerResponse,
 		)
