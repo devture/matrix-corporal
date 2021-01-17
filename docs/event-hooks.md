@@ -155,8 +155,6 @@ The `eventType` field for a given hook can take these values:
 
 - `afterUnauthenticatedRequest` - the same as `afterAnyRequest`, but only gets fired for unauthenticated requests.
 
-As mentioned in [Limitations](#limitations) below, **at most one hook will match/run for a given event type**.
-
 ## Matching rules
 
 Besides matching on **event type**, whether a hook is eligible for running or not depends on other (optional) matching rules.
@@ -165,7 +163,7 @@ You'll most likely wish to perform actions for some URLs (and not for others) an
 
 The following fields can be used:
 
-- `routeMatchesRegex` - specifies a regular expression that needs to match against the incoming HTTP request's URI. If not specified, the Hook has a chance to run (provided it satisfies the rest of the matching criteria).
+- `routeMatchesRegex` - specifies a regular expression that needs to match against the incoming HTTP request's URI. If not specified, we don't do matching against this.
 
 	If specified, matching is done against the parsed path of the request URI (no query string). Example:
     - original request URI: `/_matrix/client/r0/rooms/!AbCdEF%3Aexample.com/invite?something=here`
@@ -176,14 +174,22 @@ The following fields can be used:
 	- `^/_matrix/client/r0/rooms/([^/]+)/ban`
 	- `^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$`
 
-- `methodMatchesRegex` - specifies a regular expression that needs to match against the incoming HTTP request's method (GET, POST, etc.). If not specified, the Hook has a chance to run (provided it satisfies the rest of the matching criteria).
+- `methodMatchesRegex` - specifies a regular expression that needs to match against the incoming HTTP request's method (GET, POST, etc.). If not specified, we don't do matching against this.
 
 	Example values:
 	- `^POST$`
 	- `POST`
 	- `GET|POST`
 
-As mentioned in [Limitations](#limitations) below, **at most one hook will match/run for a given event type**.
+- `matrixUserIDMatchesRegex` - specifies a regular expression that needs to match against the full Matrix ID of the user making the request (e.g. `@user:example.com`). If not specified, we don't do matching against this.
+
+	Example values:
+	- `^@user:example\.com`
+	- `^@(george|peter|admin):example\.com`
+    - `^@(george|peter|admin):`
+
+	It's nice being explicit, but you can also safely skip the server name from this definition.
+	Each instance of current homeservers (Synapse, etc.) only handle 1 server name. You can't encounter foreign users authenticated against your server.
 
 ## Actions
 
