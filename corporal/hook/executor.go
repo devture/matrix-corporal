@@ -71,7 +71,7 @@ func (me *Executor) executeBeforeHook(
 
 // executeTypelessHook executes a hook which has no type.
 //
-// These hooks are the result of consulting a hooks returned from REST services.
+// These hooks are the result of consulting a REST service.
 //
 // Hooks coming from REST services are not really a "before" or "after" hook.
 // They're just hooks that get executed immediately.
@@ -129,7 +129,7 @@ func (me *Executor) executeAfterHook(
 		)
 	}
 
-	var responseModifier HttpResponseModifierFunc = func(response *http.Response) error {
+	var responseModifier HttpResponseModifierFunc = func(response *http.Response) ( /* skipNextModifiers */ bool, error) {
 		logger.Debugln("In after-hook response modifier")
 
 		if len(requestBodyBytes) > 0 {
@@ -185,25 +185,45 @@ func (me *Executor) executeAfterHook(
 				"Afer-hook execution failed, cannot proceed",
 			)
 
-			return nil
+			return true, nil
 		}
 
-		if result.ReverseProxyResponseModifier != nil {
-			logger.Debugln("Passing control to the action's response modifier")
-			err := (*result.ReverseProxyResponseModifier)(response)
-			logger.Debugln("Returned to the after-hook action's response modifier")
-			return err
+		if len(result.ReverseProxyResponseModifiers) != 0 {
+			for _, modifier := range result.ReverseProxyResponseModifiers {
+				logger.Debugln("Passing control to the action's response modifier")
+				skipNextModifiers, err := modifier(response)
+				logger.Debugln("Returned to the after-hook action's response modifier")
+
+				if err != nil {
+					return true, err
+				}
+
+				if skipNextModifiers {
+					// This embedded response modifier (spawned from the execution of the hook)
+					// asked that no one modifiers run.
+					// We should both "break" here and also prevent other top-level response modifiers from running.
+					return true, nil
+				}
+			}
+
+			// All response modifiers ran successfully
+			return false, nil
+		}
+
+		if result.SkipNextHooksInChain {
+			logger.Debugf("After-hook execution result requested that we skip execution of all other hooks in the chain: %#v\n", result)
+			return true, nil
 		}
 
 		// Ignoring `ResponseSent` here.
 
 		logger.Debugln("Finished after-hook response modifier")
 
-		return nil
+		return false, nil
 	}
 
 	return ExecutionResult{
-		ReverseProxyResponseModifier: &responseModifier,
+		ReverseProxyResponseModifiers: []HttpResponseModifierFunc{responseModifier},
 	}
 }
 
@@ -218,10 +238,7 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 
 	newHookObj, err := me.restServiceConsultor.Consult(request, response, *hookObj, logger)
 	if err != nil {
-		return ExecutionResult{
-			Hook:            hookObj,
-			ProcessingError: err,
-		}
+		return createProcessingErrorExecutionResult(hookObj, err)
 	}
 
 	if newHookObj.ID == "" {
@@ -241,12 +258,20 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 		//   in `executeAfterHook` again, which merely returns a new HTTP response modifier.
 		//   Those are not meant to be called recursively, as they'll get confused with response body copying.
 		logger.Warnf(
-			"Switching hook `%s` received from REST service from eventType = `%s` to typeless",
-			newHookObj.ID,
+			"Switching REST service result hook (%s) from eventType = `%s` to typeless",
+			newHookObj,
 			newHookObj.EventType,
 		)
 
 		newHookObj.EventType = ""
+	}
+
+	if hookObj.IsAfterHook() && newHookObj.Action == ActionPassModifiedRequest {
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf(
+			"An after hook (%s) yielded a request-modification hook: %s. It makes no sense - it's already too late to modify the request",
+			hookObj,
+			newHookObj,
+		))
 	}
 
 	exportedHookJSON, err := json.Marshal(newHookObj)
@@ -259,7 +284,7 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 	logger.Debugf("Hook Executor: %s provided a new hook response %s", *hookObj.RESTServiceURL, string(exportedHookJSON))
 
 	executionResult := me.Execute(newHookObj, w, request, logger)
-	executionResult.Hook = hookObj
+	executionResult.Hooks = []*Hook{hookObj}
 
 	return executionResult
 }
@@ -285,8 +310,10 @@ func executeActionReject(hookObj *Hook, w http.ResponseWriter, request *http.Req
 	)
 
 	return ExecutionResult{
-		Hook:         hookObj,
+		Hooks:        []*Hook{hookObj},
 		ResponseSent: true,
+		// Regardless of this SkipNextHooksInChain value, hook execution can't continue anyway.
+		SkipNextHooksInChain: hookObj.SkipNextHooksInChain,
 	}
 }
 
@@ -329,14 +356,18 @@ func executeActionRespond(hookObj *Hook, w http.ResponseWriter, request *http.Re
 	)
 
 	return ExecutionResult{
-		Hook:         hookObj,
+		Hooks:        []*Hook{hookObj},
 		ResponseSent: true,
+		// Regardless of this SkipNextHooksInChain value, hook execution can't continue anyway.
+		SkipNextHooksInChain: hookObj.SkipNextHooksInChain,
 	}
 }
 
 func executePassUnmodified(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
 	return ExecutionResult{
-		Hook: hookObj,
+		Hooks:                []*Hook{hookObj},
+		ResponseSent:         false,
+		SkipNextHooksInChain: hookObj.SkipNextHooksInChain,
 	}
 }
 
@@ -377,7 +408,8 @@ func executePassModifiedRequest(hookObj *Hook, w http.ResponseWriter, request *h
 	}
 
 	return ExecutionResult{
-		Hook: hookObj,
+		Hooks:                []*Hook{hookObj},
+		SkipNextHooksInChain: hookObj.SkipNextHooksInChain,
 	}
 }
 
@@ -392,7 +424,7 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 		return executePassUnmodified(hookObj, w, request, response, logger)
 	}
 
-	var responseModifier HttpResponseModifierFunc = func(response *http.Response) error {
+	var responseModifier HttpResponseModifierFunc = func(response *http.Response) ( /* skipNextModifiers */ bool, error) {
 		// We're operating under the assumption that the response contains a key-value JSON payload.
 		// If this is not the case for some responses, we'll fail below.
 		// This assumption and failure mode can be adjusted in the future, if necessary.
@@ -407,7 +439,7 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 			// and somewhat "swallowing" this errors (even though we've logged it already).
 			// We'd better fail hard when there's an expectation mismatch.
 			// We may make this behavior customizable in the future, if necessary.
-			return err
+			return true, err
 		}
 
 		for k, v := range *hookObj.InjectJSONIntoResponse {
@@ -419,7 +451,7 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 			// We don't expect this to happen, but..
 			logger.Errorf("Failed to serialize modified response payload as JSON: %s", err)
 
-			return err
+			return true, err
 		}
 
 		response.Body = ioutil.NopCloser(bytes.NewReader(newResponseBytes))
@@ -431,11 +463,12 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 			}
 		}
 
-		return nil
+		return false, nil
 	}
 
 	return ExecutionResult{
-		Hook:                         hookObj,
-		ReverseProxyResponseModifier: &responseModifier,
+		Hooks:                         []*Hook{hookObj},
+		ReverseProxyResponseModifiers: []HttpResponseModifierFunc{responseModifier},
+		SkipNextHooksInChain:          hookObj.SkipNextHooksInChain,
 	}
 }

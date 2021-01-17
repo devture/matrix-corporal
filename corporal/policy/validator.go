@@ -42,15 +42,30 @@ func (me *Validator) Validate(policy *Policy) error {
 		}
 	}
 
+	hookIDToIndexMap := make(map[string]int)
+
 	for idx, hook := range policy.Hooks {
+		existingIndex, exists := hookIDToIndexMap[hook.ID]
+		if exists {
+			return fmt.Errorf(
+				"Hook at index `%d` (ID = %s) has the same ID as the hook at index %d. Assign unique hook IDs to prevent confusion",
+				idx,
+				hook.ID,
+				existingIndex,
+			)
+		}
+
 		err := hook.Validate()
 		if err != nil {
 			return fmt.Errorf(
-				"Hook at index `%d` is invalid: %s",
+				"Hook at index `%d` (ID = %s) is invalid: %s",
 				idx,
+				hook.ID,
 				err,
 			)
 		}
+
+		hookIDToIndexMap[hook.ID] = idx
 	}
 
 	return nil

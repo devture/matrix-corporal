@@ -143,6 +143,10 @@ type Hook struct {
 	// See the various `Action*` constants.
 	Action string `json:"action"`
 
+	// SkipNextHooksInChain tells whether all other hooks in the same execution chain should be skipped.
+	// Execution chain means "eligible hooks of this same event type".
+	SkipNextHooksInChain bool `json:"skipNextHooksInChain"`
+
 	restActionHookDetails
 
 	respondActionHookDetails
@@ -152,6 +156,14 @@ type Hook struct {
 	passModifiedRequestActionHookDetails
 
 	passModifiedResponseActionHookDetails
+}
+
+func (me Hook) IsBeforeHook() bool {
+	return strings.HasPrefix(me.EventType, "before")
+}
+
+func (me Hook) IsAfterHook() bool {
+	return strings.HasPrefix(me.EventType, "after")
 }
 
 func (me Hook) Validate() error {
@@ -170,8 +182,8 @@ func (me Hook) Validate() error {
 	// We can allow this and it will work (response modification is scheduled to run later on anyway).
 	// But it's confusing to define a before hook, which actually runs as an after hook.
 	// Better ask people to define it correctly.
-	if strings.HasPrefix(me.EventType, "before") && me.Action == ActionPassModifiedResponse {
-		return fmt.Errorf("action=%s cannot be combined with eventType=%s, found in hook #%s ", me.Action, me.EventType, me.ID)
+	if me.IsBeforeHook() && me.Action == ActionPassModifiedResponse {
+		return fmt.Errorf("action=%s cannot be combined with eventType=%s, found in hook #%s", me.Action, me.EventType, me.ID)
 	}
 
 	err := me.ensureInitialized()
@@ -231,4 +243,17 @@ func (me *Hook) ensureInitialized() error {
 
 func (me Hook) String() string {
 	return fmt.Sprintf("<Hook #%s (%s @ %s)>", me.ID, me.Action, me.EventType)
+}
+
+func ListToChain(hooksList []*Hook) string {
+	if len(hooksList) == 0 {
+		return "none"
+	}
+
+	var ids []string
+	for _, hookObj := range hooksList {
+		ids = append(ids, fmt.Sprintf("#%s", hookObj.ID))
+	}
+
+	return strings.Join(ids, " -> ")
 }

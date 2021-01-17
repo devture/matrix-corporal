@@ -8,8 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// runHook runs the first matching hook of a given type, possibly injects a response modifier and returns false if we should stop execution
-func runHook(
+// runHooks runs all matching hook of a given type, possibly injects a response modifier and returns false if we should stop execution
+func runHooks(
 	hookRunner *hookrunner.HookRunner,
 	eventType string,
 	w http.ResponseWriter,
@@ -17,17 +17,15 @@ func runHook(
 	logger *logrus.Entry,
 	httpResponseModifierFuncs *[]hook.HttpResponseModifierFunc,
 ) bool {
-	hookResult := hookRunner.RunFirstMatchingType(eventType, w, r, logger)
+	hookResult := hookRunner.RunAllMatchingType(eventType, w, r, logger)
 	if hookResult.ResponseSent {
-		logger.WithField("hookId", hookResult.Hook.ID).WithField("hookEventType", hookResult.Hook.EventType).Infoln(
+		logger.WithField("hookChain", hook.ListToChain(hookResult.Hooks)).Infoln(
 			"HTTP gateway (policy-checked): hook delivered a response, so we're not proceeding further",
 		)
 		return false
 	}
 
-	if hookResult.ReverseProxyResponseModifier != nil {
-		*httpResponseModifierFuncs = append(*httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
-	}
+	*httpResponseModifierFuncs = append(*httpResponseModifierFuncs, hookResult.ReverseProxyResponseModifiers...)
 
 	return true
 }

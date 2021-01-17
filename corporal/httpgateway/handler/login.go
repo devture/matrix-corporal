@@ -59,7 +59,7 @@ func (me *loginHandler) createInterceptorHandler(name string, interceptorObj int
 		// Before hooks run early on and may abort execution right here.
 		// After hooks just schedule HTTP response modifier functions and will actually run later on.
 		for _, eventType := range hooksToRun {
-			if !runHook(me.hookRunner, eventType, w, r, logger, &httpResponseModifierFuncs) {
+			if !runHooks(me.hookRunner, eventType, w, r, logger, &httpResponseModifierFuncs) {
 				return
 			}
 		}

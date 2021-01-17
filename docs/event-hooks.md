@@ -25,11 +25,28 @@ With hooks, you can:
 {
 	"hooks": [
 		{
-			"id": "custom-hook-to-prevent-banning",
+			"id": "whitelist-banning-in-some-specific-room-by-skipping-hooks-below",
+
 			"eventType": "beforeAnyRequest",
+
+			"routeMatchesRegex": "^/_matrix/client/r0/rooms/!some-room:server/ban",
+			"methodMatchesRegex": "POST",
+
+			"action": "pass.unmodified",
+
+			"skipNextHooksInChain": true
+		},
+
+		{
+			"id": "custom-hook-to-prevent-banning-in-all-other-rooms",
+
+			"eventType": "beforeAnyRequest",
+
 			"routeMatchesRegex": "^/_matrix/client/r0/rooms/([^/]+)/ban",
 			"methodMatchesRegex": "POST",
+
 			"action": "reject",
+
 			"responseStatusCode": 403,
 			"rejectionErrorCode": "M_FORBIDDEN",
 			"rejectionErrorMessage": "Banning is forbidden on this server. We're nice like that!"
@@ -37,9 +54,13 @@ With hooks, you can:
 
 		{
 			"id": "force-every-message-to-say-hello",
+
 			"eventType": "beforeAnyRequest",
+
 			"routeMatchesRegex": "^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$",
+
 			"action": "pass.modifiedRequest",
+
 			"injectJSONIntoRequest": {
 				"body": "Hello!"
 			}
@@ -47,13 +68,18 @@ With hooks, you can:
 
 		{
 			"id": "custom-hook-to-reject-room-creation-once-in-a-while",
+
 			"eventType": "beforeAuthenticatedRequest",
+
 			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+
 			"action": "consult.RESTServiceURL",
+
 			"RESTServiceURL": "http://hook-rest-service:8080/reject/with-33-percent-chance",
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
 			},
+
 			"RESTServiceContingencyHook": {
 				"action": "reject",
 				"responseStatusCode": 403,
@@ -64,9 +90,13 @@ With hooks, you can:
 
 		{
 			"id": "custom-hook-to-capture-room-creation-details",
+
 			"eventType": "afterAnyRequest",
+
 			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+
 			"action": "consult.RESTServiceURL",
+
 			"RESTServiceURL": "http://hook-rest-service:8080/dump",
 			"RESTServiceRequestHeaders": {
 				"Authorization": "Bearer SOME_TOKEN"
@@ -156,7 +186,9 @@ Example:
 
 	"eventType": "beforeAnyRequest",
 
-	"action": "pass.unmodified"
+	"action": "pass.unmodified",
+
+	"skipNextHooksInChain": false
 }
 ```
 
@@ -169,6 +201,8 @@ If `action` is set to `pass.modifiedRequest`, you can control execution with the
 - `injectJSONIntoRequest` - a JSON dictionary containing fields to be merged into the original JSON payload. Naturally, this means that you can only use this for modifying JSON payloads, which is what most of the Client-Server APIs take (except for the media repository routes).
 
 - `injectHeadersIntoRequest` (optional) - a JSON dictionary containing a map of header names to header values, which are to be used to modify the original request's HTTP headers.
+
+- `skipNextHooksInChain` (optional, default `false`) - tells whether other matching hooks in the same chain (hooks with the same `eventType`) will be executed
 
 Example:
 
@@ -186,7 +220,9 @@ Example:
 	},
 	"injectHeadersIntoRequest": {
 		"X-Modified-By-Corporal-Hook": "1"
-	}
+	},
+
+	"skipNextHooksInChain": false
 }
 ```
 
@@ -199,6 +235,8 @@ If `action` is set to `pass.modifiedResponse`, you can control execution with th
 - `injectJSONIntoResponse` - a JSON dictionary containing fields to be merged into the response JSON payload (coming from the upstream homeserver). Naturally, this means that you can only use this for modifying JSON response payloads, which is what most of the Client-Server APIs return (except for the media repository routes).
 
 - `injectHeadersIntoResponse` (optional) - a JSON dictionary containing a map of header names to header values, which are to be used to modify the response's HTTP headers.
+
+- `skipNextHooksInChain` (optional, default `false`) - tells whether other matching hooks in the same chain (hooks with the same `eventType`) will be executed
 
 Example:
 
@@ -213,7 +251,9 @@ Example:
 
 	"injectJSONIntoResponse": {
 		"homeserverFrontedByCorporal": true
-	}
+	},
+
+	"skipNextHooksInChain": false
 }
 ```
 
@@ -360,7 +400,9 @@ Example:
 		"responseStatusCode": 403,
 		"rejectionErrorCode": "M_FORBIDDEN",
 		"rejectionErrorMessage": "REST service down. Rejecting you to be on the safe side"
-	}
+	},
+
+	"skipNextHooksInChain": false
 }
 ```
 
@@ -412,7 +454,9 @@ Example reply you may send:
 
 ```json
 {
-	"action": "pass.unmodified"
+	"action": "pass.unmodified",
+
+	"skipNextHooksInChain": false
 }
 ```
 
@@ -420,16 +464,16 @@ The above REST service hook actually work when you test it in the [development e
 It's [implemented in this PHP script](../etc/services/hook-rest-service/index.php).
 
 
-## Limitations
-
-`matrix-corporal` currently runs **at most 1 hook per event-type**. That is to say, for a given request:
-- only 1 `beforeAnyRequest` hook can run
-- followed by, only 1 `beforeAnyAuthenticatedRequest` hook running
-- followed by, only 1 `afterAnyRequest` hook running
-- followed by, only 1 `afterAuthenticatedRequest` hook running
+## Execution notes
 
 The event types differ depending on the route and the user-authentication state - we don't run `{before,after}AuthenticatedRequest` hooks for unauthenticated users.
 
-The *1 hook per event-type* that runs is the first-matching hook, so the order of hooks in the list matters.
+Some types of `eventType` + `action` combinations make no sense. `matrix-corporal` will tell you about it.
+For example, trying to do `action = pass.modifiedRequest` from an `after*` hook makes no sense. At the time `after*` hooks run, it's already too late to modify the request (it has already been sent to the upstream server, a response has arrived, etc.).
 
-If you use the [`consult.RESTServiceURL` action](#action-consultrestserviceurl) (see [Actions](#actions)), you may be able to chain hooks, working around this.
+`matrix-corporal` runs **all matching hooks** that match a given request.
+
+If you define 2 `pass.modifiedRequest` hooks that match the request, both will be executed, in order.
+
+If you'd like to break the execution flow, you can make one of these hooks set `skipNextHooksInChain` to `true`,
+or you can introduce a no-op hook between them, which consists of `action = pass.unmodified` and `skipNextHooksInChain = true`.

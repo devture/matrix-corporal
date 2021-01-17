@@ -110,7 +110,7 @@ func (me *policyCheckedRoutesHandler) createPolicyCheckingHandler(name string, p
 
 		httpResponseModifierFuncs := make([]hook.HttpResponseModifierFunc, 0)
 
-		if !runHook(me.hookRunner, hook.EventTypeBeforeAnyRequest, w, r, logger, &httpResponseModifierFuncs) {
+		if !runHooks(me.hookRunner, hook.EventTypeBeforeAnyRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 
@@ -145,11 +145,11 @@ func (me *policyCheckedRoutesHandler) createPolicyCheckingHandler(name string, p
 		r = r.WithContext(context.WithValue(r.Context(), "accessToken", accessToken))
 		r = r.WithContext(context.WithValue(r.Context(), "userId", userId))
 
-		if !runHook(me.hookRunner, hook.EventTypeBeforeAuthenticatedRequest, w, r, logger, &httpResponseModifierFuncs) {
+		if !runHooks(me.hookRunner, hook.EventTypeBeforeAuthenticatedRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 
-		if !runHook(me.hookRunner, hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest, w, r, logger, &httpResponseModifierFuncs) {
+		if !runHooks(me.hookRunner, hook.EventTypeBeforeAuthenticatedPolicyCheckedRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 
@@ -184,15 +184,15 @@ func (me *policyCheckedRoutesHandler) createPolicyCheckingHandler(name string, p
 			return
 		}
 
-		if !runHook(me.hookRunner, hook.EventTypeAfterAnyRequest, w, r, logger, &httpResponseModifierFuncs) {
+		if !runHooks(me.hookRunner, hook.EventTypeAfterAnyRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 
-		if !runHook(me.hookRunner, hook.EventTypeAfterAuthenticatedRequest, w, r, logger, &httpResponseModifierFuncs) {
+		if !runHooks(me.hookRunner, hook.EventTypeAfterAuthenticatedRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 
-		if !runHook(me.hookRunner, hook.EventTypeAfterAuthenticatedPolicyCheckedRequest, w, r, logger, &httpResponseModifierFuncs) {
+		if !runHooks(me.hookRunner, hook.EventTypeAfterAuthenticatedPolicyCheckedRequest, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 

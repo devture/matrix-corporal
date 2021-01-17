@@ -75,7 +75,7 @@ func (me *catchAllHandler) actionCatchAll(w http.ResponseWriter, r *http.Request
 	// Before hooks run early on and may abort execution right here.
 	// After hooks just schedule HTTP response modifier functions and will actually run later on.
 	for _, eventType := range me.orderedEventTypesByAuthStatus(isAuthenticated) {
-		if !me.runHook(eventType, w, r, logger, &httpResponseModifierFuncs) {
+		if !me.runHooks(eventType, w, r, logger, &httpResponseModifierFuncs) {
 			return
 		}
 	}
@@ -95,25 +95,23 @@ func (me *catchAllHandler) actionCatchAll(w http.ResponseWriter, r *http.Request
 	reverseProxyToUse.ServeHTTP(w, r)
 }
 
-// runHook runs the first matching hook of a given type, possibly injects a response modifier and returns false if we should stop execution
-func (me *catchAllHandler) runHook(
+// runHooks runs all matching hooks of a given type, possibly injects a response modifier and returns false if we should stop execution
+func (me *catchAllHandler) runHooks(
 	eventType string,
 	w http.ResponseWriter,
 	r *http.Request,
 	logger *logrus.Entry,
 	httpResponseModifierFuncs *[]hook.HttpResponseModifierFunc,
 ) bool {
-	hookResult := me.hookRunner.RunFirstMatchingType(eventType, w, r, logger)
+	hookResult := me.hookRunner.RunAllMatchingType(eventType, w, r, logger)
 	if hookResult.ResponseSent {
-		logger.WithField("hookId", hookResult.Hook.ID).WithField("hookEventType", hookResult.Hook.EventType).Infoln(
+		logger.WithField("hookChain", hook.ListToChain(hookResult.Hooks)).Infoln(
 			"HTTP gateway (catch-all): hook delivered a response, so we're not proceeding further",
 		)
 		return false
 	}
 
-	if hookResult.ReverseProxyResponseModifier != nil {
-		*httpResponseModifierFuncs = append(*httpResponseModifierFuncs, *hookResult.ReverseProxyResponseModifier)
-	}
+	*httpResponseModifierFuncs = append(*httpResponseModifierFuncs, hookResult.ReverseProxyResponseModifiers...)
 
 	return true
 }
