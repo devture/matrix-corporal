@@ -83,6 +83,11 @@ The configuration contains the following fields:
 
 		- `IPNetworkWhitelist` - an optional list of network ranges (e.g. `1.1.1.1/24`) that are allowed to access this authentication API. We don't rate-limit it (yet), so exposing it to every IP address is not a good idea.  If you define this as an empty list, all IP addresses are allowed. If you don't define this at all (or define it as `null`), we default to local/private IP ranges only.
 
+	- `UserMappingResolver` - controls how `matrix-corporal` resolves access tokens for incoming requests to user IDs (internally, it uses the `/account/whoami` Client-Server API endpoint)
+		- `CacheSize` (default: `10000`) - specifies the number of items that will be cached
+
+		- `ExpirationTimeMilliseconds` (default `300000` = 5 minutes) - specifies how long before a cached item expires. After this time, the same incoming access token will have to be re-resolved by hitting the homeserver again. This can be important for [event hooks](event-hooks.md), if you rely on a hook's `meta.authenticatedMatrixUserID` data.
+
 
 - `HttpApi` - HTTP API-related configuration
 

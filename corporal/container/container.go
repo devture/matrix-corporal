@@ -55,7 +55,7 @@ func BuildContainer(
 	})
 
 	container.Set("matrix.user_mapping_resolver.cache", func(c service.Container) interface{} {
-		cache, err := lru.New2Q(1000)
+		cache, err := lru.New2Q(configuration.HttpGateway.UserMappingResolver.CacheSize)
 		if err != nil {
 			panic(err)
 		}
@@ -65,8 +65,9 @@ func BuildContainer(
 	container.Set("matrix.user_mapping_resolver", func(c service.Container) interface{} {
 		return matrix.NewUserMappingResolver(
 			logger,
-			container.Get("matrix.user_mapping_resolver.cache").(*lru.TwoQueueCache),
 			configuration.Matrix.HomeserverApiEndpoint,
+			container.Get("matrix.user_mapping_resolver.cache").(*lru.TwoQueueCache),
+			configuration.HttpGateway.UserMappingResolver.ExpirationTimeMilliseconds,
 		)
 	})
 
@@ -222,7 +223,6 @@ func BuildContainer(
 	})
 
 	container.Set("hook.rest_service_consultor", func(c service.Container) interface{} {
-		// TODO - do not hardcode
 		return hook.NewRESTServiceConsultor(30 * time.Second)
 	})
 

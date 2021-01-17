@@ -30,11 +30,21 @@ type HttpGateway struct {
 	ListenAddress       string
 	TimeoutMilliseconds int
 	InternalRESTAuth    HttpGatewayInternalRESTAuth
+	UserMappingResolver HttpGatewayUserMappingResolver
 }
 
 type HttpGatewayInternalRESTAuth struct {
 	Enabled            *bool
 	IPNetworkWhitelist *[]string
+}
+
+type HttpGatewayUserMappingResolver struct {
+	// CacheSize specifies the number of access tokens to cache
+	CacheSize int
+
+	// ExpirationTimeMilliseconds specifies how long resolved user IDs are valid for.
+	// After expiration, we'll re-resolve them.
+	ExpirationTimeMilliseconds int64
 }
 
 type Matrix struct {
@@ -73,12 +83,24 @@ func LoadConfiguration(filePath string, logger *logrus.Logger) (*Configuration, 
 		return nil, fmt.Errorf("Failed to decode JSON: %s", err)
 	}
 
+	setConfigurationDefaults(&configuration)
+
 	err = validateConfiguration(&configuration, logger)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to validate configuration: %s", err)
 	}
 
 	return &configuration, nil
+}
+
+func setConfigurationDefaults(configuration *Configuration) {
+	if configuration.HttpGateway.UserMappingResolver.CacheSize == 0 {
+		configuration.HttpGateway.UserMappingResolver.CacheSize = 10000
+	}
+
+	if configuration.HttpGateway.UserMappingResolver.ExpirationTimeMilliseconds == 0 {
+		configuration.HttpGateway.UserMappingResolver.ExpirationTimeMilliseconds = 5 * 60 * 1000
+	}
 }
 
 func validateConfiguration(configuration *Configuration, logger *logrus.Logger) error {
