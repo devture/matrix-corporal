@@ -1,9 +1,9 @@
-# Version 2.0.0 (unreleased)
+# Version 2.0.0 (2021-01-17)
 
 This is a very large release (hence the version bump) with the following **small breaking changes**:
 
-- `Reconciliation.UserId` configuration key got moved to `Corporal.UserId`
-- we now **require** Synapse `>= v1.24.0`
+- `Reconciliation.UserId` configuration key got moved to `Corporal.UserID`
+- we now **require** Synapse `>= v1.24.0`. To stay on older versions, use v1 of `matrix-corporal`.
 - you're not required to, but may wish to install [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider) and point it at `matrix-corporal`. See why below.
 
 The major changes are described below.

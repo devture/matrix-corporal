@@ -57,7 +57,7 @@ type Matrix struct {
 }
 
 type Corporal struct {
-	UserId string
+	UserID string
 }
 
 type Reconciliation struct {
@@ -104,10 +104,10 @@ func setConfigurationDefaults(configuration *Configuration) {
 }
 
 func validateConfiguration(configuration *Configuration, logger *logrus.Logger) error {
-	if !matrix.IsFullUserIdOfDomain(configuration.Corporal.UserId, configuration.Matrix.HomeserverDomainName) {
+	if !matrix.IsFullUserIdOfDomain(configuration.Corporal.UserID, configuration.Matrix.HomeserverDomainName) {
 		return fmt.Errorf(
-			"Reconciliation user `%s` (specified in Corporal.UserId) is not hosted on the managed homeserver domain (%s)",
-			configuration.Corporal.UserId,
+			"Reconciliation user `%s` (specified in Corporal.UserID) is not hosted on the managed homeserver domain (%s)",
+			configuration.Corporal.UserID,
 			configuration.Matrix.HomeserverDomainName,
 		)
 	}

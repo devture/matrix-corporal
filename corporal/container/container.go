@@ -312,7 +312,7 @@ func BuildContainer(
 			logger,
 			container.Get("connector.synapse").(*connector.SynapseConnector),
 			container.Get("reconciliation.computator").(*computator.ReconciliationStateComputator),
-			configuration.Corporal.UserId,
+			configuration.Corporal.UserID,
 			container.Get("avatar.avatar_reader").(*avatar.AvatarReader),
 		)
 	})
@@ -345,7 +345,7 @@ func BuildContainer(
 		instance := connector.NewSynapseConnector(
 			container.Get("connector.api").(*connector.ApiConnector),
 			configuration.Matrix.RegistrationSharedSecret,
-			configuration.Corporal.UserId,
+			configuration.Corporal.UserID,
 		)
 
 		shutdownHandler.Add(func() {
