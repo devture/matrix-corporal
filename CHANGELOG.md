@@ -1,3 +1,10 @@
+# Version 2.1.0 (2021-01-18)
+
+This release introduces a new global [policy flag](docs/policy.md#flags) (`flags.allowUnauthenticatedPasswordResets`), which you can use to control whether an unauthenticated password-reset flow (via `/_matrix/client/r0/account/password`) is allowed to happen.
+
+Previously, we were always refusing such non-authenticated requests, but certain servers may wish to allow them.
+
+
 # Version 2.0.1 (2021-01-17)
 
 Bugfix release for the "Internal REST Auth" feature used for supporting Interactive Authentication, in coordination with [matrix-synapse-rest-password-provider](https://github.com/ma1uta/matrix-synapse-rest-password-provider).
