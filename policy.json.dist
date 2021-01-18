@@ -4,6 +4,7 @@
 		"allowCustomUserDisplayNames": false,
 		"allowCustomUserAvatars": false,
 		"allowCustomPassthroughUserPasswords": false,
+		"allowUnauthenticatedPasswordResets": false,
 		"forbidRoomCreation": false,
 		"forbidEncryptedRoomCreation": false,
 		"forbidUnencryptedRoomCreation": false

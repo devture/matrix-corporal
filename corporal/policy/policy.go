@@ -63,6 +63,12 @@ type PolicyFlags struct {
 	// against the AuthCredential specified in the user's policy.
 	AllowCustomPassthroughUserPasswords bool `json:"allowCustomPassthroughUserPasswords"`
 
+	// AllowUnauthenticatedPasswordResets tells if unauthenticated users (no access token) can reset their password using the `/account/password` API.
+	// They prove their identity by verifying 3pids before sending the unauthenticated request.
+	// Corporal doesn't reach into the request data and can't figure out who it is, whether it's a policy-managed user, etc.,
+	// so should you enable this option, Corporal can't effectively prevent password-changing for managed users.
+	AllowUnauthenticatedPasswordResets bool `json:"allowUnauthenticatedPasswordResets"`
+
 	// ForbidRoomCreation tells whether users are forbidden from creating rooms.
 	// When there's a dedicated `UserPolicy` for the user, that one takes precedence over this default.
 	ForbidRoomCreation bool `json:"forbidRoomCreation"`
