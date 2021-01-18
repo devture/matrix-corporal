@@ -287,7 +287,10 @@ Example:
 	"id": "request-which-forces-every-sent-message-to-say-hello",
 
 	"eventType": "beforeAnyRequest",
-	"routeMatchesRegex": "^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$",
+
+	"matchRules": [
+		{"type": "route", "regex": "^/_matrix/client/r0/rooms/[^/]+/send/m.room.message/[^/]+$"}
+	],
 
 	"action": "pass.modifiedRequest",
 
@@ -321,7 +324,10 @@ Example:
 	"id": "inject-field-into-matrix-client-versions",
 
 	"eventType": "afterAnyRequest",
-	"routeMatchesRegex": "^/_matrix/client/versions",
+
+	"matchRules": [
+		{"type": "route", "regex": "^/_matrix/client/versions"}
+	],
 
 	"action": "pass.modifiedResponse",
 
@@ -356,8 +362,11 @@ Example:
 	"id": "custom-hook-to-prevent-banning",
 
 	"eventType": "beforeAnyRequest",
-	"routeMatchesRegex": "^/_matrix/client/r0/rooms/([^/]+)/ban",
-	"methodMatchesRegex": "POST",
+
+	"matchRules": [
+		{"type": "method", "regex": "POST"},
+		{"type": "route", "regex": "^/_matrix/client/r0/rooms/([^/]+)/ban"}
+	],
 
 	"action": "reject",
 
@@ -400,8 +409,11 @@ Example:
 	"id": "capture-displayname-change-attempts-and-pretend-to-accept-them",
 
 	"eventType": "beforeAnyRequest",
-	"routeMatchesRegex": "^/_matrix/client/r0/profile/([^/]+)/displayname",
-	"methodMatchesRegex": "PUT",
+
+	"matchRules": [
+		{"type": "method", "regex": "PUT"},
+		{"type": "route", "regex": "^/_matrix/client/r0/profile/([^/]+)/displayname"}
+	],
 
 	"action": "respond",
 
@@ -458,7 +470,11 @@ Example:
 	"id": "custom-hook-to-reject-room-creation-once-in-a-while",
 
 	"eventType": "beforeAuthenticatedPolicyCheckedRequest",
-	"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+
+	"matchRules": [
+		{"type": "method", "regex": "POST"},
+		{"type": "route", "regex": "^/_matrix/client/r0/createRoom"}
+	],
 
 	"action": "consult.RESTServiceURL",
 
