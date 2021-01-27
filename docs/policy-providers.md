@@ -66,16 +66,15 @@ Configuration options:
 - `TimeoutMilliseconds` - how long (in milliseconds) HTTP requests (from `matrix-corporal` to the policy-serving `Uri`) are allowed to take before being timed out. Can be set to `null` to allow for unlimited waits (not recommended).
 
 
-Besides with interval-reloading, you can use this policy provider with API-driven reloading too.
-That is, your external service can hit up `matrix-corporal` and tell it to reload the policy right now.
-To do this, you need to enable Matrix Corporal's [HTTP API](http-api.md) and send a reload-request to [its policy-provider-reloading endpoint](http-api.md#policy-provider-reloading-endpoint).
+Besides this interval-driven reloading, your external service can hit up `matrix-corporal` and tell it to reload the policy right now (outside of the regular schedule).
+To do this, enable Matrix Corporal's [HTTP API](http-api.md) and send a request to matrix-corporal's [Policy-provider reload endpoint](http-api.md#policy-provider-reload-endpoint).
 
 
 ## Push-style policy providers
 
 If you want to keep your policy-generation service private, you can have it push new [policies](policy.md) directly to `matrix-corporal`. This way, data is sent directly to `matrix-corporal` and it doesn't need to be able to reach your external service.
 
-To do this, you need to enable Matrix Corporal's [HTTP API](http-api.md) and send policies to [its policy-receiving endpoint](http-api.md#policy-receiving-endpoint).
+To do this, you need to enable Matrix Corporal's [HTTP API](http-api.md) and send policies to its [Policy submission endpoint](http-api.md#policy-submission-endpoint).
 
 To make `matrix-corporal` store the last-seen policy locally and reload it when the server restarts, use the following `matrix-corporal` [configuration](configuration.md):
 
@@ -85,3 +84,7 @@ To make `matrix-corporal` store the last-seen policy locally and reload it when 
 	"CachePath": "var/last-seen-policy.json"
 }
 ```
+
+Push-style policy providers are helpeful for when your other server (the one providing the policy) is not reachable from matrix-corporal's side.
+
+If your policy-generating server is reachable, it may be better to use a [pull-style policy provider](#http-pull-style-policy-provider) in combination with matrix-corporal's [Policy-provider reload endpoint](http-api.md#policy-provider-reload-endpoint) (to trigger reloading outside of the regular schedule).
