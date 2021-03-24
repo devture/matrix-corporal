@@ -37,7 +37,9 @@ You need to set up the [Shared Secret Authenticator](https://github.com/devture/
 
 You also need to set up the [REST Auth](https://github.com/ma1uta/matrix-synapse-rest-password-provider) password provider module and point it to `matrix-corporal`'s HTTP gateway server's `/_matrix/corporal` endpoint (e.g. `http://matrix-corporal:41080/_matrix/corporal`). This is necessary for making Interactive Authentication (initiated by the homeserver) work when it's `matrix-corporal` that handles [user authentication](user-authentication.md).
 
-You should also make sure that the federation port (8448) of Matrix Synapse only handles federation traffic (not `client` API traffic). By default, it doesn't, so you need to disable that.
+You should also make sure that the federation port (8448) of Matrix Synapse only handles federation traffic (not `client` API traffic). By default, it probably handles both (see Synapse's `listeners` section in `homeserver.yaml`), so you need to adjust the configuration.
+
+To prevent the `matrix-corporal` user (and other users that matrix-corporal may impersonate) from being rate-limited by the homeserver, you may also need to adjust the rate limits (mostly `rc_login`). If it were just the `matrix-corporal` user, something like [Synapse #6286](https://github.com/matrix-org/synapse/issues/6286)) could have been used as well.
 
 
 ## Reverse proxy configuration
