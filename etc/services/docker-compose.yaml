@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   postgres:
-    image: docker.io/postgres:13.1-alpine
+    image: docker.io/postgres:13.2-alpine
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     environment:
      POSTGRES_USER: synapse
@@ -16,7 +16,7 @@ services:
     - /etc/passwd:/etc/passwd:ro
 
   synapse:
-    image: docker.io/matrixdotorg/synapse:v1.25.0
+    image: docker.io/matrixdotorg/synapse:v1.31.0
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     entrypoint: python
     command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
@@ -33,7 +33,7 @@ services:
     - ./matrix-synapse-media-store:/media_store
 
   element-web:
-    image: docker.io/vectorim/element-web:v1.7.16
+    image: docker.io/vectorim/element-web:v1.7.25
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "41465:8080"
@@ -43,7 +43,7 @@ services:
     - ../etc/services/matrix-element-web/config.json:/app/config.json:ro
 
   hook-rest-service:
-    image: docker.io/php:8.0.0-cli-alpine3.12
+    image: docker.io/php:8.0.3-cli-alpine3.12
     ports:
     - "41466:8080"
     volumes:
