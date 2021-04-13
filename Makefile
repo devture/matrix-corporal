@@ -87,7 +87,7 @@ run-in-container-quick: var/go ## Runs matrix-corporal in a container
 	-p 41081:41081 \
 	--mount type=bind,src=`pwd`,dst=/work \
 	--network=matrix-corporal_default \
-	docker.io/golang:1.15.6-alpine3.12 \
+	docker.io/golang:1.16.3-alpine3.13 \
 	go run matrix-corporal.go
 
 var/go:
