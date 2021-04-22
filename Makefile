@@ -67,8 +67,8 @@ run-in-container: build-container-image ## Runs matrix-corporal in a container
 	-it \
 	--rm \
 	--name=matrix-corporal \
-	-p 41080:41080 \
-	-p 41081:41081 \
+	-p 127.0.0.1:41080:41080 \
+	-p 127.0.0.1:41081:41081 \
 	--mount type=bind,src=`pwd`/config.json,dst=/config.json,ro \
 	--mount type=bind,src=`pwd`/policy.json,dst=/policy.json,ro \
 	--network=matrix-corporal_default \
@@ -83,8 +83,8 @@ run-in-container-quick: var/go ## Runs matrix-corporal in a container
 	--workdir=/work \
 	-e GOPATH=/work/var/go/gopath \
 	-e GOCACHE=/work/var/go/build-cache \
-	-p 41080:41080 \
-	-p 41081:41081 \
+	-p 127.0.0.1:41080:41080 \
+	-p 127.0.0.1:41081:41081 \
 	--mount type=bind,src=`pwd`,dst=/work \
 	--network=matrix-corporal_default \
 	docker.io/golang:1.16.3-alpine3.13 \
