@@ -30,7 +30,7 @@ With hooks, you can:
 			"eventType": "beforeAuthenticatedRequest",
 
 			"matchRules": [
-				{"type": "method", "regex": "POST"}
+				{"type": "method", "regex": "POST"},
 				{"type": "route", "regex": "^/_matrix/client/r0/rooms/!some-room-exception:server/ban", "invert": true},
 				{"type": "route", "regex": "^/_matrix/client/r0/rooms/!some-room:server/ban"}
 			],
