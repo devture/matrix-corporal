@@ -50,8 +50,8 @@ func (me *catchAllHandler) actionCatchAll(w http.ResponseWriter, r *http.Request
 		logger.Debugf("HTTP gateway: replying to OPTIONS")
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, Date")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
