@@ -1,3 +1,7 @@
+# Version 2.1.1 (2021-07-10)
+
+Minor changes to match Synapse v1.38.0's CORS behavior. Internal compiler and dependency upgrades.
+
 # Version 2.1.0 (2021-01-18)
 
 This release introduces a new global [policy flag](docs/policy.md#flags) (`flags.allowUnauthenticatedPasswordResets`), which you can use to control whether an unauthenticated password-reset flow (via `/_matrix/client/r0/account/password`) is allowed to happen.
