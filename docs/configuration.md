@@ -5,15 +5,15 @@ The `matrix-corporal` configuration is a JSON document that looks like this:
 ```json
 {
 	"Matrix": {
-		"HomeserverDomainName": "matrix-corporal.127.0.0.1.xip.io",
-		"HomeserverApiEndpoint": "http://matrix-corporal.127.0.0.1.xip.io:41408",
+		"HomeserverDomainName": "matrix-corporal.127.0.0.1.nip.io",
+		"HomeserverApiEndpoint": "http://matrix-corporal.127.0.0.1.nip.io:41408",
 		"AuthSharedSecret": "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF",
 		"RegistrationSharedSecret": "y4aTYam;zxKZ#MnaHRrGDPs4&dS*3VEv_&Ck_;pe1=CrtM8*=7",
 		"TimeoutMilliseconds": 45000
 	},
 
 	"Corporal": {
-		"UserId": "@matrix-corporal:matrix-corporal.127.0.0.1.xip.io"
+		"UserId": "@matrix-corporal:matrix-corporal.127.0.0.1.nip.io"
 	},
 
 	"Reconciliation": {

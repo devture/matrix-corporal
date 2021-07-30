@@ -37,7 +37,7 @@
 
 	"users": [
 		{
-			"id": "@a:matrix-corporal.127.0.0.1.xip.io",
+			"id": "@a:matrix-corporal.127.0.0.1.nip.io",
 			"active": true,
 			"authType": "plain",
 			"authCredential": "test",
@@ -48,7 +48,7 @@
 			"forbidEncryptedRoomCreation": true
 		},
 		{
-			"id": "@b:matrix-corporal.127.0.0.1.xip.io",
+			"id": "@b:matrix-corporal.127.0.0.1.nip.io",
 			"active": true,
 			"authType": "sha1",
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
@@ -59,7 +59,7 @@
 			"forbidRoomCreation": true
 		},
 		{
-			"id": "@c:matrix-corporal.127.0.0.1.xip.io",
+			"id": "@c:matrix-corporal.127.0.0.1.nip.io",
 			"active": true,
 			"authType": "rest",
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",

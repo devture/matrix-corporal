@@ -7,7 +7,7 @@
 # e.g. matrix.org, localhost:8080, etc.
 # This is also the last part of your UserID.
 #
-server_name: "matrix-corporal.127.0.0.1.xip.io"
+server_name: "matrix-corporal.127.0.0.1.nip.io"
 
 # When running as a daemon, the file to store the pid in
 #
@@ -293,11 +293,11 @@ listeners:
 # instance, if using certbot, use `fullchain.pem` as your certificate,
 # not `cert.pem`).
 #
-#tls_certificate_path: "/data/matrix-corporal.127.0.0.1.xip.io.tls.crt"
+#tls_certificate_path: "/data/matrix-corporal.127.0.0.1.nip.io.tls.crt"
 
 # PEM-encoded private key for TLS
 #
-#tls_private_key_path: "/data/matrix-corporal.127.0.0.1.xip.io.tls.key"
+#tls_private_key_path: "/data/matrix-corporal.127.0.0.1.nip.io.tls.key"
 
 # Whether to verify TLS server certificates for outbound federation requests.
 #
@@ -462,7 +462,7 @@ database:
 
 # A yaml python logging config file
 #
-log_config: "/data/matrix-corporal.127.0.0.1.xip.io.log.config"
+log_config: "/data/matrix-corporal.127.0.0.1.nip.io.log.config"
 
 
 ## Ratelimiting ##
@@ -949,7 +949,7 @@ form_secret: "g2:tvyaCbugJrP#1w.+6Eta:xxIfvl*HIF:o#8+qTbU7tPlUhY"
 
 # Path to the signing key to sign messages with
 #
-signing_key_path: "/data/matrix-corporal.127.0.0.1.xip.io.signing.key"
+signing_key_path: "/data/matrix-corporal.127.0.0.1.nip.io.signing.key"
 
 # The keys that the server used to sign messages with but won't use
 # to sign new messages. E.g. it has lost its private key

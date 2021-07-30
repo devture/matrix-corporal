@@ -504,7 +504,7 @@ Example JSON payload that hits your REST service:
 {
 	"meta": {
 		"hookId": "custom-hook-to-reject-room-creation-once-in-a-while",
-		"authenticatedMatrixUserId":"@a:matrix-corporal.127.0.0.1.xip.io"
+		"authenticatedMatrixUserId":"@a:matrix-corporal.127.0.0.1.nip.io"
 	},
 
 	"request": {
@@ -535,7 +535,7 @@ Example JSON payload that hits your REST service:
 			"Date": "Sat, 16 Jan 2021 19:23:08 GMT",
 			"Server": "Synapse/1.25.0"
 		},
-		"payload":"{\"room_id\":\"!zoFOpIhxSyiJDqXCqv:matrix-corporal.127.0.0.1.xip.io\"}"
+		"payload":"{\"room_id\":\"!zoFOpIhxSyiJDqXCqv:matrix-corporal.127.0.0.1.nip.io\"}"
 	}
 }
 ```

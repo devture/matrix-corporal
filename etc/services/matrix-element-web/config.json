@@ -1,5 +1,5 @@
 {
-    "default_hs_url": "http://matrix-corporal.127.0.0.1.xip.io:41080",
+    "default_hs_url": "http://matrix-corporal.127.0.0.1.nip.io:41080",
     "default_is_url": "https://vector.im",
     "integrations_ui_url": "https://scalar.vector.im/",
     "integrations_rest_url": "https://scalar.vector.im/api",
