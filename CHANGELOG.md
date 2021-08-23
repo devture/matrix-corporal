@@ -1,3 +1,7 @@
+# Version 2.1.2 (2021-08-23)
+
+Internal compiler and dependency upgrades.
+
 # Version 2.1.1 (2021-07-10)
 
 Minor changes to match Synapse v1.38.0's CORS behavior. Internal compiler and dependency upgrades.
