@@ -5,7 +5,7 @@ COPY . /build/.
 RUN go get -u -v github.com/ahmetb/govvv
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "$(govvv -flags)" matrix-corporal.go
 
-FROM docker.io/alpine:3.14
+FROM docker.io/alpine:3.14.1
 WORKDIR /
 RUN apk --no-cache add ca-certificates
 COPY --from=0 /build/matrix-corporal .
