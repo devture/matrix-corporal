@@ -9,17 +9,17 @@ var/.env:
 	echo 'CURRENT_USER_UID='`id -u` > var/.env;
 	echo 'CURRENT_USER_GID='`id -g` >> var/.env
 
-services-start: _prepare_services ## Starts all services (Postgres, Synapse, Riot)
-	docker-compose --project-directory var -f etc/services/docker-compose.yaml -p matrix-corporal up -d
+services-start: _prepare_services ## Starts all services (Postgres, Synapse, Element)
+	./bin/docker-compose --project-directory var --env-file var/.env -f etc/services/docker-compose.yaml -p matrix-corporal up -d
 
-services-stop: _prepare_services ## Stops all services (Postgres, Synapse, Riot)
-	docker-compose --project-directory var -f etc/services/docker-compose.yaml -p matrix-corporal down
+services-stop: _prepare_services ## Stops all services (Postgres, Synapse, Element)
+	./bin/docker-compose --project-directory var --env-file var/.env -f etc/services/docker-compose.yaml -p matrix-corporal down
 
 services-tail-logs: _prepare_services ## Tails the logs for all running services
-	docker-compose --project-directory var -f etc/services/docker-compose.yaml -p matrix-corporal logs -f
+	./bin/docker-compose --project-directory var --env-file var/.env -f etc/services/docker-compose.yaml -p matrix-corporal logs -f
 
 create-sample-system-user: _prepare_services ## Creates a system user, used for managing the Matrix server
-	docker-compose --project-directory var -f etc/services/docker-compose.yaml -p matrix-corporal \
+	./bin/docker-compose --project-directory var --env-file var/.env -f etc/services/docker-compose.yaml -p matrix-corporal \
 		exec synapse \
 		register_new_matrix_user \
 		-a \
@@ -29,7 +29,7 @@ create-sample-system-user: _prepare_services ## Creates a system user, used for 
 		http://localhost:8008
 
 run-postgres-cli: ## Starts a Postgres CLI (psql)
-	docker-compose --project-directory var -f etc/services/docker-compose.yaml -p matrix-corporal \
+	./bin/docker-compose --project-directory var --env-file var/.env -f etc/services/docker-compose.yaml -p matrix-corporal \
 		exec postgres \
 		/bin/sh -c 'PGUSER=synapse PGPASSWORD=synapse-password PGDATABASE=homeserver psql -h postgres'
 

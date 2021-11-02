@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# This script transparently forwards to the old docker-compose binary (Python)
+# or to the `docker compose` Docker subcommand (Compose v2, Golang),
+# depending on which one is available.
+
+if [ -f "/usr/bin/docker-compose" ]; then
+        /usr/bin/docker-compose "$@"
+else
+        docker compose --compatibility "$@"
+fi
