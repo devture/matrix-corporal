@@ -165,7 +165,7 @@ curl \
 
 An example implementation of the authentication service is available in [`etc/services/rest-password-auth-service/index.php`](../etc/services/rest-password-auth-service/index.php).
 
-If the HTTP authentication service is down (unreachable or responds with some non-200-OK HTTP status), to prevent downtime, `matrix-corporal` will reuse authentication data from previous authentication sessions. That is, if a given user (say `@user:example.com`) has been found to have authenticated through `matrix-corporal` with a pasword of `some-password` a while ago, that same authentication combination will be allowed until the HTTP authentication service becomes operational again.
+If the HTTP authentication service is down (unreachable or responds with some non-200-OK HTTP status), to prevent downtime, `matrix-corporal` will reuse authentication data from previous authentication sessions. That is, if a given user (say `@user:example.com`) has been found to have authenticated through `matrix-corporal` with a password of `some-password` a while ago, that same authentication combination will be allowed until the HTTP authentication service becomes operational again.
 
 
 ## How authentication works?
