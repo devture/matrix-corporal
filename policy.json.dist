@@ -62,7 +62,7 @@
 			"id": "@c:matrix-corporal.127.0.0.1.nip.io",
 			"active": true,
 			"authType": "rest",
-			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
+			"authCredential": "http://rest-password-auth-service:8080/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "User C",
 			"joinedCommunityIds": [],
 			"joinedRoomIds": [],

@@ -51,3 +51,13 @@ services:
     command: "/usr/local/bin/php -S 0.0.0.0:8080 /work/index.php"
     # PHP doesn't seem to respond to SIGTERM and we'd rather not wait.
     stop_signal: SIGKILL
+
+  rest-password-auth-service:
+    image: docker.io/php:8.0.12-cli-alpine3.14
+    ports:
+    - "41467:8080"
+    volumes:
+    - ../etc/services/rest-password-auth-service:/work:ro
+    command: "/usr/local/bin/php -S 0.0.0.0:8080 /work/index.php"
+    # PHP doesn't seem to respond to SIGTERM and we'd rather not wait.
+    stop_signal: SIGKILL

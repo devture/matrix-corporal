@@ -130,7 +130,7 @@ Here's an example policy:
 
 Each time the user tries to authenticate with the Matrix server, `matrix-corporal` will make a request to the URL specified in `authCredential`.
 
-The HTTP request payload and response are the same as the ones used by the [HTTP JSON REST Authenticator module](https://github.com/kamax-io/matrix-synapse-rest-auth) for Synapse. It's not like you need to use that authenticator module. In fact, if you're using `matrix-corporal`, you don't. It's just that the request/response syntax is the same.
+The HTTP request payload and response are the same as the ones used by the [HTTP JSON REST Authenticator module](https://github.com/ma1uta/matrix-synapse-rest-password-provider) for Synapse. It's not like you need to use that authenticator module. In fact, if you're using `matrix-corporal`, you don't. It's just that the request/response syntax is the same.
 
 The HTTP call will be a `POST` request with the following payload body:
 
@@ -162,6 +162,8 @@ curl \
 -XPOST \
 --data-raw '{"user": {"id": "@user:example.com", "password": "some-password"}}' https://intranet.example.com/_matrix-internal/identity/v1/check_credentials
 ```
+
+An example implementation of the authentication service is available in [`etc/services/rest-password-auth-service/index.php`](../etc/services/rest-password-auth-service/index.php).
 
 If the HTTP authentication service is down (unreachable or responds with some non-200-OK HTTP status), to prevent downtime, `matrix-corporal` will reuse authentication data from previous authentication sessions. That is, if a given user (say `@user:example.com`) has been found to have authenticated through `matrix-corporal` with a pasword of `some-password` a while ago, that same authentication combination will be allowed until the HTTP authentication service becomes operational again.
 
