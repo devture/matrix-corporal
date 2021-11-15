@@ -1,3 +1,12 @@
+# Version 2.1.4 (2021-11-15)
+
+This fixes a regression introduced in 2.1.3, which broke `GET /_matrix/client/r0/pushrules/` requests.
+
+The security fix implemented in 2.1.3 stripped trailing slashes from request URLs. This worked well for most requests,
+but broke certain special requests like the one mentioned above.
+
+2.1.4 basically implements the fix found in 2.1.3 in a more robust way.
+
 # Version 2.1.3 (2021-11-15)
 
 Fixes a security-vulnerability, which allowed attackers to circuimvent policy-checks by sending HTTP requests with a trailing slash.
