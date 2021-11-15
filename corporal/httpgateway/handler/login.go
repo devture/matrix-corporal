@@ -34,8 +34,14 @@ func NewLoginHandler(
 }
 
 func (me *loginHandler) RegisterRoutesWithRouter(router *mux.Router) {
+	// The route below defines an optional trailing slash.
+	// Reasoning explained in `policyCheckedRoutesHandler.RegisterRoutesWithRouter`.
+	//
+	// As of this moment (2021-11-15), Synapse (v1.46) does not like trailing-slash login requests.
+	// Still, we handle both trailing and non-trailing to be on the safe side.
+
 	router.Handle(
-		"/_matrix/client/r0/login",
+		"/_matrix/client/r0/login{optionalTrailingSlash:[/]?}",
 		me.createInterceptorHandler("login", me.loginInterceptor),
 	).Methods("POST")
 }
