@@ -2,7 +2,7 @@ FROM docker.io/golang:1.17.3-alpine3.14
 WORKDIR /build
 RUN apk --no-cache add git
 COPY . /build/.
-RUN go get -u -v github.com/ahmetb/govvv
+RUN go install github.com/ahmetb/govvv@v0.3.0
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "$(govvv -flags)" matrix-corporal.go
 
 FROM docker.io/alpine:3.14.2
