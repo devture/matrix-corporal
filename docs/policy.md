@@ -143,7 +143,7 @@ The following policy flags are supported:
 
 - `allowCustomUserAvatars` (`true` or `false`, defaults to `false`) - controls whether users are allowed to set custom avatar images. By default, users are created with the avatar image specified in the policy. Whether they're able to set a custom one by themselves later on is controlled by this flag.
 
-- `allowCustomPassthroughUserPasswords` (`true` or `false`, defaults to `false`) - controls whether users with `authType=passthrough` can set custom passwsords. By default, such users are created with an initial password as defined in `authCredential`. Whether they can change their homeserver password later or not is controlled by this flag.
+- `allowCustomPassthroughUserPasswords` (`true` or `false`, defaults to `false`) - controls whether users with `authType=passthrough` can set custom passwords. By default, such users are created with an initial password as defined in `authCredential`. Whether they can change their homeserver password later or not is controlled by this flag.
 
 - `allowUnauthenticatedPasswordResets` (`true` or `false`, defaults to `false`) - controls whether unauthenticated users (no access token) can reset their password using the `/_matrix/client/r0/account/password` API. They prove their identity by verifying 3pids before sending the unauthenticated request. `matrix-corporal` doesn't reach into the `auth` request data for this endpoint and can't figure out who it is and whether it's a policy-managed user or not and what policy it should apply. Should you enable this option, all users will be allowed to reset their Synapse-stored password. If all your users are managed by `matrix-corporal` and have passwords in its policy, you'd better not enable this.
 
