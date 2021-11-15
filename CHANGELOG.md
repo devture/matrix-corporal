@@ -1,3 +1,9 @@
+# Version 2.1.3 (2021-11-15)
+
+Fixes a security-vulnerability, which allowed attackers to circuimvent policy-checks by sending HTTP requests with a trailing slash.
+
+The issue has been discovered accidentally, due to element-web (v1.9.4) sending room state-change requests with a trailing slash like this: `/_matrix/client/r0/rooms/{roomId}/state/m.room.encryption/`. Other policy-checked routes are probably affected just the same, but exploiting this vulnerability only happened with more intentional targeting, rather than accidentally.
+
 # Version 2.1.2 (2021-08-23)
 
 Internal compiler and dependency upgrades.
