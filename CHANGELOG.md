@@ -1,3 +1,13 @@
+# Version 2.2.0 (2021-11-19)
+
+Adds support for handling `v3` Client-Server API requests, instead of rejecting them as unknown.
+Synapse v1.48.0 is meant to [add support](https://github.com/matrix-org/synapse/pull/11318) for v3 APIs (as per [Matrix Spec v1.1](https://matrix.org/blog/2021/11/09/matrix-v-1-1-release)).
+
+We patched a what-would-become a security vulnerability related to this in matrix-corporal 2.1.5. Read below.
+
+The matrix-corporal 2.2.0 release continues the v3 work by actually handling v3 requests (the same way r0 requests are handled).
+
+
 # Version 2.1.5 (2021-11-19)
 
 Fixes an issue which would become a security vulnerability starting with Synapse v1.48.0 (to be released in the future).
