@@ -1,6 +1,18 @@
+# Version 2.1.5 (2021-11-19)
+
+Fixes an issue which would become a security vulnerability starting with Synapse v1.48.0 (to be released in the future).
+
+Synapse v1.48.0 is meant to [add support](https://github.com/matrix-org/synapse/pull/11318) for v3 APIs (as per [Matrix Spec v1.1](https://matrix.org/blog/2021/11/09/matrix-v-1-1-release)).
+`/_matrix/client/v3/..` requests could circuimvent matrix-corporal's policy checks, because it only handled the `r0` Client-Server API version (as well as other `r`-prefixed versions).
+
+The `v`-prefixed naming scheme was not supported by matrix-corporal until now, so such requests could go through unchecked.
+Running the upcoming Synapse v1.48.0+ release with matrix-corporal (`<2.1.4`) would become a security issue, so it's important to update to matrix-corporal 2.1.5.
+
+More complete `v3` support will be added to matrix-corporal in a future release (matrix-corporal 2.2.0).
+
 # Version 2.1.4 (2021-11-15)
 
-This fixes a regression introduced in 2.1.3, which broke `GET /_matrix/client/r0/pushrules/` requests.
+Fixes a regression introduced in 2.1.3, which broke `GET /_matrix/client/r0/pushrules/` requests.
 
 The security fix implemented in 2.1.3 stripped trailing slashes from request URLs. This worked well for most requests,
 but broke certain special requests like the one mentioned above.
