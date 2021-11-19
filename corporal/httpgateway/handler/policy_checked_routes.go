@@ -47,15 +47,15 @@ func (me *policyCheckedRoutesHandler) RegisterRoutesWithRouter(router *mux.Route
 	//
 	// It's important to us that policy-checked routes are matched (with and without a slash),
 	// so we can guarantee policy checking happens and that we potentially reject requests that need to be rejected.
-	// Without this, a request for `/_matrix/client/r0/rooms/{roomId}/state/m.room.encryption/` (note the trailing slash)
-	// does not match our `/_matrix/client/r0/rooms/{roomId}/state/m.room.encryption` policy-checked handler,
+	// Without this, a request for `/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/state/m.room.encryption/` (note the trailing slash)
+	// does not match our `/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/state/m.room.encryption` policy-checked handler,
 	// slips through and gets happily served by the homserver.
 	//
 	// Alternative solutions are:
 	// 1. Using the mux Router's `StripSlash(true)` setting (but it does weird 301 redirects for POST/PUT requests, so it's not effective)
 	// 2. Applying a router middleware that modifies the request (stripping trailing slashes) before matching happens.
 	// See: https://natedenlinger.com/dealing-with-trailing-slashes-on-requesturi-in-go-with-mux/
-	// The 2nd solution doesn't work as well, because some APIs (`GET /_matrix/client/r0/pushrules/`) require a trailing slash.
+	// The 2nd solution doesn't work as well, because some APIs (`GET /_matrix/client/{apiVersion:(?:r0|v\d+)}/pushrules/`) require a trailing slash.
 	// Removing the trailing slash on our side and forwarding the request to the homeserver results in `{"errcode":"M_UNRECOGNIZED","error":"Unrecognized request"}`.
 	//
 	// Instead of trying to whitelist routes that require a slash and potentially missing something,
@@ -64,56 +64,58 @@ func (me *policyCheckedRoutesHandler) RegisterRoutesWithRouter(router *mux.Route
 	// Most of the APIs below will not even be served by the homeserver, as a trailing slash is not tolerated at the homeserver level.
 	// Still, it's safer if we policy-check them all and not have to worry future homeserver versions handling things differently.
 
+	// Requests for an `apiVersion` that we don't support (and don't match below) are rejected via a `denyUnsupportedApiVersionsMiddleware` middleware.
+
 	router.HandleFunc(
-		"/_matrix/client/r0/groups/{communityId}/self/leave{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/groups/{communityId}/self/leave{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("community.self.leave", policycheck.CheckCommunitySelfLeave, false),
 	).Methods("PUT")
 
 	router.HandleFunc(
-		"/_matrix/client/r0/rooms/{roomId}/leave{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/leave{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.leave", policycheck.CheckRoomLeave, false),
 	).Methods("POST")
 
 	// Another way to leave a room is kick yourself out of it. It doesn't require any special permissions.
 	router.HandleFunc(
-		"/_matrix/client/r0/rooms/{roomId}/kick{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/kick{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.kick", policycheck.CheckRoomKick, false),
 	).Methods("POST")
 
 	// Another way to leave a room is to PUT a "membership=leave" into your m.room.member state.
 	router.HandleFunc(
-		"/_matrix/client/r0/rooms/{roomId}/state/m.room.member/{memberId}{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/state/m.room.member/{memberId}{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.member.state.set", policycheck.CheckRoomMembershipStateChange, false),
 	).Methods("PUT")
 
 	// Another way to make a room encrypted is by enabling encryption subsequently.
 	router.HandleFunc(
-		"/_matrix/client/r0/rooms/{roomId}/state/m.room.encryption{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/state/m.room.encryption{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.subsequenly_enabling_encryption", policycheck.CheckRoomEncryptionStateChange, false),
 	).Methods("PUT")
 
 	router.HandleFunc(
-		"/_matrix/client/r0/createRoom{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/createRoom{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.create", policycheck.CheckRoomCreate, false),
 	).Methods("POST")
 
 	router.HandleFunc(
-		"/_matrix/client/r0/rooms/{roomId}/send/{eventType}/{txnId}{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/send/{eventType}/{txnId}{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.send_event", policycheck.CheckRoomSendEvent, false),
 	).Methods("PUT")
 
 	router.HandleFunc(
-		"/_matrix/client/r0/profile/{targetUserId}/displayname{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/profile/{targetUserId}/displayname{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("user.set_display_name", policycheck.CheckProfileSetDisplayName, false),
 	).Methods("PUT")
 
 	router.HandleFunc(
-		"/_matrix/client/r0/profile/{targetUserId}/avatar_url{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/profile/{targetUserId}/avatar_url{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("user.set_avatar", policycheck.CheckProfileSetAvatarUrl, false),
 	).Methods("PUT")
 
 	router.HandleFunc(
-		"/_matrix/client/r0/account/deactivate{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/account/deactivate{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("user.deactivate", policycheck.CheckUserDeactivate, false),
 	).Methods("POST")
 
@@ -123,7 +125,7 @@ func (me *policyCheckedRoutesHandler) RegisterRoutesWithRouter(router *mux.Route
 	//
 	// We don't want to break the 2nd (access-token-less) flow in some cases (depending on the policy).
 	router.HandleFunc(
-		"/_matrix/client/r0/account/password{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/account/password{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("user.password", policycheck.CheckUserSetPassword, true),
 	).Methods("POST")
 }

@@ -40,8 +40,10 @@ func (me *loginHandler) RegisterRoutesWithRouter(router *mux.Router) {
 	// As of this moment (2021-11-15), Synapse (v1.46) does not like trailing-slash login requests.
 	// Still, we handle both trailing and non-trailing to be on the safe side.
 
+	// Requests for an `apiVersion` that we don't support (and don't match below) are rejected via a `denyUnsupportedApiVersionsMiddleware` middleware.
+
 	router.Handle(
-		"/_matrix/client/r0/login{optionalTrailingSlash:[/]?}",
+		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/login{optionalTrailingSlash:[/]?}`,
 		me.createInterceptorHandler("login", me.loginInterceptor),
 	).Methods("POST")
 }

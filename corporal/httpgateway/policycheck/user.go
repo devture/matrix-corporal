@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// CheckUserDeactivate is a policy checker for: /_matrix/client/r0/account/deactivate
+// CheckUserDeactivate is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/account/deactivate
 func CheckUserDeactivate(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 
@@ -28,7 +28,7 @@ func CheckUserDeactivate(r *http.Request, ctx context.Context, policy policy.Pol
 	}
 }
 
-// CheckUserSetPassword is a policy checker for: /_matrix/client/r0/account/password
+// CheckUserSetPassword is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/account/password
 func CheckUserSetPassword(r *http.Request, ctx context.Context, policyObj policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userIdOrNil := ctx.Value("userId")
 	userId, ok := userIdOrNil.(string)

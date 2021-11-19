@@ -21,6 +21,7 @@ func init() {
 
 	supportedApiVersions = []string{
 		"r0",
+		"v3",
 	}
 }
 
@@ -33,7 +34,7 @@ func denyUnsupportedApiVersionsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		releaseVersion := matches[1] // Something like `r0`
+		releaseVersion := matches[1] // Something like `r0` or `v3`, etc.
 
 		if util.IsStringInArray(releaseVersion, supportedApiVersions) {
 			// We do support this version and can safely let our gateway

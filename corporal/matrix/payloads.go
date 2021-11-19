@@ -1,6 +1,6 @@
 package matrix
 
-// ApiLoginRequestPayload represents is a request payload for: POST /_matrix/client/r0/login
+// ApiLoginRequestPayload represents is a request payload for: POST /_matrix/client/{apiVersion:(r0|v3)}/login
 type ApiLoginRequestPayload struct {
 	// Type is matrix.LoginTypeToken or something else
 	Type string `json:"type"`
@@ -51,33 +51,33 @@ type ApiAdminEntityUser struct {
 	AvatarURL    string `json:"avatar_url"`
 }
 
-// ApiWhoAmIResponse is a response as found at: GET /_matrix/client/r0/account/whoami
+// ApiWhoAmIResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/account/whoami
 type ApiWhoAmIResponse struct {
 	UserId string `json:"user_id"`
 }
 
-// ApiUserProfileResponse is a response as found at: GET /_matrix/client/r0/profile/{userId}
+// ApiUserProfileResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/profile/{userId}
 type ApiUserProfileResponse struct {
 	AvatarUrl   string `json:"avatar_url"`
 	DisplayName string `json:"displayname"`
 }
 
-// ApiUserProfileDisplayNameRequestPayload is a request payload for: POST /_matrix/client/r0/profile/{userId}/displayname
+// ApiUserProfileDisplayNameRequestPayload is a request payload for: POST /_matrix/client/{apiVersion:(r0|v3)}/profile/{userId}/displayname
 type ApiUserProfileDisplayNameRequestPayload struct {
 	DisplayName string `json:"displayname"`
 }
 
-// ApiJoinedGroupsResponse is a response as found at: GET /_matrix/client/r0/joined_groups
+// ApiJoinedGroupsResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/joined_groups
 type ApiJoinedGroupsResponse struct {
 	GroupIds []string `json:"groups"`
 }
 
-// ApiAdminRegisterNonceResponse is a response as found at: GET /_matrix/client/r0/admin/register
+// ApiAdminRegisterNonceResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/admin/register
 type ApiUserAccountRegisterNonceResponse struct {
 	Nonce string `json:"nonce"`
 }
 
-// ApiUserAccountRegisterRequestPayload is a request payload for: POST /_matrix/client/r0/admin/register
+// ApiUserAccountRegisterRequestPayload is a request payload for: POST /_matrix/client/{apiVersion:(r0|v3)}/admin/register
 type ApiUserAccountRegisterRequestPayload struct {
 	Nonce    string `json:"nonce"`
 	Username string `json:"username"`
@@ -87,19 +87,19 @@ type ApiUserAccountRegisterRequestPayload struct {
 	Admin    bool   `json:"admin"`
 }
 
-// ApiUserAccountRegisterResponse is a response as found at: POST /_matrix/client/r0/admin/register
+// ApiUserAccountRegisterResponse is a response as found at: POST /_matrix/client/{apiVersion:(r0|v3)}/admin/register
 type ApiUserAccountRegisterResponse struct {
 	AccessToken string `json:"access_token"`
 	HomeServer  string `json:"home_server"`
 	UserId      string `json:"user_id"`
 }
 
-// ApiCommunityInviteResponse is a response as found at: POST /_matrix/client/r0/groups/{communityId}/admin/users/invite/<invitee-id>
+// ApiCommunityInviteResponse is a response as found at: POST /_matrix/client/{apiVersion:(r0|v3)}/groups/{communityId}/admin/users/invite/<invitee-id>
 type ApiCommunityInviteResponse struct {
 	State string `json:"state"`
 }
 
-// ApiCommunityInvitedUsersResponse is a response as found at: GET /_matrix/client/r0/groups/{communityId}/invited_users
+// ApiCommunityInvitedUsersResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/groups/{communityId}/invited_users
 type ApiCommunityInvitedUsersResponse struct {
 	Chunk                  []ApiEntityCommunityInvitedUser `json:"chunk"`
 	TotalUserCountEstimate int                             `json:"total_user_count_estimate"`

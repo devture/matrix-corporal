@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// CheckProfileSetDisplayName is a policy checker for: /_matrix/client/r0/profile/{targetUserId}/displayname
+// CheckProfileSetDisplayName is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/profile/{targetUserId}/displayname
 func CheckProfileSetDisplayName(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 	targetUserId := mux.Vars(r)["targetUserId"]
@@ -63,7 +63,7 @@ func CheckProfileSetDisplayName(r *http.Request, ctx context.Context, policy pol
 	}
 }
 
-// CheckProfileSetAvatarUrl is a policy checker for: /_matrix/client/r0/profile/{targetUserId}/avatar_url
+// CheckProfileSetAvatarUrl is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/profile/{targetUserId}/avatar_url
 func CheckProfileSetAvatarUrl(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 	targetUserId := mux.Vars(r)["targetUserId"]

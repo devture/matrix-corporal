@@ -11,7 +11,7 @@ import (
 	"github.com/matrix-org/gomatrix"
 )
 
-// CheckRoomCreate is a policy checker for: /_matrix/client/r0/createRoom
+// CheckRoomCreate is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/createRoom
 func CheckRoomCreate(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 
@@ -64,7 +64,7 @@ func CheckRoomCreate(r *http.Request, ctx context.Context, policy policy.Policy,
 	}
 }
 
-// CheckRoomEncryptionStateChange is a policy checker for: /_matrix/client/r0/rooms/{roomId}/state/m.room.encryption
+// CheckRoomEncryptionStateChange is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/rooms/{roomId}/state/m.room.encryption
 func CheckRoomEncryptionStateChange(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 
@@ -81,7 +81,7 @@ func CheckRoomEncryptionStateChange(r *http.Request, ctx context.Context, policy
 	}
 }
 
-// CheckRoomSendEvent is a policy checker for: /_matrix/client/r0/rooms/{roomId}/send/{eventType}/{txnId}
+// CheckRoomSendEvent is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/rooms/{roomId}/send/{eventType}/{txnId}
 func CheckRoomSendEvent(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 	eventType := mux.Vars(r)["eventType"]
@@ -100,7 +100,7 @@ func CheckRoomSendEvent(r *http.Request, ctx context.Context, policy policy.Poli
 	}
 }
 
-// CheckRoomLeave is a policy checker for: /_matrix/client/r0/rooms/{roomId}/leave
+// CheckRoomLeave is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/rooms/{roomId}/leave
 func CheckRoomLeave(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 	roomId := mux.Vars(r)["roomId"]
@@ -118,7 +118,7 @@ func CheckRoomLeave(r *http.Request, ctx context.Context, policy policy.Policy, 
 	}
 }
 
-// CheckRoomMembershipStateChange is a policy checker for: /_matrix/client/r0/rooms/{roomId}/state/m.room.member/{memberId}
+// CheckRoomMembershipStateChange is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/rooms/{roomId}/state/m.room.member/{memberId}
 func CheckRoomMembershipStateChange(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 	roomId := mux.Vars(r)["roomId"]
@@ -151,7 +151,7 @@ func CheckRoomMembershipStateChange(r *http.Request, ctx context.Context, policy
 	}
 }
 
-// CheckRoomKick is a policy checker for: /_matrix/client/r0/rooms/{roomId}/kick
+// CheckRoomKick is a policy checker for: /_matrix/client/{apiVersion:(r0|v3)}/rooms/{roomId}/kick
 func CheckRoomKick(r *http.Request, ctx context.Context, policy policy.Policy, checker policy.Checker) PolicyCheckResponse {
 	userId := ctx.Value("userId").(string)
 	roomId := mux.Vars(r)["roomId"]
