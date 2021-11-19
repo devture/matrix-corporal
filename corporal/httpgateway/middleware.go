@@ -13,11 +13,14 @@ var regexApiVersionFromUri *regexp.Regexp
 var supportedApiVersions []string
 
 func init() {
-	regexApiVersionFromUri = regexp.MustCompile("/_matrix/client/r([^/]+)")
+	// We'd like to match things like:
+	// - `/_matrix/client/r0`
+	// - `/_matrix/client/v3` (and other v-prefixed versions in the future)
+	// but not match things like: `/_matrix/client/versions`
+	regexApiVersionFromUri = regexp.MustCompile(`/_matrix/client/((?:r|v)\d+)`)
 
 	supportedApiVersions = []string{
-		//We only support r0 for the time being.
-		"0",
+		"r0",
 	}
 }
 
@@ -30,7 +33,7 @@ func denyUnsupportedApiVersionsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		releaseVersion := matches[1] // Something like `0`
+		releaseVersion := matches[1] // Something like `r0`
 
 		if util.IsStringInArray(releaseVersion, supportedApiVersions) {
 			// We do support this version and can safely let our gateway
