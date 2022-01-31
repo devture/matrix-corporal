@@ -1,15 +1,6 @@
-services:
-  - name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:20-dind
-    alias: docker
-    command: ["--tls=false"]
-
 variables:
   # We opt for the fastest compression, because our artifacts are bzip2-compressed already.
   ARTIFACT_COMPRESSION_LEVEL: "fastest"
-
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
 
   CONTAINER_IMAGE_NAME: devture/matrix-corporal
   CONTAINER_IMAGE_NAME_DASHED: devture-matrix-corporal
@@ -17,7 +8,7 @@ variables:
   LATEST_REPOSITORY_BRANCH_NAME: master
   LATEST_CONTAINER_IMAGE_TAG_PREFIX: latest
 
-  CONTAINER_REGISTRY: '' # empty for Docker Hub
+  CONTAINER_REGISTRY: 'docker.io'
   CONTAINER_REGISTRY_USER: ''
   CONTAINER_REGISTRY_PASSWORD: ''
 
@@ -55,23 +46,22 @@ build-container-image-arm32v7:
 # - builds the container image for the given platform (`BUILDX_PLATFORM`, `PLATFORM_IDENTIFIER`)
 # - tags it as `CONTAINER_IMAGE_NAME:CONTAINER_IMAGE_TAG` (`CONTAINER_IMAGE_TAG` is dynamically built below)
 # - exports it as an artifact to a file (`${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2`)
+#
+# This build job is inspired by: https://medium.com/prgcont/using-buildah-in-gitlab-ci-9b529af19e42
 .build-container-image:
   stage: build-container-images
   needs: []
 
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/jdrouet/docker-with-buildx:stable
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.30
 
   before_script:
     # Log in to the Gitlab Dependency Proxy container regsitry, so we can use it below.
-    - docker login ${CI_DEPENDENCY_PROXY_SERVER} -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD}
+    - podman login ${CI_DEPENDENCY_PROXY_SERVER} -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD}
 
     # Log in to Docker Hub regardless of whether we'll be pushing images or not, because rate limits for logged in users are higher.
-    - docker login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PASSWORD} ${CONTAINER_REGISTRY}
+    - podman login ${CONTAINER_REGISTRY} -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PASSWORD}
 
-    - docker run --rm --privileged ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/multiarch/qemu-user-static --reset -p yes
-
-    - docker buildx create --name cibuilder --driver docker-container --use
-    - docker buildx inspect --bootstrap
+    - podman run --rm --network=none --privileged ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/multiarch/qemu-user-static --reset -p yes
 
     - CONTAINER_IMAGE_TAG="${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}"
 
@@ -92,8 +82,8 @@ build-container-image-arm32v7:
 
   script:
     - echo Building for ${BUILDX_PLATFORM} and tagging as ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
-    - docker buildx build --platform="${BUILDX_PLATFORM}" --load -t ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} -f /tmp/Dockerfile .
-    - docker save ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} | bzip2 > ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
+    - buildah bud -f /tmp/Dockerfile --format=docker --platform=${BUILDX_PLATFORM} -t ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} .
+    - podman save ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} | bzip2 > ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
 
   artifacts:
     name: ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
@@ -102,8 +92,8 @@ build-container-image-arm32v7:
 
 # This publishing job:
 # - takes all platform-specific images from artifact files
-# - imports them all into Docker via `docker load`
-# - re-tags them in one or more ways and publishes to Docker Hub
+# - imports them all locally
+# - re-tags them and publishes to Docker Hub
 publish-container-images:
   stage: publish-container-images
   needs:
@@ -115,12 +105,12 @@ publish-container-images:
     - build-container-image-arm64v8
     - build-container-image-arm32v7
 
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:20.10
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.30
 
   before_script:
     - |
       for platform_identifier in amd64 arm64v8 arm32v7; do
-        docker load -i "${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${platform_identifier}-container-image.tbz2"
+        podman load -i "${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${platform_identifier}-container-image.tbz2"
       done
 
     # Repository pushes to `LATEST_REPOSITORY_BRANCH_NAME` will trigger an image push for `image:LATEST` and `image:LATEST-PLATFORM_IDENTIFIER`.
@@ -136,17 +126,20 @@ publish-container-images:
         container_image_published_tag_prefix=${CI_COMMIT_TAG}
       fi
 
+  # We push a manifest in the v2s2 format, instead of the default (oci). Otherwise Docker Hub's UI does not render it correctly.
   script:
     - |
       if [ "$container_image_published_tag_prefix" ]; then
-        docker login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PASSWORD} ${CONTAINER_REGISTRY}
+        podman login ${CONTAINER_REGISTRY} -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PASSWORD}
+
+        set -x
 
         for platform_identifier in amd64 arm64v8 arm32v7; do
-          docker tag ${CONTAINER_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}-${platform_identifier} ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-${platform_identifier}
-          docker push ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-${platform_identifier}
+          podman tag ${CONTAINER_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}-${platform_identifier} ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-${platform_identifier}
+          podman push ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-${platform_identifier}
         done
 
-        docker manifest create ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix} ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-amd64 ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-arm64v8 ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-arm32v7
+        podman manifest create ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix} ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-amd64 ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-arm64v8 ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-arm32v7
 
-        docker manifest push ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}
+        podman manifest push --format=v2s2 ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix} ${CONTAINER_REGISTRY}/${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}
       fi
