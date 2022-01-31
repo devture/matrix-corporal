@@ -16,7 +16,7 @@ services:
     - /etc/passwd:/etc/passwd:ro
 
   synapse:
-    image: docker.io/matrixdotorg/synapse:v1.48.0
+    image: docker.io/matrixdotorg/synapse:v1.51.0
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     entrypoint: python
     command: "-m synapse.app.homeserver -c /data/homeserver.yaml"
@@ -33,7 +33,7 @@ services:
     - ./matrix-synapse-media-store:/media_store
 
   element-web:
-    image: docker.io/vectorim/element-web:v1.9.5
+    image: docker.io/vectorim/element-web:v1.9.9
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "41465:8080"
@@ -43,7 +43,7 @@ services:
     - ../etc/services/matrix-element-web/config.json:/app/config.json:ro
 
   hook-rest-service:
-    image: docker.io/php:8.1.0-cli-alpine3.15
+    image: docker.io/php:8.1.2-cli-alpine3.15
     ports:
     - "41466:8080"
     volumes:
@@ -53,7 +53,7 @@ services:
     stop_signal: SIGKILL
 
   rest-password-auth-service:
-    image: docker.io/php:8.1.0-cli-alpine3.15
+    image: docker.io/php:8.1.2-cli-alpine3.15
     ports:
     - "41467:8080"
     volumes:
