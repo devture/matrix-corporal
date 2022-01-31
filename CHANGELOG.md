@@ -1,3 +1,7 @@
+# Version 2.2.3 (2022-01-31)
+
+Internal compiler and dependency upgrades.
+
 # Version 2.2.2 (2021-12-01)
 
 Internal compiler and dependency upgrades.
