@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.17.3-alpine3.15
+FROM docker.io/golang:1.17.6-alpine3.15
 WORKDIR /build
 RUN apk --no-cache add git
 COPY . /build/.
