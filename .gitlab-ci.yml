@@ -1,0 +1,152 @@
+services:
+  - name: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:20-dind
+    alias: docker
+    command: ["--tls=false"]
+
+variables:
+  # We opt for the fastest compression, because our artifacts are bzip2-compressed already.
+  ARTIFACT_COMPRESSION_LEVEL: "fastest"
+
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+  CONTAINER_IMAGE_NAME: devture/matrix-corporal
+  CONTAINER_IMAGE_NAME_DASHED: devture-matrix-corporal
+
+  LATEST_REPOSITORY_BRANCH_NAME: master
+  LATEST_CONTAINER_IMAGE_TAG_PREFIX: latest
+
+  CONTAINER_REGISTRY: '' # empty for Docker Hub
+  CONTAINER_REGISTRY_USER: ''
+  CONTAINER_REGISTRY_PASSWORD: ''
+
+# This pipeline is only triggered for tags, the default branch and the `LATEST_REPOSITORY_BRANCH_NAME` branch (which likely matches the default).
+# Publishing may follow different rules.
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $LATEST_REPOSITORY_BRANCH_NAME
+
+stages:
+  - build-container-images
+  - publish-container-images
+
+build-container-image-amd64:
+  extends: .build-container-image
+  variables:
+    BUILDX_PLATFORM: linux/amd64
+    PLATFORM_IDENTIFIER: amd64
+
+build-container-image-arm64v8:
+  extends: .build-container-image
+  variables:
+    BUILDX_PLATFORM: linux/arm64/v8
+    PLATFORM_IDENTIFIER: arm64v8
+
+build-container-image-arm32v7:
+  extends: .build-container-image
+  variables:
+    BUILDX_PLATFORM: linux/arm/v7
+    PLATFORM_IDENTIFIER: arm32v7
+
+# This private job spec that we invoke via `build-container-image-*` jobs:
+# - builds the container image for the given platform (`BUILDX_PLATFORM`, `PLATFORM_IDENTIFIER`)
+# - tags it as `CONTAINER_IMAGE_NAME:CONTAINER_IMAGE_TAG` (`CONTAINER_IMAGE_TAG` is dynamically built below)
+# - exports it as an artifact to a file (`${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2`)
+.build-container-image:
+  stage: build-container-images
+  needs: []
+
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/jdrouet/docker-with-buildx:stable
+
+  before_script:
+    # Log in to the Gitlab Dependency Proxy container regsitry, so we can use it below.
+    - docker login ${CI_DEPENDENCY_PROXY_SERVER} -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD}
+
+    # Log in to Docker Hub regardless of whether we'll be pushing images or not, because rate limits for logged in users are higher.
+    - docker login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PASSWORD} ${CONTAINER_REGISTRY}
+
+    - docker run --rm --privileged ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/multiarch/qemu-user-static --reset -p yes
+
+    - docker buildx create --name cibuilder --driver docker-container --use
+    - docker buildx inspect --bootstrap
+
+    - CONTAINER_IMAGE_TAG="${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}"
+
+    # We might potentially modify the Dockerfile we'll build from (below),
+    # so we'd like to modify a copy of it, instead of dirtying up the git worktree.
+    # The reason we care about keeping the git worktree clean is that `govvv` (see the Dockerfile) will say "dirty" if we don't.
+    - cp etc/docker/Dockerfile /tmp/Dockerfile
+
+    # Use the Gitlab Dependency Proxy instead of docker.io to speed things up and avoid rate limits.
+    #
+    # Pulling from Dependency Proxy is only enabled on amd64 for now,
+    # because using it to pull multiarch images (such as the ones we have in the Dockerfile) causes issues.
+    # See: https://gitlab.com/gitlab-org/gitlab/-/issues/349466
+    - |
+      if [ "$PLATFORM_IDENTIFIER" == "amd64" ]; then
+        sed --in-place 's|docker.io|'${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}'|g' /tmp/Dockerfile
+      fi
+
+  script:
+    - echo Building for ${BUILDX_PLATFORM} and tagging as ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
+    - docker buildx build --platform="${BUILDX_PLATFORM}" --load -t ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} -f /tmp/Dockerfile .
+    - docker save ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} | bzip2 > ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
+
+  artifacts:
+    name: ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
+    paths:
+      - ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
+
+# This publishing job:
+# - takes all platform-specific images from artifact files
+# - imports them all into Docker via `docker load`
+# - re-tags them in one or more ways and publishes to Docker Hub
+publish-container-images:
+  stage: publish-container-images
+  needs:
+    - build-container-image-amd64
+    - build-container-image-arm64v8
+    - build-container-image-arm32v7
+  dependencies:
+    - build-container-image-amd64
+    - build-container-image-arm64v8
+    - build-container-image-arm32v7
+
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/docker:20.10
+
+  before_script:
+    - |
+      for platform_identifier in amd64 arm64v8 arm32v7; do
+        docker load -i "${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${platform_identifier}-container-image.tbz2"
+      done
+
+    # Repository pushes to `LATEST_REPOSITORY_BRANCH_NAME` will trigger an image push for `image:LATEST` and `image:LATEST-PLATFORM_IDENTIFIER`.
+    # Repository pushes to a tag (e.g. `VERSION_TAG`) will trigger an image push for `image:VERSION_TAG` and `image:VERSION_TAG-PLATFORM_IDENTIFIER`
+    - |
+      container_image_published_tag_prefix=""
+
+      if [ "$CI_COMMIT_BRANCH" == "$LATEST_REPOSITORY_BRANCH_NAME" ]; then
+        container_image_published_tag_prefix=${LATEST_CONTAINER_IMAGE_TAG_PREFIX}
+      fi
+
+      if [ "$CI_COMMIT_TAG" ]; then
+        container_image_published_tag_prefix=${CI_COMMIT_TAG}
+      fi
+
+  script:
+    - |
+      if [ "$container_image_published_tag_prefix" ]; then
+        docker login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PASSWORD} ${CONTAINER_REGISTRY}
+
+        for platform_identifier in amd64 arm64v8 arm32v7; do
+          docker tag ${CONTAINER_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}-${platform_identifier} ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-${platform_identifier}
+          docker push ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-${platform_identifier}
+        done
+
+        docker manifest create ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix} ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-amd64 ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-arm64v8 ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}-arm32v7
+
+        docker manifest push ${CONTAINER_IMAGE_NAME}:${container_image_published_tag_prefix}
+      fi
