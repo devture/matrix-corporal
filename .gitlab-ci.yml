@@ -27,23 +27,23 @@ stages:
 build-container-image-amd64:
   extends: .build-container-image
   variables:
-    BUILDX_PLATFORM: linux/amd64
+    PLATFORM: linux/amd64
     PLATFORM_IDENTIFIER: amd64
 
 build-container-image-arm64v8:
   extends: .build-container-image
   variables:
-    BUILDX_PLATFORM: linux/arm64/v8
+    PLATFORM: linux/arm64/v8
     PLATFORM_IDENTIFIER: arm64v8
 
 build-container-image-arm32v7:
   extends: .build-container-image
   variables:
-    BUILDX_PLATFORM: linux/arm/v7
+    PLATFORM: linux/arm/v7
     PLATFORM_IDENTIFIER: arm32v7
 
 # This private job spec that we invoke via `build-container-image-*` jobs:
-# - builds the container image for the given platform (`BUILDX_PLATFORM`, `PLATFORM_IDENTIFIER`)
+# - builds the container image for the given platform (`PLATFORM`, `PLATFORM_IDENTIFIER`)
 # - tags it as `CONTAINER_IMAGE_NAME:CONTAINER_IMAGE_TAG` (`CONTAINER_IMAGE_TAG` is dynamically built below)
 # - exports it as an artifact to a file (`${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2`)
 #
@@ -81,8 +81,8 @@ build-container-image-arm32v7:
       fi
 
   script:
-    - echo Building for ${BUILDX_PLATFORM} and tagging as ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
-    - buildah bud -f /tmp/Dockerfile --format=docker --platform=${BUILDX_PLATFORM} -t ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} .
+    - echo Building for ${PLATFORM} and tagging as ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
+    - buildah bud -f /tmp/Dockerfile --format=docker --platform=${PLATFORM} -t ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} .
     - podman save ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG} | bzip2 > ${CONTAINER_IMAGE_NAME_DASHED}-${CI_COMMIT_SHORT_SHA}-${PLATFORM_IDENTIFIER}-container-image.tbz2
 
   artifacts:
