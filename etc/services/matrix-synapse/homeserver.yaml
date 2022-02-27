@@ -1,4 +1,32 @@
-# vim:ft=yaml
+#jinja2: lstrip_blocks: "True"
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+
+
+## Modules ##
+
+# Server admins can expand Synapse's functionality with external modules.
+#
+# See https://matrix-org.github.io/synapse/latest/modules/index.html for more
+# documentation on how to configure or create custom modules for Synapse.
+#
+#modules:
+  #- module: my_super_module.MySuperClass
+  #  config:
+  #    do_thing: true
+  #- module: my_other_super_module.SomeClass
+  #  config: {}
+modules:
+  - module: "shared_secret_authenticator.SharedSecretAuthProvider"
+    config:
+      com_devture_shared_secret_auth_support_enabled: true
+      m_login_password_support_enabled: true
+      shared_secret: "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF"
 
 ## Server ##
 
@@ -1201,9 +1229,6 @@ password_config:
 #        #bind_password:
 #        #filter: "(objectClass=posixAccount)"
 password_providers:
-- module: "shared_secret_authenticator.SharedSecretAuthenticator"
-  config:
-    sharedSecret: "7DXvheK1400ydCHjAymDU50FkeUedQJ2AYpitr3inLpSBIdRJN4kfS5IkGYvUptF"
 - module: "rest_auth_provider.RestAuthProvider"
   config:
     endpoint: "http://matrix-corporal:41080/_matrix/corporal"
