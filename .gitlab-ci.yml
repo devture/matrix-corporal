@@ -52,7 +52,7 @@ build-container-image-arm32v7:
   stage: build-container-images
   needs: []
 
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.30
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.32
 
   before_script:
     # Log in to the Gitlab Dependency Proxy container regsitry, so we can use it below.
