@@ -5,7 +5,6 @@
 				"id": "@a:host",
 				"displayName": "A",
 				"active": false,
-				"joinedCommunityIds": ["+a:host"],
 				"joinedRoomIds": ["!a:host"]
 			}
 		]
@@ -24,7 +23,6 @@
 				"id": "@a:host",
 				"displayName": "User A",
 				"active": false,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			}
 		]

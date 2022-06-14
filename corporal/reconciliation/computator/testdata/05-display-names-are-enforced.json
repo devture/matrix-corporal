@@ -4,20 +4,17 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			},
 			{
 				"id": "@b:host",
 				"displayName": "B",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			},
 			{
 				"id": "@c:host",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			}
 		]
@@ -36,20 +33,17 @@
 				"id": "@a:host",
 				"displayName": "User A",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			},
 			{
 				"id": "@b:host",
 				"displayName": "User B",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			},
 			{
 				"id": "@c:host",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": []
 			}
 		]

@@ -75,23 +75,6 @@ func (me *Checker) CanUserChangeOwnMembershipStateInRoom(policy Policy, userId s
 	return true
 }
 
-func (me *Checker) CanUserLeaveCommunity(policy Policy, userId string, communityId string) bool {
-	return me.CanUserChangeOwnMembershipStateInCommunity(policy, userId, communityId)
-}
-
-func (me *Checker) CanUserChangeOwnMembershipStateInCommunity(policy Policy, userId string, communityId string) bool {
-	userPolicy := policy.GetUserPolicyByUserId(userId)
-	if userPolicy == nil {
-		return true
-	}
-
-	if util.IsStringInArray(communityId, userPolicy.JoinedCommunityIds) {
-		return false
-	}
-
-	return true
-}
-
 func (me *Checker) CanUserUseCustomDisplayName(policy Policy, userId string) bool {
 	return policy.Flags.AllowCustomUserDisplayNames
 }

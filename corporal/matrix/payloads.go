@@ -67,11 +67,6 @@ type ApiUserProfileDisplayNameRequestPayload struct {
 	DisplayName string `json:"displayname"`
 }
 
-// ApiJoinedGroupsResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/joined_groups
-type ApiJoinedGroupsResponse struct {
-	GroupIds []string `json:"groups"`
-}
-
 // ApiAdminRegisterNonceResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/admin/register
 type ApiUserAccountRegisterNonceResponse struct {
 	Nonce string `json:"nonce"`
@@ -92,21 +87,4 @@ type ApiUserAccountRegisterResponse struct {
 	AccessToken string `json:"access_token"`
 	HomeServer  string `json:"home_server"`
 	UserId      string `json:"user_id"`
-}
-
-// ApiCommunityInviteResponse is a response as found at: POST /_matrix/client/{apiVersion:(r0|v3)}/groups/{communityId}/admin/users/invite/<invitee-id>
-type ApiCommunityInviteResponse struct {
-	State string `json:"state"`
-}
-
-// ApiCommunityInvitedUsersResponse is a response as found at: GET /_matrix/client/{apiVersion:(r0|v3)}/groups/{communityId}/invited_users
-type ApiCommunityInvitedUsersResponse struct {
-	Chunk                  []ApiEntityCommunityInvitedUser `json:"chunk"`
-	TotalUserCountEstimate int                             `json:"total_user_count_estimate"`
-}
-
-type ApiEntityCommunityInvitedUser struct {
-	Id          string  `json:"user_id"`
-	DisplayName string  `json:"displayname"`
-	AvatarUrl   *string `json:"avatar_url"`
 }

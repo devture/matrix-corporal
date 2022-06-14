@@ -4,7 +4,6 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": ["!d:host"]
 			}
 		]
@@ -22,14 +21,10 @@
 			"!b:host"
 		],
 
-		"managedCommunityIds": [
-		],
-
 		"users": [
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedCommunityIds": [],
 				"joinedRoomIds": ["!a:host", "!b:host", "!c:host"]
 			}
 		]

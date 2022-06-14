@@ -5,11 +5,6 @@
 			"!b:host"
 		],
 
-		"managedCommunityIds": [
-			"+a:host",
-			"+b:host"
-		],
-
 		"users": [
 		]
 	},
@@ -32,24 +27,6 @@
 			},
 			"allowed": true,
 			"expectationComment": "Non-managed users allowed to leave non-managed rooms"
-		},
-		{
-			"type": "leaveCommunity",
-			"payload": {
-				"userId": "@a:host",
-				"communityId": "+a:host"
-			},
-			"allowed": true,
-			"expectationComment": "Non-managed users allowed to leave managed communities"
-		},
-		{
-			"type": "leaveCommunity",
-			"payload": {
-				"userId": "@a:host",
-				"communityId": "+c:host"
-			},
-			"allowed": true,
-			"expectationComment": "Non-managed users allowed to leave non-managed communities"
 		}
 	]
 }

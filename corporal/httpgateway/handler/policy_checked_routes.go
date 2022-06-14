@@ -67,11 +67,6 @@ func (me *policyCheckedRoutesHandler) RegisterRoutesWithRouter(router *mux.Route
 	// Requests for an `apiVersion` that we don't support (and don't match below) are rejected via a `denyUnsupportedApiVersionsMiddleware` middleware.
 
 	router.HandleFunc(
-		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/groups/{communityId}/self/leave{optionalTrailingSlash:[/]?}`,
-		me.createPolicyCheckingHandler("community.self.leave", policycheck.CheckCommunitySelfLeave, false),
-	).Methods("PUT")
-
-	router.HandleFunc(
 		`/_matrix/client/{apiVersion:(?:r0|v\d+)}/rooms/{roomId}/leave{optionalTrailingSlash:[/]?}`,
 		me.createPolicyCheckingHandler("room.leave", policycheck.CheckRoomLeave, false),
 	).Methods("POST")

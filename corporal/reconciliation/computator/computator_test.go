@@ -88,8 +88,9 @@ func determineReconciliationStateMismatchError(expected, computed *reconciliatio
 	for idx, expectedAction := range expected.Actions {
 		if len(computed.Actions)-1 < idx {
 			return fmt.Errorf(
-				"Expected a %s action at index %d, but got nothing",
+				"Expected a %s action (%s) at index %d, but got nothing",
 				expectedAction.Type,
+				expectedAction,
 				idx,
 			)
 		}

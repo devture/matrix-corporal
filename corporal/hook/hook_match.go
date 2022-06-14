@@ -97,7 +97,7 @@ func (me *HookMatchRule) validate() error {
 
 	err := me.ensureInitialized()
 	if err != nil {
-		return fmt.Errorf("Failed initialization for hook match rule (%s): %s", me, err)
+		return fmt.Errorf("failed initialization for hook match rule (%s): %s", me.Type, err)
 	}
 
 	return nil

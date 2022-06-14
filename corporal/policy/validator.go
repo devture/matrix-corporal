@@ -17,7 +17,7 @@ func NewValidator(homeserverDomainName string) *Validator {
 
 func (me *Validator) Validate(policy *Policy) error {
 	if policy.SchemaVerson != 1 {
-		return fmt.Errorf("Found policy with schema version (%d) that we do not support", policy.SchemaVerson)
+		return fmt.Errorf("found policy with schema version (%d) that we do not support", policy.SchemaVerson)
 	}
 
 	for _, userId := range policy.GetManagedUserIds() {
@@ -34,7 +34,7 @@ func (me *Validator) Validate(policy *Policy) error {
 		err := userPolicy.Validate()
 		if err != nil {
 			return fmt.Errorf(
-				"User policy validation for `%s` (index %d) failed: %s",
+				"user policy validation for `%s` (index %d) failed: %s",
 				userPolicy.Id,
 				idx,
 				err,
@@ -48,7 +48,7 @@ func (me *Validator) Validate(policy *Policy) error {
 		existingIndex, exists := hookIDToIndexMap[hook.ID]
 		if exists {
 			return fmt.Errorf(
-				"Hook at index `%d` (ID = %s) has the same ID as the hook at index %d. Assign unique hook IDs to prevent confusion",
+				"hook at index `%d` (ID = %s) has the same ID as the hook at index %d. Assign unique hook IDs to prevent confusion",
 				idx,
 				hook.ID,
 				existingIndex,
@@ -58,7 +58,7 @@ func (me *Validator) Validate(policy *Policy) error {
 		err := hook.Validate()
 		if err != nil {
 			return fmt.Errorf(
-				"Hook at index `%d` (ID = %s) is invalid: %s",
+				"hook at index `%d` (ID = %s) is invalid: %s",
 				idx,
 				hook.ID,
 				err,

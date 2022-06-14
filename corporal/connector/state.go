@@ -19,6 +19,5 @@ type CurrentUserState struct {
 	DisplayName         string   `json:"displayName"`
 	AvatarMxcUri        string   `json:"avatarMxcUri"`
 	AvatarSourceUriHash string   `json:"avatarSourceUriHash"`
-	JoinedCommunityIds  []string `json:"joinedCommunityIds"`
 	JoinedRoomIds       []string `json:"joinedRoomIds"`
 }

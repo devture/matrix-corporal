@@ -33,7 +33,7 @@ func NewInternalRESTAuthHandler(
 ) *internalRestAuthHandler {
 	whitelistedIPBlocks, err := determineWhitelistedIPBlocks(configuration, logger)
 	if err != nil {
-		logger.Panic(fmt.Errorf("Failed parsing IPNetworkWhitelist: %s", err))
+		logger.Panic(fmt.Errorf("failed parsing IPNetworkWhitelist: %s", err))
 	}
 
 	return &internalRestAuthHandler{
@@ -52,7 +52,7 @@ func (me *internalRestAuthHandler) RegisterRoutesWithRouter(router *mux.Router) 
 }
 
 func (me *internalRestAuthHandler) actionCheckCredentials(w http.ResponseWriter, r *http.Request) {
-	if me.configuration.Enabled == nil || (*me.configuration.Enabled) == false {
+	if me.configuration.Enabled == nil || !(*me.configuration.Enabled) {
 		httphelp.RespondWithMatrixError(w, http.StatusForbidden, matrix.ErrorForbidden, "Internal REST auth is not enabled")
 		return
 	}
@@ -166,7 +166,7 @@ func (me *internalRestAuthHandler) checkIfRequestIsAllowed(r *http.Request, logg
 
 	userIP := net.ParseIP(ip)
 	if userIP == nil {
-		return fmt.Errorf("Failed to parse IP: `%s`", ip)
+		return fmt.Errorf("failed to parse IP: `%s`", ip)
 	}
 
 	logger.Debugf("Checking if IP address `%s` is allowed..", userIP)
@@ -178,14 +178,14 @@ func (me *internalRestAuthHandler) checkIfRequestIsAllowed(r *http.Request, logg
 
 	if !isWhitelistedIPAddress(userIP, *me.whitelistedIPBlocks) {
 		logger.Debugf("Determined that %s is NOT allowed", userIP)
-		return fmt.Errorf("Not allowed from this IP address")
+		return fmt.Errorf("not allowed from this IP address")
 	}
 
 	return nil
 }
 
 func determineWhitelistedIPBlocks(configuration configuration.HttpGatewayInternalRESTAuth, logger *logrus.Logger) (*[]*net.IPNet, error) {
-	if configuration.Enabled == nil || (*configuration.Enabled) == false {
+	if configuration.Enabled == nil || !(*configuration.Enabled) {
 		// Doing extra work (and logging) below is useless when Internal REST Auth is not even enabled.
 		return nil, nil
 	}
@@ -212,7 +212,7 @@ func determineWhitelistedIPBlocks(configuration configuration.HttpGatewayInterna
 	}
 
 	// And finally, a list with at least some entries will get utilized.
-	logger.Info("HTTP Internal REST Auth will only be accessible from: %s", *configuration.IPNetworkWhitelist)
+	logger.Infof("HTTP Internal REST Auth will only be accessible from: %s", *configuration.IPNetworkWhitelist)
 
 	return cidrListToBlockList(*configuration.IPNetworkWhitelist)
 }
@@ -224,7 +224,7 @@ func cidrListToBlockList(cidrList []string) (*[]*net.IPNet, error) {
 	for _, cidr := range cidrList {
 		_, block, err := net.ParseCIDR(cidr)
 		if err != nil {
-			return nil, fmt.Errorf("Failed parsing %q: %v", cidr, err)
+			return nil, fmt.Errorf("failed parsing %q: %v", cidr, err)
 		}
 
 		blocks = append(blocks, block)

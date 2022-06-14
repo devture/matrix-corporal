@@ -118,7 +118,7 @@ func (me *ApiConnector) DetermineCurrentState(
 	adminUserId string,
 ) (*CurrentState, error) {
 	// This cannot be implemented using standard (implementation-agnostic) Client-Server APIs.
-	return nil, fmt.Errorf("Not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (me *ApiConnector) getUserStateByUserId(
@@ -126,11 +126,6 @@ func (me *ApiConnector) getUserStateByUserId(
 	userId string,
 ) (*CurrentUserState, error) {
 	client, err := me.createMatrixClientForUserId(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	joinedCommunityIds, err := me.getJoinedCommunityIdsByUserId(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +171,6 @@ func (me *ApiConnector) getUserStateByUserId(
 		DisplayName:         displayName,
 		AvatarMxcUri:        userProfile.AvatarUrl,
 		AvatarSourceUriHash: avatarSourceUriHash,
-		JoinedCommunityIds:  joinedCommunityIds,
 		JoinedRoomIds:       joinedRoomIds,
 	}, nil
 }
@@ -245,7 +239,7 @@ func (me *ApiConnector) determineAvatarSourceUriHashByUserAndMxcUri(
 
 func (me *ApiConnector) EnsureUserAccountExists(userId, password string) error {
 	// This cannot be implemented using standard (implementation-agnostic) Client-Server APIs.
-	return fmt.Errorf("Not implemented")
+	return fmt.Errorf("not implemented")
 }
 
 func (me *ApiConnector) GetUserAccountDataContentByType(
@@ -277,25 +271,6 @@ func (me *ApiConnector) GetUserAccountDataContentByType(
 	}
 
 	return accountData, nil
-}
-
-func (me *ApiConnector) getJoinedCommunityIdsByUserId(
-	ctx *AccessTokenContext,
-	userId string,
-) ([]string, error) {
-	client, err := me.createMatrixClientForUserId(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp matrix.ApiJoinedGroupsResponse
-
-	err = client.MakeRequest("GET", client.BuildURL("/joined_groups"), nil, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.GroupIds, nil
 }
 
 func (me *ApiConnector) GetUserProfileByUserId(ctx *AccessTokenContext, userId string) (*matrix.ApiUserProfileResponse, error) {
@@ -362,7 +337,7 @@ func (me *ApiConnector) SetUserAvatar(
 	// This request cannot be retried so easily, as we'd need to rewind the Body somehow.
 	resp, err := client.UploadToContentRepo(avatar.Body, avatar.ContentType, avatar.ContentLength)
 	if err != nil {
-		return fmt.Errorf("Failed uploading avatar: %s", err)
+		return fmt.Errorf("failed uploading avatar: %s", err)
 	}
 
 	mxcUri := resp.ContentURI
@@ -371,7 +346,7 @@ func (me *ApiConnector) SetUserAvatar(
 		return client.SetAvatarURL(mxcUri)
 	})
 	if err != nil {
-		return fmt.Errorf("Failed setting avatar: %s", err)
+		return fmt.Errorf("failed setting avatar: %s", err)
 	}
 
 	// To keep track of what this avatar is derived from, store a mapping
@@ -380,7 +355,7 @@ func (me *ApiConnector) SetUserAvatar(
 		return me.storeAvatarSourceUriHashForUserAndMxcUri(ctx, userId, mxcUri, avatar.UriHash)
 	})
 	if err != nil {
-		return fmt.Errorf("Failed storing avatar URI to avatar source uri hash mapping: %s", err)
+		return fmt.Errorf("failed storing avatar URI to avatar source uri hash mapping: %s", err)
 	}
 
 	return nil
@@ -398,150 +373,6 @@ func (me *ApiConnector) SetUserDisplayName(
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "user.set_display_name", func() error {
 		return client.SetDisplayName(displayName)
-	})
-}
-
-func (me *ApiConnector) InviteUserToCommunity(
-	ctx *AccessTokenContext,
-	inviterId string,
-	inviteeId string,
-	communityId string,
-) error {
-	client, err := me.createMatrixClientForUserId(ctx, inviterId)
-	if err != nil {
-		return err
-	}
-
-	var response matrix.ApiCommunityInviteResponse
-
-	err = matrix.ExecuteWithRateLimitRetries(me.logger, "community.invite", func() error {
-		return client.MakeRequest(
-			"PUT",
-			client.BuildURL(fmt.Sprintf(
-				"/groups/%s/admin/users/invite/%s",
-				communityId,
-				inviteeId,
-			)),
-			map[string]interface{}{},
-			&response,
-		)
-	})
-	if err == nil {
-		return nil
-	}
-
-	// At the moment, Synapse would respond with 500 / M_UNKNOWN / Internal Server Error
-	// if we try to invite the same user twice.
-	// Below, we'll attempt to detect and ignore this error.
-	// When [this](https://github.com/matrix-org/synapse/issues/3623) gets fixed, it will be simpler.
-
-	if !matrix.IsErrorWithCode(err, matrix.ErrorUnknown) {
-		return err
-	}
-
-	isInvited, errInv := me.isUserIdInvitedToCommunityByMatrixClient(inviteeId, communityId, client)
-	if errInv != nil {
-		return fmt.Errorf(
-			"Failed inviting %s to %s (%s), but also failed checking invites: %s",
-			inviteeId,
-			communityId,
-			err,
-			errInv,
-		)
-	}
-
-	if !isInvited {
-		return fmt.Errorf(
-			"Failed inviting %s to %s (%s) and determined the user to not be invited",
-			inviteeId,
-			communityId,
-			err,
-		)
-	}
-
-	// Invitation failed, but user turned out to be invited, so it's OK.
-	return nil
-}
-
-func (me *ApiConnector) isUserIdInvitedToCommunityByMatrixClient(
-	userId string,
-	communityId string,
-	client *gomatrix.Client,
-) (bool, error) {
-	var response matrix.ApiCommunityInvitedUsersResponse
-
-	err := client.MakeRequest(
-		"GET",
-		client.BuildURL(fmt.Sprintf(
-			"/groups/%s/invited_users",
-			communityId,
-		)),
-		nil,
-		&response,
-	)
-	if err != nil {
-		return false, err
-	}
-
-	for _, user := range response.Chunk {
-		if user.Id == userId {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func (me *ApiConnector) AcceptCommunityInvite(
-	ctx *AccessTokenContext,
-	userId string,
-	communityId string,
-) error {
-	client, err := me.createMatrixClientForUserId(ctx, userId)
-	if err != nil {
-		return err
-	}
-
-	return matrix.ExecuteWithRateLimitRetries(me.logger, "community.accept_invite", func() error {
-		return client.MakeRequest(
-			"PUT",
-			client.BuildURL(fmt.Sprintf(
-				"/groups/%s/self/accept_invite",
-				communityId,
-			)),
-			map[string]interface{}{},
-			nil,
-		)
-	})
-}
-
-func (me *ApiConnector) KickUserFromCommunity(
-	ctx *AccessTokenContext,
-	kickerUserId string,
-	kickeeUserId string,
-	communityId string,
-) error {
-	if kickerUserId == kickeeUserId {
-		return fmt.Errorf("Kicking self (%s) does not make sense", kickerUserId)
-	}
-
-	client, err := me.createMatrixClientForUserId(ctx, kickerUserId)
-	if err != nil {
-		return err
-	}
-
-	return matrix.ExecuteWithRateLimitRetries(me.logger, "community.kick", func() error {
-		// This request is idempotent.
-		return client.MakeRequest(
-			"PUT",
-			client.BuildURL(fmt.Sprintf(
-				"/groups/%s/admin/users/remove/%s",
-				communityId,
-				kickeeUserId,
-			)),
-			map[string]interface{}{},
-			nil,
-		)
 	})
 }
 
@@ -628,7 +459,7 @@ func (me *ApiConnector) KickUserFromRoom(
 	roomId string,
 ) error {
 	if kickerUserId == kickeeUserId {
-		return fmt.Errorf("Kicking self (%s) does not make sense", kickerUserId)
+		return fmt.Errorf("kicking self (%s) does not make sense", kickerUserId)
 	}
 
 	client, err := me.createMatrixClientForUserId(ctx, kickerUserId)
@@ -682,7 +513,7 @@ func (me *ApiConnector) createMatrixClientForUserIdAndToken(
 ) (*gomatrix.Client, error) {
 	client, err := gomatrix.NewClient(me.homeserverApiEndpoint, userId, accessToken)
 	if err != nil {
-		err = fmt.Errorf("Failed creating client for %s: %s", userId, err)
+		err = fmt.Errorf("failed creating client for %s: %s", userId, err)
 	}
 
 	client.Client = me.httpClient
@@ -706,7 +537,7 @@ func (me *ApiConnector) VerifyAccessToken(userId string, accessToken string) err
 	}
 
 	if resp.UserId != userId {
-		return fmt.Errorf("Failed who-am-I user id verification check")
+		return fmt.Errorf("failed who-am-I user id verification check")
 	}
 
 	return nil

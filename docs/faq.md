@@ -54,25 +54,6 @@ Users can create and join any room which is not listed in the global `managedRoo
 It's just rooms listed in the `managedRoomIds` that `matrix-corporal` cares about and controls tightly (requiring an explicit join rule in the `joinedRoomIds` list for that user).
 
 
-## Can users join other communities?
-
-Users are automatically joined and made to leave communities according to the `joinedCommunityIds` field in their [user policy](policy.md#user-policy-fields) and to the global `managedCommunityIds` [policy field](policy.md#fields).
-
-Users can join any community which is not listed in the global `managedCommunityIds` policy field.
-
-It's just communities listed in the `managedCommunityIds` that `matrix-corporal` cares about and controls tightly (requiring an explicit join rule in the `joinedCommunityIds` list for that user).
-
-
-## Can Matrix Corporal be made to create rooms and communities?
-
-Not for now.
-
-You are responsible for creating all rooms and communities.
-Once created through the reconciliator/system user (see `Reconciliator.UserId` in [configuration](configuration.md)), you define membership information in the [policy](policy.md) and users are made to join/leave accordingly.
-
-Creating rooms and communities declaratively may be implemented in the future.
-
-
 ## Does Matrix Corporal require access to Matrix Synapse's database?
 
 Not for now.

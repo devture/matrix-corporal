@@ -4,12 +4,12 @@
 
 `matrix-corporal` manages your [Matrix](http://matrix.org/) server according to a configuration policy.
 
-The point is to have a single source of truth about users/rooms/communities somewhere
+The point is to have a single source of truth about users/rooms somewhere
 (say in an external system, like your intranet),
 and have something (`matrix-corporal`) continually reconfigure your Matrix server in accordance with it.
 
 In a way, it can be thought of as "Kubernetes for Matrix", in that it takes such a JSON policy as an input,
-and performs **reconciliation** with the Matrix server -- creating, activating, disabling user accounts, making them (automatically) join/leave rooms and communities, etc.
+and performs **reconciliation** with the Matrix server -- creating, activating, disabling user accounts, making them (automatically) join/leave rooms, etc.
 
 Besides reconciliation, `matrix-policy` also does **firewalling** (acts as a gateway).
 You can put `matrix-corporal` in front of your [Matrix Synapse](https://github.com/matrix-org/synapse) server,
@@ -32,7 +32,7 @@ You give `matrix-corporal` a [policy](docs/policy.md) document by some means (so
 
 - changing user profile data (names and avatars), to keep them in sync with the policy
 
-- changing user room/community memberships, to keep them in sync with the policy
+- changing user room memberships, to keep them in sync with the policy
 
 - allowing or denying Matrix API requests, to prevent the server state deviating from the policy
 
@@ -53,11 +53,6 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 	"managedRoomIds": [
 		"!roomA:example.com",
 		"!roomB:example.com",
-	],
-
-	"managedCommunityIds": [
-		"+a:example.com",
-		"+b:example.com"
 	],
 
 	"hooks": [
@@ -92,7 +87,6 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 			"authCredential": "PaSSw0rD",
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
-			"joinedCommunityIds": ["+a:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
 		},
 		{
@@ -102,7 +96,6 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 			"displayName": "Just Peter",
 			"avatarUri": "",
-			"joinedCommunityIds": ["+b:example.com"],
 			"joinedRoomIds": ["!roomB:example.com"]
 		},
 		{
@@ -112,7 +105,6 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "Georgey",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-			"joinedCommunityIds": ["+a:example.com", "+b:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
 		}
 	]
@@ -121,13 +113,11 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 
 The JSON [policy](docs/policy.md) above, describes the state that your server should have:
 
-- managed communities - a list of communities that you want `matrix-corporal` to manage for you. Any other communities are untouched.
-
 - managed rooms - a list of rooms that you want `matrix-corporal` to manage for you. Any other rooms are untouched.
 
 - managed users (including their profile details and authentication data). Any other users are untouched.
 
-- membership information (which users need to be in which communities/rooms). Any other memberships are untouched.
+- membership information (which users need to be in which rooms). Any other memberships are untouched.
 
 
 As a result, `matrix-corporal` will perform a sequence of actions, ensuring that:
@@ -138,7 +128,7 @@ As a result, `matrix-corporal` will perform a sequence of actions, ensuring that
 
 - inactive users will be disabled and prevented from logging in
 
-- users are automatically joined to or kicked out of the specified communities and rooms
+- users are automatically joined to or kicked out of the specified rooms
 
 Any time you change the [policy](docs/policy.md) in the future, `matrix-corporal` acts upon the Matrix server,
 so that its state is made to match the policy.

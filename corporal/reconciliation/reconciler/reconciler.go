@@ -50,9 +50,6 @@ func New(
 		reconciliation.ActionUserActivate:       me.reconcileForActionUserActivate,
 		reconciliation.ActionUserDeactivate:     me.reconcileForActionUserDeactivate,
 
-		reconciliation.ActionCommunityJoin:  me.reconcileForActionCommunityJoin,
-		reconciliation.ActionCommunityLeave: me.reconcileForActionCommunityLeave,
-
 		reconciliation.ActionRoomJoin:  me.reconcileForActionRoomJoin,
 		reconciliation.ActionRoomLeave: me.reconcileForActionRoomLeave,
 	}
@@ -222,39 +219,6 @@ func (me *Reconciler) reconcileForActionUserDeactivate(ctx *connector.AccessToke
 	}
 
 	return nil
-}
-
-func (me *Reconciler) reconcileForActionCommunityJoin(ctx *connector.AccessTokenContext, action *reconciliation.StateAction) error {
-	userId, err := action.GetStringPayloadDataByKey("userId")
-	if err != nil {
-		return err
-	}
-
-	communityId, err := action.GetStringPayloadDataByKey("communityId")
-	if err != nil {
-		return err
-	}
-
-	err = me.connector.InviteUserToCommunity(ctx, me.reconciliatorUserId, userId, communityId)
-	if err != nil {
-		return err
-	}
-
-	return me.connector.AcceptCommunityInvite(ctx, userId, communityId)
-}
-
-func (me *Reconciler) reconcileForActionCommunityLeave(ctx *connector.AccessTokenContext, action *reconciliation.StateAction) error {
-	userId, err := action.GetStringPayloadDataByKey("userId")
-	if err != nil {
-		return err
-	}
-
-	communityId, err := action.GetStringPayloadDataByKey("communityId")
-	if err != nil {
-		return err
-	}
-
-	return me.connector.KickUserFromCommunity(ctx, me.reconciliatorUserId, userId, communityId)
 }
 
 func (me *Reconciler) reconcileForActionRoomJoin(ctx *connector.AccessTokenContext, action *reconciliation.StateAction) error {

@@ -20,10 +20,6 @@ type MatrixConnector interface {
 	SetUserDisplayName(ctx *AccessTokenContext, userId string, displayName string) error
 	SetUserAvatar(ctx *AccessTokenContext, userId string, avatar *avatar.Avatar) error
 
-	InviteUserToCommunity(ctx *AccessTokenContext, inviterId string, inviteeId string, communityId string) error
-	AcceptCommunityInvite(ctx *AccessTokenContext, userId string, communityId string) error
-	KickUserFromCommunity(ctx *AccessTokenContext, kickerUserId string, kickeeUserId string, communityId string) error
-
 	InviteUserToRoom(ctx *AccessTokenContext, inviterId string, inviteeId string, roomId string) error
 	JoinRoom(ctx *AccessTokenContext, userId string, roomId string) error
 	LeaveRoom(ctx *AccessTokenContext, userId string, roomId string) error

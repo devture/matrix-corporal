@@ -90,7 +90,7 @@ func (me *SynapseConnector) ObtainNewAccessTokenForUserId(userId, deviceId strin
 	corporalUserAccessToken, err := me.getAccessTokenForCorporalUser()
 	if err != nil {
 		return "", fmt.Errorf(
-			"Could not obtain access token for `%s`, necessary for obtaining a token for `%s`: %s",
+			"could not obtain access token for `%s`, necessary for obtaining a token for `%s`: %s",
 			me.corporalUserID,
 			userId,
 			err,

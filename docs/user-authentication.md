@@ -29,7 +29,6 @@ Here's an example policy:
 			"authCredential": "PaSSw0rD",
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
-			"joinedCommunityIds": ["+a:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
 		}
 	]
@@ -65,7 +64,6 @@ Here's an example policy:
 			"authCredential": "some-initial-password",
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
-			"joinedCommunityIds": ["+a:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
 		}
 	]
@@ -91,7 +89,6 @@ Here's an example policy:
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 			"displayName": "Just Peter",
 			"avatarUri": "",
-			"joinedCommunityIds": ["+b:example.com"],
 			"joinedRoomIds": ["!roomB:example.com"]
 		}
 	]
@@ -121,7 +118,6 @@ Here's an example policy:
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "Georgey",
 			"avatarUri": "",
-			"joinedCommunityIds": ["+a:example.com", "+b:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
 		}
 	]

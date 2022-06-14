@@ -95,18 +95,5 @@ func checkAssertment(policy Policy, checker *Checker, assertment PermissionAsser
 		return fmt.Errorf("Expected %t status for user %s being able to leave room %s", assertment.Allowed, userId, roomId)
 	}
 
-	if assertment.Type == "leaveCommunity" {
-		userId := assertment.Payload["userId"].(string)
-		communityId := assertment.Payload["communityId"].(string)
-
-		allowed := checker.CanUserLeaveCommunity(policy, userId, communityId)
-
-		if allowed == assertment.Allowed {
-			return nil
-		}
-
-		return fmt.Errorf("Expected %t status for user %s being able to leave community %s", assertment.Allowed, userId, communityId)
-	}
-
 	return fmt.Errorf("Unknown policy assertment type: %s", assertment.Type)
 }

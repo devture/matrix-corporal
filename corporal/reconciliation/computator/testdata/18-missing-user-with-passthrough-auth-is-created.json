@@ -16,17 +16,12 @@
 			"!a:host"
 		],
 
-		"managedCommunityIds": [
-			"+a:host"
-		],
-
 		"users": [
 			{
 				"id": "@a:host",
 				"authType": "passthrough",
 				"authCredential": "some-initial-password",
 				"active": true,
-				"joinedCommunityIds": ["+a:host"],
 				"joinedRoomIds": ["!a:host"]
 			}
 		]
@@ -39,14 +34,6 @@
 				"payload": {
 					"userId": "@a:host",
 					"password": "some-initial-password"
-				}
-			},
-
-			{
-				"type": "community.join",
-				"payload": {
-					"userId": "@a:host",
-					"communityId": "+a:host"
 				}
 			},
 

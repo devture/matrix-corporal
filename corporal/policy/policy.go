@@ -22,8 +22,6 @@ type Policy struct {
 
 	Hooks []*hook.Hook `json:"hooks"`
 
-	ManagedCommunityIds []string `json:"managedCommunityIds"`
-
 	ManagedRoomIds []string `json:"managedRoomIds"`
 
 	User []*UserPolicy `json:"users"`
@@ -106,8 +104,7 @@ type UserPolicy struct {
 	DisplayName string `json:"displayName"`
 	AvatarUri   string `json:"avatarUri"`
 
-	JoinedCommunityIds []string `json:"joinedCommunityIds"`
-	JoinedRoomIds      []string `json:"joinedRoomIds"`
+	JoinedRoomIds []string `json:"joinedRoomIds"`
 
 	// ForbidRoomCreation tells whether this user is forbidden from creating rooms.
 	ForbidRoomCreation *bool `json:"forbidRoomCreation"`
@@ -121,7 +118,7 @@ type UserPolicy struct {
 
 func (me UserPolicy) Validate() error {
 	if me.Id == "" {
-		return fmt.Errorf("User has no id")
+		return fmt.Errorf("user has no id")
 	}
 
 	if !userauth.IsKnownUserAuthType(me.AuthType) {

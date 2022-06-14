@@ -64,10 +64,6 @@ func (me *ReconciliationStateComputator) computeUserChanges(
 	if !userPolicy.Active {
 		// Accounts that have never been active or are being deactivated now,
 		// should not go through the other changes that appear below.
-		//
-		// We do want them to go through community/group membership changes,
-		// but `computeUserActivationChanges()` takes care of that within it,
-		// because we want leaving to happen before deactivation, because that's cleaner.
 		return actions
 	}
 
@@ -78,7 +74,7 @@ func (me *ReconciliationStateComputator) computeUserChanges(
 
 	actions = append(
 		actions,
-		me.computeUserMembershipChanges(userId, currentUserState, userPolicy, policy.ManagedCommunityIds, policy.ManagedRoomIds)...,
+		me.computeUserMembershipChanges(userId, currentUserState, userPolicy, policy.ManagedRoomIds)...,
 	)
 
 	return actions
@@ -108,11 +104,11 @@ func (me *ReconciliationStateComputator) computeUserActivationChanges(
 
 	if !userPolicy.Active {
 		// If the user is supposed to be inactive,
-		// we want to ensure that it has left all rooms and communities first,
+		// we want to ensure that it has left all rooms first,
 		// before possibly proceeding with a deactivation process.
 		actions = append(
 			actions,
-			me.computeUserMembershipChanges(userId, currentUserState, userPolicy, policy.ManagedCommunityIds, policy.ManagedRoomIds)...,
+			me.computeUserMembershipChanges(userId, currentUserState, userPolicy, policy.ManagedRoomIds)...,
 		)
 	}
 
@@ -254,75 +250,14 @@ func (me *ReconciliationStateComputator) computeUserMembershipChanges(
 	userId string,
 	currentUserState *connector.CurrentUserState,
 	userPolicy *policy.UserPolicy,
-	managedCommunityIds []string,
 	managedRoomIds []string,
 ) []*reconciliation.StateAction {
 	var actions []*reconciliation.StateAction
 
 	actions = append(
 		actions,
-		me.computeUserCommunityChanges(userId, currentUserState, userPolicy, managedCommunityIds)...,
-	)
-
-	actions = append(
-		actions,
 		me.computeUserRoomChanges(userId, currentUserState, userPolicy, managedRoomIds)...,
 	)
-
-	return actions
-}
-
-func (me *ReconciliationStateComputator) computeUserCommunityChanges(
-	userId string,
-	currentUserState *connector.CurrentUserState,
-	userPolicy *policy.UserPolicy,
-	managedCommunityIds []string,
-) []*reconciliation.StateAction {
-	var actions []*reconciliation.StateAction
-
-	for _, communityId := range userPolicy.JoinedCommunityIds {
-		if !util.IsStringInArray(communityId, managedCommunityIds) {
-			me.logger.Warnf(
-				"User %s is supposed to be joined to the %s community, but that community is not managed",
-				userPolicy.Id,
-				communityId,
-			)
-			continue
-		}
-
-		if currentUserState != nil && util.IsStringInArray(communityId, currentUserState.JoinedCommunityIds) {
-			continue
-		}
-
-		actions = append(actions, &reconciliation.StateAction{
-			Type: reconciliation.ActionCommunityJoin,
-			Payload: map[string]interface{}{
-				"userId":      userId,
-				"communityId": communityId,
-			},
-		})
-	}
-
-	if currentUserState != nil {
-		for _, communityId := range currentUserState.JoinedCommunityIds {
-			if !util.IsStringInArray(communityId, managedCommunityIds) {
-				//We rightfully ignore rooms we don't care about.
-				continue
-			}
-
-			if util.IsStringInArray(communityId, userPolicy.JoinedCommunityIds) {
-				continue
-			}
-
-			actions = append(actions, &reconciliation.StateAction{
-				Type: reconciliation.ActionCommunityLeave,
-				Payload: map[string]interface{}{
-					"userId":      userId,
-					"communityId": communityId,
-				},
-			})
-		}
-	}
 
 	return actions
 }

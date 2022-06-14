@@ -24,11 +24,6 @@ The policy is a JSON document that looks like this:
 		"forbidUnencryptedRoomCreation": false
 	},
 
-	"managedCommunityIds": [
-		"+a:example.com",
-		"+b:example.com"
-	],
-
 	"managedRoomIds": [
 		"!roomA:example.com",
 		"!roomB:example.com",
@@ -83,7 +78,6 @@ The policy is a JSON document that looks like this:
 			"authCredential": "PaSSw0rD",
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
-			"joinedCommunityIds": ["+a:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
 			"forbidRoomCreation": true
 		},
@@ -94,7 +88,6 @@ The policy is a JSON document that looks like this:
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 			"displayName": "Just Peter",
 			"avatarUri": "",
-			"joinedCommunityIds": ["+b:example.com"],
 			"joinedRoomIds": ["!roomB:example.com"],
 			"forbidRoomCreation": false,
 			"forbidEncryptedRoomCreation": true
@@ -106,7 +99,6 @@ The policy is a JSON document that looks like this:
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "Georgey",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-			"joinedCommunityIds": ["+a:example.com", "+b:example.com"],
 			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
 			"forbidRoomCreation": false,
 			"forbidUnencryptedRoomCreation": true
@@ -125,8 +117,6 @@ A policy contains the following fields:
 - `identificationStamp` - an optional `string` value provided by you to help you identify this policy. For now, it's only used for debugging purposes, but in the future we might suppress reconciliation if we fetch a policy which has the same stamp as the one last used for reconciliation. So, if you provide this value at all, make sure it gets a new value, at least whenever the policy changes.
 
 - `flags` - a list of flags telling `matrix-corporal` what other global restrictions to apply. See [flags](#flags) below.
-
-- `managedCommunityIds` - a list of community identifiers (like `+community:server`) that `matrix-corporal` is allowed to manage for `users`. Any community that is not listed here will be left untouched.
 
 - `managedRoomIds` - a list of room identifiers (like `!room:server`) that `matrix-corporal` is allowed to manage for `users`. Any room that is not listed here will be left untouched.
 
@@ -169,7 +159,6 @@ A user policy object looks like this:
 	"authCredential": "PaSSw0rD",
 	"displayName": "John",
 	"avatarUri": "https://example.com/john.jpg",
-	"joinedCommunityIds": ["+a:example.com"],
 	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
 	"forbidRoomCreation": false,
 	"forbidEncryptedRoomCreation": false,
@@ -191,8 +180,6 @@ A user-policy contains the following fields:
 - `displayName` - the name of this user. New accounts will always be created with the name specified in the policy. The display name on the Matrix server is kept in sync with the policy (and any edits by the user are prevented), unless the `allowCustomUserDisplayNames` flag is set to `true` (see [flags](#flags) above).
 
 - `avatarUri` - the avatar image of this user. It can be a public remote URL or a [data URI](https://en.wikipedia.org/wiki/Data_URI_scheme) (e.g. `data:image/png;base64,DATA_GOES_HERE`). New accounts will always be created with the avatar specified in the policy. The avatar on the Matrix server is kept in sync with the policy (and any edits by the user are prevented), unless the `allowCustomUserAvatars` flag is set to `true` (see [flags](#flags) above). For performance reasons, avatar URLs are not re-fetched unless the URL changes, so make sure avatar URLs change when the underlying data changes.
-
-- `joinedCommunityIds` - a list of community identifiers (e.g. `+community:server`) that the user is part of. The user will be auto-joined to any communities listed here, unless already joined. If the user happens to be joined to a community which is not listed here, but appears in the top-level `managedCommunityIds` field, the user will be kicked out of that community. The user can be part of any number of other communities which are not listed in `joinedCommunityIds`, as long as they are also not listed in `managedCommunityIds`.
 
 - `joinedRoomIds` - a list of room identifiers (e.g. `!room:server`) that the user is part of. The user will be auto-joined to any rooms listed here, unless already joined. If the user happens to be joined to a room which is not listed here, but appears in the top-level `managedRoomIds` field, the user will be kicked out of that room. The user can be part of any number of other room which are not listed in `joinedRoomIds`, as long as they are also not listed in `managedRoomIds`.
 

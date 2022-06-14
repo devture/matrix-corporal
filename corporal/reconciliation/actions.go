@@ -9,9 +9,6 @@ const (
 	ActionUserActivate       = "user.activate"
 	ActionUserDeactivate     = "user.deactivate"
 
-	ActionCommunityJoin  = "community.join"
-	ActionCommunityLeave = "community.leave"
-
 	ActionRoomJoin  = "room.join"
 	ActionRoomLeave = "room.leave"
 )
