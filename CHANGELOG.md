@@ -1,3 +1,12 @@
+# Version 2.3.0 (2022-06-14)
+
+Drops communities/groups support, to make it compatible with [Synapse v1.61](https://github.com/matrix-org/synapse/releases/tag/v1.61.0), which removed support for communities.
+
+You can leave your existing community definitions in the [policy](docs/policy.md) file, but this and future versions of matrix-corporal will ignore them.
+
+This version of matrix-corporal is usable with both Synapse v1.61.0 and older versions.
+
+
 # Version 2.2.3 (2022-01-31)
 
 Internal compiler and dependency upgrades.
