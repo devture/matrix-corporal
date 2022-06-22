@@ -1,3 +1,5 @@
+GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.18.3-alpine3.16"
+
 help: ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
@@ -87,7 +89,7 @@ run-in-container-quick: var/go ## Runs matrix-corporal in a container
 	-p 127.0.0.1:41081:41081 \
 	--mount type=bind,src=`pwd`,dst=/work \
 	--network=matrix-corporal_default \
-	docker.io/golang:1.17.6-alpine3.15 \
+	$(GOLANG_CONTAINER_IMAGE) \
 	go run matrix-corporal.go
 
 var/go:
