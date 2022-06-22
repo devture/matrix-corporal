@@ -33,8 +33,10 @@ The policy is a JSON document that looks like this:
 		{
 			"id": "custom-hook-to-prevent-banning",
 			"eventType": "beforeAnyRequest",
-			"routeMatchesRegex": "^/_matrix/client/r0/rooms/([^/]+)/ban",
-			"methodMatchesRegex": "POST",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/rooms/([^/]+)/ban"},
+				{"type": "method", "regex": "POST"}
+			],
 			"action": "reject",
 			"responseStatusCode": 403,
 			"rejectionErrorCode": "M_FORBIDDEN",
@@ -44,7 +46,9 @@ The policy is a JSON document that looks like this:
 		{
 			"id": "custom-hook-to-reject-room-creation-once-in-a-while",
 			"eventType": "beforeAuthenticatedRequest",
-			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/createRoom"}
+			],
 			"action": "consult.RESTServiceURL",
 			"RESTServiceURL": "http://hook-rest-service:8080/reject/with-33-percent-chance",
 			"RESTServiceRequestHeaders": {
@@ -61,7 +65,9 @@ The policy is a JSON document that looks like this:
 		{
 			"id": "custom-hook-to-capture-room-creation-details",
 			"eventType": "afterAuthenticatedRequest",
-			"routeMatchesRegex": "^/_matrix/client/r0/createRoom",
+			"matchRules": [
+				{"type": "route", "regex": "^/_matrix/client/r0/createRoom"}
+			],
 			"action": "consult.RESTServiceURL",
 			"RESTServiceURL": "http://hook-rest-service:8080/dump",
 			"RESTServiceRequestHeaders": {
