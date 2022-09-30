@@ -1,4 +1,5 @@
 GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.18.3-alpine3.16"
+GOLANGCI_LINT_CONTAINER_IMAGE := "docker.io/golangci/golangci-lint:v1.49.0"
 
 help: ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
@@ -91,6 +92,17 @@ run-in-container-quick: var/go ## Runs matrix-corporal in a container
 	--network=matrix-corporal_default \
 	$(GOLANG_CONTAINER_IMAGE) \
 	go run matrix-corporal.go
+
+go-lint: var/go ## Runs golangci-lint
+	docker run \
+	--rm \
+	-e GOPATH=/work/var/go/gopath \
+	-e GOCACHE=/work/var/go/build-cache \
+	-v $$(pwd):/work \
+	-w /work \
+	$(GOLANGCI_LINT_CONTAINER_IMAGE) \
+	golangci-lint \
+	run ./... -v
 
 var/go:
 	mkdir -p var/go/gopath 2>/dev/null
