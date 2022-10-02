@@ -93,6 +93,10 @@ run-in-container-quick: var/go ## Runs matrix-corporal in a container
 	$(GOLANG_CONTAINER_IMAGE) \
 	go run matrix-corporal.go
 
+go-update-dependencies: var/go ## Updates all Go dependencies
+	go get -u ./corporal/...
+	go mod tidy -v
+
 go-lint: var/go ## Runs golangci-lint
 	docker run \
 	--rm \
