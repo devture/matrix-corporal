@@ -21,8 +21,23 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $LATEST_REPOSITORY_BRANCH_NAME
 
 stages:
+  - lint
   - build-container-images
   - publish-container-images
+
+lint:
+  stage: lint
+
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.37
+
+  before_script:
+    - sed --in-place 's|docker run|podman run|g' Makefile
+
+  script:
+    - make go-lint
+
+  after_script:
+    - git restore Makefile
 
 build-container-image-amd64:
   extends: .build-container-image
@@ -50,9 +65,9 @@ build-container-image-arm32v7:
 # This build job is inspired by: https://medium.com/prgcont/using-buildah-in-gitlab-ci-9b529af19e42
 .build-container-image:
   stage: build-container-images
-  needs: []
+  needs: [lint]
 
-  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.32
+  image: ${CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX}/tomkukral/buildah:0.37
 
   before_script:
     # Log in to the Gitlab Dependency Proxy container regsitry, so we can use it below.
