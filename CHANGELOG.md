@@ -1,3 +1,8 @@
+# Version 2.4.0 (2022-10-02)
+
+Minor code refactoring. Internal compiler and dependency upgrades.
+
+
 # Version 2.3.0 (2022-06-14)
 
 Drops communities/groups support, to make it compatible with [Synapse v1.61](https://github.com/matrix-org/synapse/releases/tag/v1.61.0), which removed support for communities.
