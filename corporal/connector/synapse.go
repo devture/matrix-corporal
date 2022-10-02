@@ -253,7 +253,10 @@ func (me *SynapseConnector) EnsureUserAccountExists(userId, password string) err
 	// The register API creates an access token automatically.
 	// We don't need it and we'd rather be nice and get rid of it, to keep things clean.
 	clientForUser, _ := gomatrix.NewClient(me.homeserverApiEndpoint, userIdLocalPart, registerResponse.AccessToken)
-	clientForUser.Logout()
+	_, err = clientForUser.Logout()
+	if err != nil {
+		me.logger.Warnf("failed logging out user %s: %s", userIdLocalPart, err)
+	}
 
 	return nil
 }

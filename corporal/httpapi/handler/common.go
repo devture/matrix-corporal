@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"devture-matrix-corporal/corporal/httphelp"
 	"devture-matrix-corporal/corporal/matrix"
 	"encoding/json"
 	"fmt"
@@ -24,13 +25,10 @@ type ApiResponseError struct {
 }
 
 func Respond(w http.ResponseWriter, httpStatusCode int, resp interface{}) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(httpStatusCode)
-
 	respBytes, err := json.Marshal(resp)
 	if err != nil {
-		panic(fmt.Errorf("Could not create JSON response for: %s", resp))
+		panic(fmt.Errorf("could not create JSON response for: %s", resp))
 	}
 
-	w.Write(respBytes)
+	httphelp.RespondWithBytes(w, httpStatusCode, "application/json", respBytes)
 }

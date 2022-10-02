@@ -38,7 +38,7 @@ func (me *ContainerShutdownHandler) Add(destructor func()) {
 }
 
 func (me *ContainerShutdownHandler) Shutdown() {
-	for i, _ := range me.destructors {
+	for i := range me.destructors {
 		me.destructors[len(me.destructors)-i-1]()
 	}
 }
@@ -125,7 +125,10 @@ func BuildContainer(
 		)
 
 		shutdownHandler.Add(func() {
-			instance.Stop()
+			err := instance.Stop()
+			if err != nil {
+				logger.Errorf("failed stopping HTTP gateway server: %s", err)
+			}
 		})
 
 		return instance
@@ -195,7 +198,10 @@ func BuildContainer(
 		)
 
 		shutdownHandler.Add(func() {
-			instance.Stop()
+			err := instance.Stop()
+			if err != nil {
+				logger.Errorf("failed stopping HTTP API server: %s", err)
+			}
 		})
 
 		return instance

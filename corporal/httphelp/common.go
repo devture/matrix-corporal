@@ -18,7 +18,7 @@ func readBytesAndRecreateReader(source io.ReadCloser) ([]byte, io.ReadCloser, er
 	sourceBytes, err := ioutil.ReadAll(source)
 	source.Close()
 	if err != nil {
-		return nil, nil, fmt.Errorf("Cannot read bytes from source reader")
+		return nil, nil, fmt.Errorf("cannot read bytes from source reader")
 	}
 
 	return sourceBytes, ioutil.NopCloser(bytes.NewReader(sourceBytes)), nil

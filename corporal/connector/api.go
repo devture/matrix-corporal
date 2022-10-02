@@ -444,7 +444,10 @@ func (me *ApiConnector) DemoteUserInRoom(
 		return nil
 	}
 
-	jsonObj.Set(0, "users", userId)
+	_, err = jsonObj.Set(0, "users", userId)
+	if err != nil {
+		return fmt.Errorf("failed setting user in power levels object: %s", err)
+	}
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "user.demote", func() error {
 		_, err := client.SendStateEvent(roomId, "m.room.power_levels", "", jsonObj.Data())

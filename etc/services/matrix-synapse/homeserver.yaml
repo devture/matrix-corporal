@@ -786,7 +786,7 @@ uploads_path: "/tmp"
 
 # Enable registration for new users.
 #
-#enable_registration: false
+enable_registration: true
 
 # Optional account validity configuration. This allows for accounts to be denied
 # any request after a given period.
@@ -860,6 +860,8 @@ uploads_path: "/tmp"
 # Enable 3PIDs lookup requests to identity servers from this server.
 #
 #enable_3pid_lookup: true
+
+registration_requires_token: true
 
 # If set, allows registration of standard or admin accounts by anyone who
 # has the shared secret, even if registration is otherwise disabled.

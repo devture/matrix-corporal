@@ -44,7 +44,7 @@ func GetRequestBody(r *http.Request) ([]byte, error) {
 	// so very large requests would be rejected by the server in front of us
 	bodyBytes, newReader, err := readBytesAndRecreateReader(r.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot read request body payload: %s", err)
+		return nil, fmt.Errorf("cannot read request body payload: %s", err)
 	}
 
 	// We read the body, so we ought to restore it,
@@ -56,10 +56,13 @@ func GetRequestBody(r *http.Request) ([]byte, error) {
 
 func GetJsonFromRequestBody(r *http.Request, out interface{}) error {
 	bodyBytes, err := GetRequestBody(r)
+	if err != nil {
+		return fmt.Errorf("failed reading request body: %s", err)
+	}
 
 	err = json.Unmarshal(bodyBytes, out)
 	if err != nil {
-		return fmt.Errorf("Cannot understand request body payload (not JSON)")
+		return fmt.Errorf("cannot understand request body payload (not JSON)")
 	}
 
 	return nil

@@ -107,7 +107,12 @@ func (me *RESTServiceConsultor) Consult(request *http.Request, response *http.Re
 	if hook.RESTServiceAsync {
 		// We do the same thing we do synchronously. We just do it in the background and don't care what happens.
 		// Still, logging, etc., is done.
-		go me.callRestServiceWithRetries(consultingHTTPRequestFactory, hook, logger)
+		go func() {
+			_, err := me.callRestServiceWithRetries(consultingHTTPRequestFactory, hook, logger)
+			if err != nil {
+				logger.Warnf("Async REST service suffered an error: %s", err)
+			}
+		}()
 
 		if hook.RESTServiceAsyncResultHook != nil {
 			return hook.RESTServiceAsyncResultHook, nil
@@ -221,7 +226,7 @@ func prepareConsultingHTTPRequestFactory(
 	defaultTimeoutDuration time.Duration,
 ) (httpRequestFactory, error) {
 	if hook.RESTServiceURL == nil || *hook.RESTServiceURL == "" {
-		return nil, fmt.Errorf("Cannot use NewRESTServiceConsultor with an empty RESTServiceURL")
+		return nil, fmt.Errorf("cannot use NewRESTServiceConsultor with an empty RESTServiceURL")
 	}
 
 	// We extract the payload once, when making the factory, because that's when we know it's there
@@ -233,12 +238,12 @@ func prepareConsultingHTTPRequestFactory(
 	// if we do it later on for `RESTServiceAsync = true` requests.
 	consultingRequestPayload, err := prepareConsultingHTTPRequestPayload(request, response, hook)
 	if err != nil {
-		return nil, fmt.Errorf("Could not prepare request payload to be sent to the REST service: %s", err)
+		return nil, fmt.Errorf("could not prepare request payload to be sent to the REST service: %s", err)
 	}
 
 	consultingRequestPayloadBytes, err := json.Marshal(consultingRequestPayload)
 	if err != nil {
-		return nil, fmt.Errorf("Could not serialize request payload to be sent to the REST service: %s", err)
+		return nil, fmt.Errorf("could not serialize request payload to be sent to the REST service: %s", err)
 	}
 
 	consultingRequestMethod := "POST"
@@ -253,7 +258,8 @@ func prepareConsultingHTTPRequestFactory(
 
 	return func() (*http.Request, error) {
 		// This needs to be done each time, because it uses absolute time inside.
-		ctx, _ := context.WithTimeout(context.Background(), timeoutDuration)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
+		defer cancel()
 
 		consultingHTTPRequest, err := http.NewRequestWithContext(
 			ctx,

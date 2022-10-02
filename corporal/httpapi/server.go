@@ -64,9 +64,7 @@ func (me *Server) Stop() error {
 	}
 
 	me.logger.Infoln("Stopping HTTP API Server")
-	me.server.Shutdown(context.Background())
-
-	return nil
+	return me.server.Shutdown(context.Background())
 }
 
 func (me *Server) createRouter() http.Handler {

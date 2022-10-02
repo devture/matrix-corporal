@@ -77,8 +77,8 @@ func NewHttpProvider(
 	}
 
 	return &HttpProvider{
-		store: store,
-		uri:   config["Uri"].(string),
+		store:                    store,
+		uri:                      config["Uri"].(string),
 		authorizationBearerToken: config["AuthorizationBearerToken"].(string),
 		cachePath:                cachePathPtr,
 		reloadIntervalSeconds:    reloadIntervalSecondsPtr,
@@ -146,12 +146,15 @@ func (me *HttpProvider) load(allowedToLoadFromCache bool) error {
 	}
 
 	if !isFromCache {
-		me.storePolicyInCache(policy)
+		err := me.storePolicyInCache(policy)
+		if err != nil {
+			me.logger.Warnf("failed storing policy in cache: %s", err)
+		}
 	}
 
 	err = me.store.Set(policy)
 	if err != nil {
-		return fmt.Errorf("Policy set error: %s", err)
+		return fmt.Errorf("policy set error: %s", err)
 	}
 
 	return nil
@@ -167,7 +170,7 @@ func (me *HttpProvider) doLoad(allowedToLoadFromCache bool) (*policy.Policy /* i
 	me.logger.Warnf("Failed loading policy from URL (%s): %s", me.uri, errRemote)
 
 	if !allowedToLoadFromCache {
-		return nil, false, fmt.Errorf("Failed loading policy from remote (%s), while cache-loading is not allowed", errRemote)
+		return nil, false, fmt.Errorf("failed loading policy from remote (%s), while cache-loading is not allowed", errRemote)
 	}
 
 	policy, errCache := me.loadPolicyFromCache()
@@ -176,7 +179,7 @@ func (me *HttpProvider) doLoad(allowedToLoadFromCache bool) (*policy.Policy /* i
 		return policy, true, nil
 	}
 
-	return nil, false, fmt.Errorf("Failed loading policy from remote (%s) and from cache (%s)", errRemote, errCache)
+	return nil, false, fmt.Errorf("failed loading policy from remote (%s) and from cache (%s)", errRemote, errCache)
 }
 
 func (me *HttpProvider) loadPolicyFromRemote() (*policy.Policy, error) {
@@ -193,12 +196,12 @@ func (me *HttpProvider) loadPolicyFromRemote() (*policy.Policy, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Non-200 response fetching from URL: %d", resp.StatusCode)
+		return nil, fmt.Errorf("non-200 response fetching from URL: %d", resp.StatusCode)
 	}
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading HTTP response body: %s", err)
+		return nil, fmt.Errorf("failed reading HTTP response body: %s", err)
 	}
 
 	return createPolicyFromJsonBytes(bodyBytes)
@@ -206,7 +209,7 @@ func (me *HttpProvider) loadPolicyFromRemote() (*policy.Policy, error) {
 
 func (me *HttpProvider) loadPolicyFromCache() (*policy.Policy, error) {
 	if me.cachePath == nil {
-		return nil, fmt.Errorf("Cache disabled")
+		return nil, fmt.Errorf("cache disabled")
 	}
 
 	file, err := os.Open(*me.cachePath)

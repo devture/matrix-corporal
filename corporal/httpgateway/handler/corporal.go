@@ -1,11 +1,13 @@
 package handler
 
 import (
-	"devture-matrix-corporal/corporal/httphelp"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+
+	"devture-matrix-corporal/corporal/httphelp"
 )
 
 type corporalHandler struct {
@@ -31,7 +33,10 @@ func (me *corporalHandler) actionCorporalIndex(w http.ResponseWriter, r *http.Re
 	logger = logger.WithField("uri", r.RequestURI)
 	logger.Debugf("HTTP gateway: serving Matrix Corporal info page")
 
-	w.Write([]byte("Matrix Client-Server API protected by Matrix Corporal"))
+	_, err := w.Write([]byte("Matrix Client-Server API protected by Matrix Corporal"))
+	if err != nil {
+		log.Printf("failed writing response: %s", err)
+	}
 }
 
 // Ensure interface is implemented

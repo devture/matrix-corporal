@@ -178,8 +178,9 @@ func (me *policyCheckedRoutesHandler) createPolicyCheckingHandler(
 			logger = logger.WithField("userId", userId)
 
 			// These will be read in handlers and in hooks (like `hook.EventTypeBeforeAuthenticatedRequest`).
-			r = r.WithContext(context.WithValue(r.Context(), "accessToken", accessToken))
-			r = r.WithContext(context.WithValue(r.Context(), "userId", userId))
+			// We don't care that these fail the SA1029 static check
+			r = r.WithContext(context.WithValue(r.Context(), "accessToken", accessToken)) //nolint:staticcheck
+			r = r.WithContext(context.WithValue(r.Context(), "userId", userId))           //nolint:staticcheck
 
 			isAuthenticated = true
 		}

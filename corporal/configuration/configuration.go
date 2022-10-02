@@ -130,7 +130,7 @@ func validateConfiguration(configuration *Configuration, logger *logrus.Logger) 
 			configuration.Matrix.TimeoutMilliseconds,
 		)
 	}
-	if configuration.HttpGateway.InternalRESTAuth.Enabled == nil || (*configuration.HttpGateway.InternalRESTAuth.Enabled) == false {
+	if configuration.HttpGateway.InternalRESTAuth.Enabled == nil || !(*configuration.HttpGateway.InternalRESTAuth.Enabled) {
 		logger.Warn("HttpGateway.InternalRESTAuth.Enabled is neither explicitly enabled, nor disabled. Interactive Auth may not work without it. Define it as enabled or disabled to get rid of this warning")
 	} else {
 		if configuration.HttpGateway.InternalRESTAuth.IPNetworkWhitelist == nil {

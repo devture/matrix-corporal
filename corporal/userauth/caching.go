@@ -46,7 +46,7 @@ func (me *CacheFallbackAuthenticator) Authenticate(userId, givenPassword, authCr
 	cacheKeyRaw := fmt.Sprintf("%s-%s-%s", userId, givenPassword, authCredential)
 	m := sha256.New()
 	m.Write([]byte(cacheKeyRaw))
-	cacheKey := fmt.Sprintf("%s", m.Sum(nil))
+	cacheKey := string(m.Sum(nil))
 
 	isAuthenticated, errUpstream := me.other.Authenticate(userId, givenPassword, authCredential)
 
@@ -60,7 +60,7 @@ func (me *CacheFallbackAuthenticator) Authenticate(userId, givenPassword, authCr
 	// Upstream authenticator failed. See if we can fall back to our cache.
 	cacheResult, ok := me.cache.Get(cacheKey)
 	if !ok {
-		return false, fmt.Errorf("Cache fallback failed, after upstream's failure: %s", errUpstream)
+		return false, fmt.Errorf("cache fallback failed, after upstream's failure: %s", errUpstream)
 	}
 
 	me.logger.Infof(

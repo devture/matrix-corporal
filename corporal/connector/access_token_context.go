@@ -1,6 +1,7 @@
 package connector
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -74,7 +75,10 @@ func (me *AccessTokenContext) Release() {
 	me.userIdToAccessTokenMap.Range(func(userId interface{}, accessTokenInterface interface{}) bool {
 		accessToken := accessTokenInterface.(*AccessToken)
 
-		me.connector.DestroyAccessToken(userId.(string), accessToken.Token())
+		err := me.connector.DestroyAccessToken(userId.(string), accessToken.Token())
+		if err != nil {
+			log.Printf("failed destroying access token for user %s: %s", userId.(string), err)
+		}
 
 		me.userIdToAccessTokenMap.Delete(userId)
 

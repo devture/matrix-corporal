@@ -3,6 +3,7 @@ package httphelp
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/matrix-org/gomatrix"
@@ -14,7 +15,7 @@ func GetResponseBody(r *http.Response) ([]byte, error) {
 	// so very large requests would be rejected by the server in front of us
 	bodyBytes, newReader, err := readBytesAndRecreateReader(r.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot read response body payload: %s", err)
+		return nil, fmt.Errorf("cannot read response body payload: %s", err)
 	}
 
 	// We read the body, so we ought to restore it.
@@ -25,30 +26,38 @@ func GetResponseBody(r *http.Response) ([]byte, error) {
 
 func GetJsonFromResponseBody(r *http.Response, out interface{}) error {
 	bodyBytes, err := GetResponseBody(r)
+	if err != nil {
+		return fmt.Errorf("cannot read JSON from body: %s", err)
+	}
 
 	err = json.Unmarshal(bodyBytes, out)
 	if err != nil {
-		return fmt.Errorf("Cannot understand response body payload (not JSON)")
+		return fmt.Errorf("cannot understand response body payload (not JSON)")
 	}
 
 	return nil
 }
 
 func RespondWithMatrixError(w http.ResponseWriter, httpStatusCode int, errorCode string, errorMessage string) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpStatusCode)
-
 	resp := gomatrix.RespError{
 		Err:     errorMessage,
 		ErrCode: errorCode,
 	}
 	respBytes, err := json.Marshal(resp)
 	if err != nil {
-		panic(fmt.Errorf("Could not create JSON response for: %s", resp))
+		panic(fmt.Errorf("could not create JSON response for: %s", resp))
 	}
 
-	w.Write(respBytes)
+	RespondWithBytes(w, httpStatusCode, "application/json", respBytes)
+}
+
+func RespondWithJSON(w http.ResponseWriter, httpStatusCode int, responsePayload interface{}) {
+	responsePayloadBytes, err := json.Marshal(responsePayload)
+	if err != nil {
+		panic(fmt.Errorf("could not create JSON response for: %s", responsePayload))
+	}
+
+	RespondWithBytes(w, httpStatusCode, "application/json", responsePayloadBytes)
 }
 
 func RespondWithBytes(w http.ResponseWriter, httpStatusCode int, contentType string, payload []byte) {
@@ -56,14 +65,8 @@ func RespondWithBytes(w http.ResponseWriter, httpStatusCode int, contentType str
 	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(httpStatusCode)
 
-	w.Write(payload)
-}
-
-func RespondWithJSON(w http.ResponseWriter, httpStatusCode int, responsePayload interface{}) {
-	responsePayloadBytes, err := json.Marshal(responsePayload)
+	_, err := w.Write(payload)
 	if err != nil {
-		panic(fmt.Errorf("Could not create JSON response for: %s", responsePayload))
+		log.Printf("failed writing response: %s", err)
 	}
-
-	RespondWithBytes(w, httpStatusCode, "application/json", responsePayloadBytes)
 }
