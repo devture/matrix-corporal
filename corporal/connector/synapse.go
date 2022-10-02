@@ -1,8 +1,9 @@
 package connector
 
 import (
+	"devture-matrix-corporal/corporal/matrix"
+	"devture-matrix-corporal/corporal/util"
 	"fmt"
-	"net/url"
 	"sync"
 	"time"
 
@@ -10,9 +11,6 @@ import (
 	"crypto/sha1"
 
 	"github.com/matrix-org/gomatrix"
-
-	"devture-matrix-corporal/corporal/matrix"
-	"devture-matrix-corporal/corporal/util"
 )
 
 const (
@@ -112,7 +110,7 @@ func (me *SynapseConnector) ObtainNewAccessTokenForUserId(userId, deviceId strin
 	var response matrix.ApiAdminResponseUserLogin
 	err = client.MakeRequest(
 		"POST",
-		buildPrefixlessURL(client, fmt.Sprintf("/_synapse/admin/v1/users/%s/login", url.QueryEscape(userId)), map[string]string{}),
+		buildPrefixlessURL(client, fmt.Sprintf("/_synapse/admin/v1/users/%s/login", userId), map[string]string{}),
 		requestPayload,
 		&response,
 	)
