@@ -1,3 +1,8 @@
+# Version 2.5.0 (2022-12-11)
+
+Internal compiler and dependency upgrades.
+
+
 # Version 2.4.0 (2022-10-02)
 
 Minor code refactoring. Internal compiler and dependency upgrades.
