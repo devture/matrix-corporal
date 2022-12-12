@@ -1,13 +1,17 @@
+variables:
+  - &docker_with_buildx_container_image 'docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1'
+  - &docker_in_docker_container_image 'docker.io/docker:20.10.21-dind'
+
 pipeline:
   init:
-    image: docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1
+    image: *docker_with_buildx_container_image
     commands:
       - echo "Waiting for dind to start before running the other stages..."
       - sleep 5
 
   build-arm32v7:
     group: build
-    image: docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1
+    image: *docker_with_buildx_container_image
     environment:
       - DOCKER_HOST=tcp://docker:2375
       - DOCKER_TLS_CERTDIR=""
@@ -18,7 +22,7 @@ pipeline:
 
   build-arm64v8:
     group: build
-    image: docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1
+    image: *docker_with_buildx_container_image
     environment:
       - DOCKER_HOST=tcp://docker:2375
       - DOCKER_TLS_CERTDIR=""
@@ -29,7 +33,7 @@ pipeline:
 
   build-amd64:
     group: build
-    image: docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1
+    image: *docker_with_buildx_container_image
     environment:
       - DOCKER_HOST=tcp://docker:2375
       - DOCKER_TLS_CERTDIR=""
@@ -42,7 +46,7 @@ pipeline:
     when:
       branch:
         include: [master]
-    image: docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1
+    image: *docker_with_buildx_container_image
     environment:
       - DOCKER_HOST=tcp://docker:2375
       - DOCKER_TLS_CERTDIR=""
@@ -75,7 +79,7 @@ pipeline:
   push-for-tag:
     when:
       branch: 'refs/tags/*'
-    image: docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1
+    image: *docker_with_buildx_container_image
     environment:
       - DOCKER_HOST=tcp://docker:2375
       - DOCKER_TLS_CERTDIR=""
@@ -106,6 +110,6 @@ pipeline:
 
 services:
   docker:
-    image: docker.io/docker:20.10.21-dind
+    image: *docker_in_docker_container_image
     command: [ "dockerd", "--storage-driver=vfs", "--tls=false", "-H tcp://0.0.0.0:2375" ]
     privileged: true
