@@ -21,6 +21,7 @@ func init() {
 
 	supportedApiVersions = []string{
 		"r0",
+		"v1",
 		"v3",
 	}
 }
