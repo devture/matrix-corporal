@@ -1,3 +1,8 @@
+# Version 2.5.1 (2023-01-02)
+
+Fixes `/_matrix/client/v1/rooms/ID/hierarchy?suggested_only=false&limit=20`
+(invoked by element-web) not being accessible.
+
 # Version 2.5.0 (2022-12-11)
 
 Internal compiler and dependency upgrades.
