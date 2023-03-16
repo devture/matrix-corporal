@@ -1,5 +1,5 @@
-GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.19.4-alpine3.17"
-GOLANGCI_LINT_CONTAINER_IMAGE := "docker.io/golangci/golangci-lint:v1.50.1"
+GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.20.2-alpine3.17"
+GOLANGCI_LINT_CONTAINER_IMAGE := "docker.io/golangci/golangci-lint:v1.51.2"
 
 help: ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
