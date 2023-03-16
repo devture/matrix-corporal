@@ -1,3 +1,7 @@
+# Version 2.5.2 (2023-03-16)
+
+Internal compiler and dependency upgrades.
+
 # Version 2.5.1 (2023-01-02)
 
 Fixes `/_matrix/client/v1/rooms/ID/hierarchy?suggested_only=false&limit=20`
