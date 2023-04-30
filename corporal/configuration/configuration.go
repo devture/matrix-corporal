@@ -52,7 +52,6 @@ type Matrix struct {
 	HomeserverApiEndpoint    string
 	AuthSharedSecret         string
 	RegistrationSharedSecret string
-	ReconciliatorUserId      string
 	TimeoutMilliseconds      int
 }
 
