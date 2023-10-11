@@ -24,6 +24,19 @@ func (me *StateAction) GetStringPayloadDataByKey(key string) (string, error) {
 	return dataCasted, nil
 }
 
+func (me *StateAction) GetIntPayloadDataByKey(key string) (int, error) {
+	data, err := me.getPayloadDataByKey(key)
+	if err != nil {
+		return 0, err
+	}
+
+	dataCasted, castOk := data.(int)
+	if !castOk {
+		return 0, fmt.Errorf("Failed casting payload data for: %s", key)
+	}
+	return dataCasted, nil
+}
+
 func (me *StateAction) getPayloadDataByKey(key string) (interface{}, error) {
 	data, exists := me.Payload[key]
 	if !exists {

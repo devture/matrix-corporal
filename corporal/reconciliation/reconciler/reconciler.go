@@ -50,8 +50,9 @@ func New(
 		reconciliation.ActionUserActivate:       me.reconcileForActionUserActivate,
 		reconciliation.ActionUserDeactivate:     me.reconcileForActionUserDeactivate,
 
-		reconciliation.ActionRoomJoin:  me.reconcileForActionRoomJoin,
-		reconciliation.ActionRoomLeave: me.reconcileForActionRoomLeave,
+		reconciliation.ActionRoomJoin:          me.reconcileForActionRoomJoin,
+		reconciliation.ActionRoomLeave:         me.reconcileForActionRoomLeave,
+		reconciliation.ActionRoomSetPowerLevel: me.reconcileForActionRoomSetPower,
 	}
 
 	return me
@@ -232,7 +233,17 @@ func (me *Reconciler) reconcileForActionRoomJoin(ctx *connector.AccessTokenConte
 		return err
 	}
 
+	powerLevel, err := action.GetIntPayloadDataByKey("powerLevel")
+	if err != nil {
+		return err
+	}
+
 	err = me.connector.InviteUserToRoom(ctx, me.reconciliatorUserId, userId, roomId)
+	if err != nil {
+		return err
+	}
+
+	err = me.connector.UpdateRoomUserPowerLevel(ctx, me.reconciliatorUserId, userId, roomId, powerLevel)
 	if err != nil {
 		return err
 	}
@@ -252,4 +263,23 @@ func (me *Reconciler) reconcileForActionRoomLeave(ctx *connector.AccessTokenCont
 	}
 
 	return me.connector.LeaveRoom(ctx, userId, roomId)
+}
+
+func (me *Reconciler) reconcileForActionRoomSetPower(ctx *connector.AccessTokenContext, action *reconciliation.StateAction) error {
+	userId, err := action.GetStringPayloadDataByKey("userId")
+	if err != nil {
+		return err
+	}
+
+	roomId, err := action.GetStringPayloadDataByKey("roomId")
+	if err != nil {
+		return err
+	}
+
+	powerLevel, err := action.GetIntPayloadDataByKey("powerLevel")
+	if err != nil {
+		return err
+	}
+
+	return me.connector.UpdateRoomUserPowerLevel(ctx, me.reconciliatorUserId, userId, roomId, powerLevel)
 }

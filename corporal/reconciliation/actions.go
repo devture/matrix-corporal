@@ -9,6 +9,7 @@ const (
 	ActionUserActivate       = "user.activate"
 	ActionUserDeactivate     = "user.deactivate"
 
-	ActionRoomJoin  = "room.join"
-	ActionRoomLeave = "room.leave"
+	ActionRoomJoin          = "room.join"
+	ActionRoomLeave         = "room.leave"
+	ActionRoomSetPowerLevel = "room.power_level"
 )

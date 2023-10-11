@@ -1,9 +1,5 @@
 package policy
 
-import (
-	"devture-matrix-corporal/corporal/util"
-)
-
 type Checker struct {
 }
 
@@ -68,8 +64,10 @@ func (me *Checker) CanUserChangeOwnMembershipStateInRoom(policy Policy, userId s
 		return true
 	}
 
-	if util.IsStringInArray(roomId, userPolicy.JoinedRoomIds) {
-		return false
+	for _, value := range userPolicy.JoinedRooms {
+		if value.RoomId == roomId {
+			return false
+		}
 	}
 
 	return true

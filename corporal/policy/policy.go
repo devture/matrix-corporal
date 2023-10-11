@@ -85,6 +85,11 @@ type PolicyFlags struct {
 	Allow3pidLogin bool `json:"allow3pidLogin"`
 }
 
+type RoomState struct {
+	RoomId     string `json:"roomId"`
+	PowerLevel int    `json:"powerLevel"`
+}
+
 type UserPolicy struct {
 	Id     string `json:"id"`
 	Active bool   `json:"active"`
@@ -104,7 +109,7 @@ type UserPolicy struct {
 	DisplayName string `json:"displayName"`
 	AvatarUri   string `json:"avatarUri"`
 
-	JoinedRoomIds []string `json:"joinedRoomIds"`
+	JoinedRooms []*RoomState `json:"joinedRooms"`
 
 	// ForbidRoomCreation tells whether this user is forbidden from creating rooms.
 	ForbidRoomCreation *bool `json:"forbidRoomCreation"`

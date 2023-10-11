@@ -270,37 +270,64 @@ func (me *ReconciliationStateComputator) computeUserRoomChanges(
 ) []*reconciliation.StateAction {
 	var actions []*reconciliation.StateAction
 
-	for _, roomId := range userPolicy.JoinedRoomIds {
-		if !util.IsStringInArray(roomId, managedRoomIds) {
+	for _, room := range userPolicy.JoinedRooms {
+		if !util.IsStringInArray(room.RoomId, managedRoomIds) {
 			me.logger.Warnf(
 				"User %s is supposed to be joined to the %s room, but that room is not managed",
 				userPolicy.Id,
-				roomId,
+				room.RoomId,
 			)
 			continue
 		}
 
-		if currentUserState != nil && util.IsStringInArray(roomId, currentUserState.JoinedRoomIds) {
-			continue
+		var currentRoomPowerFound *int = nil
+		if currentUserState != nil {
+			for _, currentRoom := range currentUserState.JoinedRoom {
+				if currentRoom.RoomId == room.RoomId {
+					currentRoomPowerFound = &currentRoom.PowerLevel
+				}
+			}
 		}
 
-		actions = append(actions, &reconciliation.StateAction{
-			Type: reconciliation.ActionRoomJoin,
-			Payload: map[string]interface{}{
-				"userId": userId,
-				"roomId": roomId,
-			},
-		})
+		// If the user is not a member of the room, join it
+		if currentRoomPowerFound == nil {
+			actions = append(actions, &reconciliation.StateAction{
+				Type: reconciliation.ActionRoomJoin,
+				Payload: map[string]interface{}{
+					"userId":     userId,
+					"roomId":     room.RoomId,
+					"powerLevel": room.PowerLevel,
+				},
+			})
+			// If the user is a member of the room but has a different power level, change it
+		} else if *currentRoomPowerFound != room.PowerLevel {
+			actions = append(actions, &reconciliation.StateAction{
+				Type: reconciliation.ActionRoomSetPowerLevel,
+				Payload: map[string]interface{}{
+					"userId":     userId,
+					"roomId":     room.RoomId,
+					"powerLevel": room.PowerLevel,
+				},
+			})
+		}
 	}
 
 	if currentUserState != nil {
-		for _, roomId := range currentUserState.JoinedRoomIds {
-			if !util.IsStringInArray(roomId, managedRoomIds) {
+		for _, room := range currentUserState.JoinedRoom {
+			if !util.IsStringInArray(room.RoomId, managedRoomIds) {
 				//We rightfully ignore rooms we don't care about.
 				continue
 			}
 
-			if util.IsStringInArray(roomId, userPolicy.JoinedRoomIds) {
+			isInPolicyJoinedRoom := false
+			for _, room := range userPolicy.JoinedRooms {
+				if room.RoomId == room.RoomId {
+					isInPolicyJoinedRoom = true
+					break
+				}
+			}
+
+			if isInPolicyJoinedRoom {
 				continue
 			}
 
@@ -308,7 +335,7 @@ func (me *ReconciliationStateComputator) computeUserRoomChanges(
 				Type: reconciliation.ActionRoomLeave,
 				Payload: map[string]interface{}{
 					"userId": userId,
-					"roomId": roomId,
+					"roomId": room.RoomId,
 				},
 			})
 		}

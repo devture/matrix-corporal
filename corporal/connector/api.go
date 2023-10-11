@@ -135,6 +135,16 @@ func (me *ApiConnector) getUserStateByUserId(
 		return nil, err
 	}
 
+	var roomsStates []CurrentUserRoomState
+	for _, roomId := range joinedRoomIds {
+		powerLevel, err := me.getPowerLevelByRoomIdAndUserId(ctx, roomId, userId)
+		if err != nil {
+			return nil, err
+		}
+		newRoomInfo := CurrentUserRoomState{roomId, powerLevel}
+		roomsStates = append(roomsStates, newRoomInfo)
+	}
+
 	userProfile, err := me.GetUserProfileByUserId(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -171,7 +181,7 @@ func (me *ApiConnector) getUserStateByUserId(
 		DisplayName:         displayName,
 		AvatarMxcUri:        userProfile.AvatarUrl,
 		AvatarSourceUriHash: avatarSourceUriHash,
-		JoinedRoomIds:       joinedRoomIds,
+		JoinedRoom:          roomsStates,
 	}, nil
 }
 
@@ -306,6 +316,37 @@ func (me *ApiConnector) getJoinedRoomIdsByUserId(
 	return resp.JoinedRooms, nil
 }
 
+func (me *ApiConnector) getPowerLevelByRoomIdAndUserId(
+	ctx *AccessTokenContext,
+	roomId string,
+	userId string,
+) (int, error) {
+	client, err := me.createMatrixClientForUserId(ctx, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	var content map[string]interface{}
+	err = client.StateEvent(roomId, "m.room.power_levels", "", &content)
+	if err != nil {
+		return 0, err
+	}
+
+	jsonObj, err := gabs.Consume(content)
+	if err != nil {
+		return 0, err
+	}
+
+	userPowerLevel, ok := jsonObj.Search("users", userId).Data().(float64)
+	if !ok {
+		// Most likely no power level defined for the user, which means the default applies.
+		defaultVal := jsonObj.Search("users_default").Data().(float64)
+		return int(defaultVal), nil
+	}
+
+	return int(userPowerLevel), nil
+}
+
 func (me *ApiConnector) SetUserAvatar(
 	ctx *AccessTokenContext,
 	userId string,
@@ -389,6 +430,40 @@ func (me *ApiConnector) InviteUserToRoom(
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.invite", func() error {
 		_, err := client.InviteUser(roomId, &gomatrix.ReqInviteUser{UserID: inviteeId})
+		return err
+	})
+}
+
+func (me *ApiConnector) UpdateRoomUserPowerLevel(
+	ctx *AccessTokenContext,
+	updaterId string,
+	userId string,
+	roomId string,
+	powerLevel int,
+) error {
+	client, err := me.createMatrixClientForUserId(ctx, updaterId)
+	if err != nil {
+		return err
+	}
+
+	var content map[string]interface{}
+	err = client.StateEvent(roomId, "m.room.power_levels", "", &content)
+	if err != nil {
+		return err
+	}
+
+	jsonObj, err := gabs.Consume(content)
+	if err != nil {
+		return err
+	}
+
+	_, err = jsonObj.Set(powerLevel, "users", userId)
+	if err != nil {
+		return fmt.Errorf("failed setting user in power levels object: %s", err)
+	}
+
+	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.powerLevel", func() error {
+		_, err := client.SendStateEvent(roomId, "m.room.power_levels", "", jsonObj.Data())
 		return err
 	})
 }
@@ -488,6 +563,8 @@ func (me *ApiConnector) LeaveRoom(
 	if err != nil {
 		return err
 	}
+
+	//TODO remove user from power level
 
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.leave", func() error {
 		// This request is idempotent.
