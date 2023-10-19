@@ -1,3 +1,8 @@
+# Version 2.6.0 (2023-10-19)
+
+Internal compiler and dependency upgrades.
+
+
 # Version 2.5.2 (2023-03-16)
 
 Internal compiler and dependency upgrades.
