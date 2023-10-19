@@ -1,115 +1,31 @@
+# This pipeline uses the https://woodpecker-ci.org/plugins/Docker%20Buildx plugin
+
 variables:
-  - &docker_with_buildx_container_image 'docker.io/jdrouet/docker-with-buildx:20.10.21-0.9.1'
-  - &docker_in_docker_container_image 'docker.io/docker:20.10.21-dind'
+  - &repo 'docker.io/devture/matrix-corporal'
+  - &dockerfile 'etc/docker/Dockerfile'
+  - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
 
 pipeline:
-  init:
-    image: *docker_with_buildx_container_image
-    commands:
-      - echo "Waiting for dind to start before running the other stages..."
-      - sleep 5
-
-  build-arm32v7:
-    group: build
-    image: *docker_with_buildx_container_image
-    environment:
-      - DOCKER_HOST=tcp://docker:2375
-      - DOCKER_TLS_CERTDIR=""
-      - DOCKER_DRIVER=overlay2
-    commands:
-      - docker buildx create --use
-      - docker buildx build --platform linux/arm/v7 --load -t devture/matrix-corporal:current-arm32v7 -f etc/docker/Dockerfile .
-
-  build-arm64v8:
-    group: build
-    image: *docker_with_buildx_container_image
-    environment:
-      - DOCKER_HOST=tcp://docker:2375
-      - DOCKER_TLS_CERTDIR=""
-      - DOCKER_DRIVER=overlay2
-    commands:
-      - docker buildx create --use
-      - docker buildx build --platform linux/arm64/v8 --load -t devture/matrix-corporal:current-arm64v8 -f etc/docker/Dockerfile .
-
-  build-amd64:
-    group: build
-    image: *docker_with_buildx_container_image
-    environment:
-      - DOCKER_HOST=tcp://docker:2375
-      - DOCKER_TLS_CERTDIR=""
-      - DOCKER_DRIVER=overlay2
-    commands:
-      - docker buildx create --use
-      - docker buildx build --platform linux/amd64 --load -t devture/matrix-corporal:current-amd64 -f etc/docker/Dockerfile .
-
-  push-for-branch:
+  build-and-push-for-branch:
     when:
-      branch:
-        include: [master]
-    image: *docker_with_buildx_container_image
-    environment:
-      - DOCKER_HOST=tcp://docker:2375
-      - DOCKER_TLS_CERTDIR=""
-      - DOCKER_DRIVER=overlay2
-    secrets:
-      - CONTAINER_REGISTRY
-      - CONTAINER_REGISTRY_USER
-      - CONTAINER_REGISTRY_PASSWORD
-    commands:
-      - |
-        container_image_tag_to_publish=$CI_BRANCH
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: manual
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [docker_username, docker_password]
+    settings:
+      repo: *repo
+      tag: latest
+      dockerfile: *dockerfile
+      platforms: *platforms
 
-        if [ "$CI_BRANCH" == "master" ]; then
-          container_image_tag_to_publish=latest
-        fi
-
-      - "echo 'Publishing: '$container_image_tag_to_publish"
-
-      - docker login $CONTAINER_REGISTRY -u $CONTAINER_REGISTRY_USER -p $CONTAINER_REGISTRY_PASSWORD
-
-      - |
-        for platform_identifier in amd64 arm64v8 arm32v7; do
-          docker tag devture/matrix-corporal:current-$platform_identifier $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-$platform_identifier
-          docker push $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-$platform_identifier
-        done
-
-      - docker manifest create $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-amd64 $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-arm64v8 $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-arm32v7
-
-      - docker manifest push $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish
-  push-for-tag:
+  build-and-push-for-tag:
     when:
-      branch: 'refs/tags/*'
-    image: *docker_with_buildx_container_image
-    environment:
-      - DOCKER_HOST=tcp://docker:2375
-      - DOCKER_TLS_CERTDIR=""
-      - DOCKER_DRIVER=overlay2
-    secrets:
-      - CONTAINER_REGISTRY
-      - CONTAINER_REGISTRY_USER
-      - CONTAINER_REGISTRY_PASSWORD
-    commands:
-      - env
-      - docker images
-
-      - container_image_tag_to_publish=$CI_COMMIT_TAG
-
-      - "echo 'Publishing: '$container_image_tag_to_publish"
-
-      - docker login $CONTAINER_REGISTRY -u $CONTAINER_REGISTRY_USER -p $CONTAINER_REGISTRY_PASSWORD
-
-      - |
-        for platform_identifier in amd64 arm64v8 arm32v7; do
-          docker tag devture/matrix-corporal:current-$platform_identifier $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-$platform_identifier
-          docker push $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-$platform_identifier
-        done
-
-      - docker manifest create $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-amd64 $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-arm64v8 $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish-arm32v7
-
-      - docker manifest push $CONTAINER_REGISTRY/devture/matrix-corporal:$container_image_tag_to_publish
-
-services:
-  docker:
-    image: *docker_in_docker_container_image
-    command: [ "dockerd", "--storage-driver=vfs", "--tls=false", "-H tcp://0.0.0.0:2375" ]
-    privileged: true
+      - event: tag
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [docker_username, docker_password]
+    settings:
+      repo: *repo
+      tag: ${CI_COMMIT_TAG}
+      dockerfile: *dockerfile
+      platforms: *platforms
