@@ -1,4 +1,4 @@
-GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.20.2-alpine3.17"
+GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.21.3-alpine3.18"
 GOLANGCI_LINT_CONTAINER_IMAGE := "docker.io/golangci/golangci-lint:v1.51.2"
 
 help: ## Show this help.
