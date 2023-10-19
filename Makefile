@@ -2,7 +2,7 @@ GOLANG_CONTAINER_IMAGE := "docker.io/golang:1.21.3-alpine3.18"
 GOLANGCI_LINT_CONTAINER_IMAGE := "docker.io/golangci/golangci-lint:v1.51.2"
 
 help: ## Show this help.
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+	@grep -F -h "##" $(MAKEFILE_LIST) | grep -v grep | sed -e 's/\\$$//' | sed -e 's/##//'
 
 _prepare_services: var/.env
 	mkdir -p var/matrix-synapse-media-store var/matrix-synapse-postgres
