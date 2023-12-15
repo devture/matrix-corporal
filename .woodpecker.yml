@@ -5,7 +5,7 @@ variables:
   - &dockerfile 'etc/docker/Dockerfile'
   - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
 
-pipeline:
+steps:
   build-and-push-for-branch:
     when:
       - event: push
