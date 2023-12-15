@@ -44,8 +44,8 @@ type ApiAdminResponseUsers struct {
 // at: GET /_synapse/admin/v2/users
 type ApiAdminEntityUser struct {
 	Id           string `json:"name"`
-	Admin        int    `json:"admin"`    //0 or 1
-	Guest        int    `json:"is_guest"` //0 or 1
+	Admin        bool   `json:"admin"`
+	Guest        bool   `json:"is_guest"`
 	PasswordHash string `json:"password_hash"`
 	DisplayName  string `json:"displayname"`
 	AvatarURL    string `json:"avatar_url"`
