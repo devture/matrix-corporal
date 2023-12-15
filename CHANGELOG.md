@@ -1,3 +1,8 @@
+# Version 2.7.0 (2023-12-15)
+
+- Fixing compatibility with newer versions of Synapse which use `bool` instead of `int` values for payloads returned by the `GET /_synapse/admin/v2/users` API. Related to [issue #30 in our repository](https://github.com/devture/matrix-corporal/issues/30) and [Synapse issue #16733](https://github.com/matrix-org/synapse/issues/16733)
+- Internal compiler and dependency upgrades
+
 # Version 2.6.0 (2023-10-19)
 
 Internal compiler and dependency upgrades.
