@@ -5,6 +5,13 @@ variables:
   - &dockerfile 'etc/docker/Dockerfile'
   - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
 
+services:
+  docker:
+    image: docker:24.0.7-dind
+    commands:
+      - dockerd --tls=false --host=tcp://0.0.0.0:2376
+    privileged: true
+
 steps:
   build-and-push-for-branch:
     when:
@@ -13,7 +20,7 @@ steps:
       - event: manual
     image: woodpeckerci/plugin-docker-buildx:2.2.1
     environment:
-       - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_HOST=tcp://docker:2376
     secrets: [docker_username, docker_password]
     settings:
       repo: *repo
@@ -26,17 +33,10 @@ steps:
       - event: tag
     image: woodpeckerci/plugin-docker-buildx:2.2.1
     environment:
-       - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_HOST=tcp://docker:2376
     secrets: [docker_username, docker_password]
     settings:
       repo: *repo
       tag: ${CI_COMMIT_TAG}
       dockerfile: *dockerfile
       platforms: *platforms
-
-services:
-  docker:
-    image: docker:24.0.7-dind
-    commands:
-      - dockerd --tls=false --host=tcp://0.0.0.0:2376
-    privileged: true
