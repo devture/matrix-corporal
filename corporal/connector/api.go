@@ -181,7 +181,7 @@ func (me *ApiConnector) getUserStateByUserId(
 		DisplayName:         displayName,
 		AvatarMxcUri:        userProfile.AvatarUrl,
 		AvatarSourceUriHash: avatarSourceUriHash,
-		JoinedRoom:          roomsStates,
+		JoinedRooms:         roomsStates,
 	}, nil
 }
 
@@ -434,40 +434,6 @@ func (me *ApiConnector) InviteUserToRoom(
 	})
 }
 
-func (me *ApiConnector) UpdateRoomUserPowerLevel(
-	ctx *AccessTokenContext,
-	updaterId string,
-	userId string,
-	roomId string,
-	powerLevel int,
-) error {
-	client, err := me.createMatrixClientForUserId(ctx, updaterId)
-	if err != nil {
-		return err
-	}
-
-	var content map[string]interface{}
-	err = client.StateEvent(roomId, "m.room.power_levels", "", &content)
-	if err != nil {
-		return err
-	}
-
-	jsonObj, err := gabs.Consume(content)
-	if err != nil {
-		return err
-	}
-
-	_, err = jsonObj.Set(powerLevel, "users", userId)
-	if err != nil {
-		return fmt.Errorf("failed setting user in power levels object: %s", err)
-	}
-
-	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.powerLevel", func() error {
-		_, err := client.SendStateEvent(roomId, "m.room.power_levels", "", jsonObj.Data())
-		return err
-	})
-}
-
 func (me *ApiConnector) JoinRoom(
 	ctx *AccessTokenContext,
 	userId string,
@@ -569,6 +535,41 @@ func (me *ApiConnector) LeaveRoom(
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.leave", func() error {
 		// This request is idempotent.
 		_, err := client.LeaveRoom(roomId)
+		return err
+	})
+}
+
+func (me *ApiConnector) UpdateRoomUserPowerLevel(
+	ctx *AccessTokenContext,
+	ownerId string,
+	roomPowerForUserId map[string]int,
+	roomId string,
+) error {
+	client, err := me.createMatrixClientForUserId(ctx, ownerId)
+	if err != nil {
+		return err
+	}
+
+	var content map[string]interface{}
+	err = client.StateEvent(roomId, "m.room.power_levels", "", &content)
+	if err != nil {
+		return err
+	}
+
+	jsonObj, err := gabs.Consume(content)
+	if err != nil {
+		return err
+	}
+
+	for userId, powerLevel := range roomPowerForUserId {
+		_, err = jsonObj.Set(powerLevel, "users", userId)
+		if err != nil {
+			return err
+		}
+	}
+
+	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.powerLevel", func() error {
+		_, err = client.SendStateEvent(roomId, "m.room.power_levels", "", jsonObj.Data())
 		return err
 	})
 }

@@ -21,7 +21,7 @@ type MatrixConnector interface {
 	SetUserAvatar(ctx *AccessTokenContext, userId string, avatar *avatar.Avatar) error
 
 	InviteUserToRoom(ctx *AccessTokenContext, inviterId string, inviteeId string, roomId string) error
-	UpdateRoomUserPowerLevel(ctx *AccessTokenContext, updaterId string, userId string, roomId string, powerLevel int) error
+	UpdateRoomUserPowerLevel(ctx *AccessTokenContext, updaterId string, roomPowerForUserId map[string]int, roomId string) error
 	JoinRoom(ctx *AccessTokenContext, userId string, roomId string) error
 	LeaveRoom(ctx *AccessTokenContext, userId string, roomId string) error
 }

@@ -24,5 +24,5 @@ type CurrentUserState struct {
 	DisplayName         string                 `json:"displayName"`
 	AvatarMxcUri        string                 `json:"avatarMxcUri"`
 	AvatarSourceUriHash string                 `json:"avatarSourceUriHash"`
-	JoinedRoom          []CurrentUserRoomState `json:"joinedRoomIds"`
+	JoinedRooms         []CurrentUserRoomState `json:"joinedRooms"`
 }

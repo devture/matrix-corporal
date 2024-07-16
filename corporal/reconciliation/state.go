@@ -12,7 +12,7 @@ type StateAction struct {
 }
 
 func (me *StateAction) GetStringPayloadDataByKey(key string) (string, error) {
-	data, err := me.getPayloadDataByKey(key)
+	data, err := me.GetPayloadDataByKey(key)
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +25,7 @@ func (me *StateAction) GetStringPayloadDataByKey(key string) (string, error) {
 }
 
 func (me *StateAction) GetIntPayloadDataByKey(key string) (int, error) {
-	data, err := me.getPayloadDataByKey(key)
+	data, err := me.GetPayloadDataByKey(key)
 	if err != nil {
 		return 0, err
 	}
@@ -37,7 +37,7 @@ func (me *StateAction) GetIntPayloadDataByKey(key string) (int, error) {
 	return dataCasted, nil
 }
 
-func (me *StateAction) getPayloadDataByKey(key string) (interface{}, error) {
+func (me *StateAction) GetPayloadDataByKey(key string) (interface{}, error) {
 	data, exists := me.Payload[key]
 	if !exists {
 		return nil, fmt.Errorf("Missing %s payload data", key)
