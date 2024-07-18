@@ -7,7 +7,7 @@
 				"displayName": "",
 				"avatarMxcUri": "mxc://something/another",
 				"avatarSourceUriHash": "53d18b18fddf6a58bebf9c2f349020a37e0136d2cb24de236f7ae9deeefebbd3bf67bf245825e4fb9397003e6b8c1ca5c1490a098db183fabf243e8666c3c15f",
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},
@@ -26,7 +26,7 @@
 				"active": true,
 				"displayName": "",
 				"avatarUri": "http://example.com/image.jpg",
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},

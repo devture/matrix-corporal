@@ -530,8 +530,6 @@ func (me *ApiConnector) LeaveRoom(
 		return err
 	}
 
-	//TODO remove user from power level
-
 	return matrix.ExecuteWithRateLimitRetries(me.logger, "room.leave", func() error {
 		// This request is idempotent.
 		_, err := client.LeaveRoom(roomId)

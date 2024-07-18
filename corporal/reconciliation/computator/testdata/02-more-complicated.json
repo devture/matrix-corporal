@@ -4,12 +4,31 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedRoomIds": ["!a:host", "!b:host", "!c:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					},
+					{
+						"roomId": "!b:host",
+						"powerLevel": 0
+					},
+					{
+						"roomId": "!c:host",
+						"powerLevel": 0
+					}
+				]
+
 			},
 			{
 				"id": "@b:host",
 				"active": true,
-				"joinedRoomIds": ["!b:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!b:host",
+						"powerLevel": 0
+					}
+				]
 			}
 		]
 	},
@@ -31,22 +50,45 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedRoomIds": ["!a:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"PowerLevel": 0
+					}
+				]
 			},
 			{
 				"id": "@b:host",
 				"active": true,
-				"joinedRoomIds": ["!a:host", "!b:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					},
+					{
+						"roomId": "!b:host",
+						"powerLevel": 0
+					}
+				]
 			},
 			{
 				"id": "@c:host",
 				"active": true,
-				"joinedRoomIds": ["!a:host", "!b:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					},
+					{
+						"roomId": "!b:host",
+						"powerLevel": 0
+					}
+				]
 			},
 			{
 				"id": "@d:host",
 				"active": false,
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},
@@ -90,6 +132,21 @@
 				"payload": {
 					"userId": "@c:host",
 					"roomId": "!b:host"
+				}
+			},
+
+			{
+				"type": "room.users_set_power_levels",
+				"payload": {
+					"roomId": "!a:host",
+					"roomPowerForUserId": "map[@b:host:0 @c:host:0]"
+				}
+			},
+			{
+				"type": "room.users_set_power_levels",
+				"payload": {
+					"roomId": "!b:host",
+					"roomPowerForUserId": "map[@c:host:0]"
 				}
 			}
 		]

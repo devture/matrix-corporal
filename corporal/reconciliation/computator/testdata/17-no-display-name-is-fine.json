@@ -5,7 +5,7 @@
 				"id": "@a:host",
 				"active": true,
 				"displayName": "Something",
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},
@@ -22,7 +22,7 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},

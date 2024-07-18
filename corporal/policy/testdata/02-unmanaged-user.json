@@ -1,6 +1,6 @@
 {
 	"policy": {
-		"managedRoomIds": [
+		"managedRooms": [
 			"!a:host",
 			"!b:host"
 		],

@@ -22,14 +22,19 @@
 				"authType": "plain",
 				"authCredential": "test",
 				"active": true,
-				"joinedRoomIds": ["!a:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					}
+				]
 			},
 			{
 				"id": "@b:host",
 				"authType": "sha1",
 				"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 				"active": true,
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},
@@ -56,6 +61,14 @@
 				"payload": {
 					"userId": "@b:host",
 					"password": "__RANDOM__"
+				}
+			},
+
+			{
+				"type": "room.users_set_power_levels",
+				"payload": {
+					"roomId": "!a:host",
+					"roomPowerForUserId": "map[@a:host:0]"
 				}
 			}
 		]
