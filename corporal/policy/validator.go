@@ -16,8 +16,8 @@ func NewValidator(homeserverDomainName string) *Validator {
 }
 
 func (me *Validator) Validate(policy *Policy) error {
-	if policy.SchemaVerson != 1 {
-		return fmt.Errorf("found policy with schema version (%d) that we do not support", policy.SchemaVerson)
+	if policy.SchemaVersion != 1 {
+		return fmt.Errorf("found policy with schema version (%d) that we do not support", policy.SchemaVersion)
 	}
 
 	for _, userId := range policy.GetManagedUserIds() {

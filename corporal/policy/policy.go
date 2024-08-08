@@ -7,7 +7,7 @@ import (
 )
 
 type Policy struct {
-	SchemaVerson int `json:"schemaVersion"`
+	SchemaVersion int `json:"schemaVersion"`
 
 	// IdentificationStamp holds a policy identification value.
 	// Policy providers/generators can attach any string value to a policy to help identify it.
