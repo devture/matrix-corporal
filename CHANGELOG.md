@@ -1,3 +1,34 @@
+# Version 3.0.0 (2024-08-08)
+
+This release brings support for **power-level management** (thanks to [this PR](https://github.com/devture/matrix-corporal/pull/32)). You will need to adapt your [policy](docs/policy.md) configuration or matrix-corporal will refuse to work with your existing policy.
+
+The old `joinedRoomIds` field in the [user policy fields](docs/policy.md#user-policy-fields) was replaced with a new `joinedRooms` field. Instead of specifying room ids that users must be joined to, you're now supposed to specify room definitions which contain a `roomId` and (optionally) a `powerLevel` key.
+
+You need to make the following changes to adapt your [policy](docs/policy.md) configuration:
+
+```diff
+ {
+-    "schemaVersion": 1,
++    "schemaVersion": 2,
+     "users": [
+         {
+             "id": "someone",
+-            "joinedRoomIds": [
+-                "!roomA:server",
+-                "!roomB:server",
+-            ],
++            "joinedRooms": [
++                {"roomId": "!roomA:example.com", "powerLevel": 0},
++                {"roomId": "!roomB:example.com", "powerLevel": 0}
++            ]
+        }
+    ]
+ }
+```
+
+You can learn more about the new `joinedRooms` field (and the different `powerLevel` values you may use) in the [user policy fields](docs/policy.md#user-policy-fields) documentation. Be aware that certain high `powerLevel` values may be dangerous and cause reconciliation to break in the future.
+
+
 # Version 2.8.0 (2024-07-04)
 
 Internal compiler and dependency upgrades.
