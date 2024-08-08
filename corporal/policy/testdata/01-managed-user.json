@@ -9,7 +9,12 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedRoomIds": ["!a:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					}
+				]
 			}
 		]
 	},

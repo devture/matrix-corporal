@@ -22,7 +22,12 @@
 				"authType": "passthrough",
 				"authCredential": "some-initial-password",
 				"active": true,
-				"joinedRoomIds": ["!a:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					}
+				]
 			}
 		]
 	},
@@ -42,6 +47,14 @@
 				"payload": {
 					"userId": "@a:host",
 					"roomId": "!a:host"
+				}
+			},
+
+			{
+				"type": "room.users_set_power_levels",
+				"payload": {
+					"roomId": "!a:host",
+					"roomPowerForUserId": "map[@a:host:0]"
 				}
 			}
 		]

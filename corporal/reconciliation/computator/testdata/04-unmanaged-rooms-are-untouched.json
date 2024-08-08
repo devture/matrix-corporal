@@ -4,7 +4,12 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedRoomIds": ["!d:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!d:host",
+						"powerLevel": 0
+					}
+				]
 			}
 		]
 	},
@@ -25,7 +30,20 @@
 			{
 				"id": "@a:host",
 				"active": true,
-				"joinedRoomIds": ["!a:host", "!b:host", "!c:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					},
+					{
+						"roomId": "!b:host",
+						"powerLevel": 0
+					},
+					{
+						"roomId": "!c:host",
+						"powerLevel": 0
+					}
+				]
 			}
 		]
 	},
@@ -37,6 +55,14 @@
 				"payload": {
 					"userId": "@a:host",
 					"roomId": "!b:host"
+				}
+			},
+
+			{
+				"type": "room.users_set_power_levels",
+				"payload": {
+					"roomId": "!a:host",
+					"roomPowerForUserId": "map[@a:host:0 @b:host:0 @c:host:0]"
 				}
 			}
 		]

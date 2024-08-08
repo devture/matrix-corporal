@@ -84,7 +84,10 @@ The policy is a JSON document that looks like this:
 			"authCredential": "PaSSw0rD",
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
-			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
+			"joinedRooms": [
+				{"roomId": "!roomA:example.com", "powerLevel": 0},
+				{"roomId": "!roomB:example.com", "powerLevel": 50}
+			],
 			"forbidRoomCreation": true
 		},
 		{
@@ -94,7 +97,9 @@ The policy is a JSON document that looks like this:
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 			"displayName": "Just Peter",
 			"avatarUri": "",
-			"joinedRoomIds": ["!roomB:example.com"],
+			"joinedRooms": [
+				{"roomId": "!roomB:example.com", "powerLevel": 0}
+			],
 			"forbidRoomCreation": false,
 			"forbidEncryptedRoomCreation": true
 		},
@@ -105,7 +110,10 @@ The policy is a JSON document that looks like this:
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "Georgey",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
+			"joinedRooms": [
+				{"roomId": "!roomA:example.com", "powerLevel": 25},
+				{"roomId": "!roomB:example.com", "powerLevel": 50}
+			],
 			"forbidRoomCreation": false,
 			"forbidUnencryptedRoomCreation": true
 		}
@@ -118,7 +126,7 @@ The policy is a JSON document that looks like this:
 
 A policy contains the following fields:
 
-- `schemaVersion` - tells which schema version this policy is using. This field will be useful in case we introduce backward-incompatible changes in the future. For now, it's always set to `1`.
+- `schemaVersion` - tells which schema version this policy is using. This field will be useful in case we introduce backward-incompatible changes in the future. The current `schemaVersion` is `2`.
 
 - `identificationStamp` - an optional `string` value provided by you to help you identify this policy. For now, it's only used for debugging purposes, but in the future we might suppress reconciliation if we fetch a policy which has the same stamp as the one last used for reconciliation. So, if you provide this value at all, make sure it gets a new value, at least whenever the policy changes.
 
@@ -165,7 +173,10 @@ A user policy object looks like this:
 	"authCredential": "PaSSw0rD",
 	"displayName": "John",
 	"avatarUri": "https://example.com/john.jpg",
-	"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"],
+	"joinedRooms": [
+		{"roomId": "!roomA:example.com", "powerLevel": 0},
+		{"roomId": "!roomB:example.com", "powerLevel": 50}
+	],
 	"forbidRoomCreation": false,
 	"forbidEncryptedRoomCreation": false,
 	"forbidUnencryptedRoomCreation": false
@@ -187,7 +198,12 @@ A user-policy contains the following fields:
 
 - `avatarUri` - the avatar image of this user. It can be a public remote URL or a [data URI](https://en.wikipedia.org/wiki/Data_URI_scheme) (e.g. `data:image/png;base64,DATA_GOES_HERE`). New accounts will always be created with the avatar specified in the policy. The avatar on the Matrix server is kept in sync with the policy (and any edits by the user are prevented), unless the `allowCustomUserAvatars` flag is set to `true` (see [flags](#flags) above). For performance reasons, avatar URLs are not re-fetched unless the URL changes, so make sure avatar URLs change when the underlying data changes.
 
-- `joinedRoomIds` - a list of room identifiers (e.g. `!room:server`) that the user is part of. The user will be auto-joined to any rooms listed here, unless already joined. If the user happens to be joined to a room which is not listed here, but appears in the top-level `managedRoomIds` field, the user will be kicked out of that room. The user can be part of any number of other room which are not listed in `joinedRoomIds`, as long as they are also not listed in `managedRoomIds`.
+- `joinedRooms` - a list of room definitions (e.g. `{"roomId": "!room:server", "powerLevel": 25}`) that the user is part of:
+  - The user will be auto-joined to any rooms listed here, unless already joined. If the user happens to be joined to a room which is not listed here, but appears in the top-level `managedRoomIds` field, the user will be kicked out of that room. The user can be part of any number of other room which are not listed in `joinedRooms`, as long as they are also not listed in `managedRoomIds`.
+  - The `powerLevel` field can be omitted, in which case it will default to `0`.
+  - A `powerLevel` value of `0` does not mean "do not manage user levels", but "set the user's power level to 0". The default power level for users that were joined to rooms was `0` anyway (although rooms can be configured to use a different value). Unless you've changed the default room power level or individual power levels for users manually, using a `0` power level value should be backward-compatible.
+  - You can use any power level you'd like, as long as it's not higher than what the `matrix-corporal` user has.
+  - Using a power level that equals the power level of the `matrix-corporal` user means that demotion will not be possible. Users of equal power cannot demote one another.
 
 - `forbidRoomCreation` (`true` or `false`, defaults to `false`) - controls whether this user is forbidden from creating rooms. If this field is omitted, the global `forbidRoomCreation` [flag](#flags) is used as a fallback.
 

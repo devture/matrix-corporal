@@ -39,7 +39,7 @@
 			"authType": "plain",
 			"authCredential": "test",
 			"displayName": "User A",
-			"joinedRoomIds": [],
+			"joinedRooms": [],
 			"forbidRoomCreation": false,
 			"forbidEncryptedRoomCreation": true
 		},
@@ -50,7 +50,7 @@
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 			"displayName": "User B",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-			"joinedRoomIds": [],
+			"joinedRooms": [],
 			"forbidRoomCreation": true
 		},
 		{
@@ -59,7 +59,7 @@
 			"authType": "rest",
 			"authCredential": "http://rest-password-auth-service:8080/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "User C",
-			"joinedRoomIds": [],
+			"joinedRooms": [],
 			"forbidRoomCreation": false,
 			"forbidUnencryptedRoomCreation": true
 		}

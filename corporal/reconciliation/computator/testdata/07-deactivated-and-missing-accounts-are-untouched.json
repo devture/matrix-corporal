@@ -11,7 +11,7 @@
 			{
 				"id": "@a:host",
 				"active": false,
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},

@@ -47,11 +47,11 @@ It might be possible to forward traffic selectively (just the "dangerous" or oth
 
 ## Can users join other rooms?
 
-Users are automatically joined and made to leave rooms according to the `joinedRoomIds` field in their [user policy](policy.md#user-policy-fields) and to the global `managedRoomIds` [policy field](policy.md#fields).
+Users are automatically joined and made to leave rooms according to the `joinedRooms` field in their [user policy](policy.md#user-policy-fields) and to the global `managedRoomIds` [policy field](policy.md#fields).
 
 Users can create and join any room which is not listed in the global `managedRoomIds` policy field.
 
-It's just rooms listed in the `managedRoomIds` that `matrix-corporal` cares about and controls tightly (requiring an explicit join rule in the `joinedRoomIds` list for that user).
+It's just rooms listed in the `managedRoomIds` that `matrix-corporal` cares about and controls tightly (requiring an explicit join rule in the `joinedRooms` list for that user).
 
 
 ## Does Matrix Corporal require access to Matrix Synapse's database?

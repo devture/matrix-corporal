@@ -5,7 +5,12 @@
 				"id": "@a:host",
 				"displayName": "A",
 				"active": false,
-				"joinedRoomIds": ["!a:host"]
+				"joinedRooms": [
+					{
+						"roomId": "!a:host",
+						"powerLevel": 0
+					}
+				]
 			}
 		]
 	},
@@ -23,7 +28,7 @@
 				"id": "@a:host",
 				"displayName": "User A",
 				"active": false,
-				"joinedRoomIds": []
+				"joinedRooms": []
 			}
 		]
 	},

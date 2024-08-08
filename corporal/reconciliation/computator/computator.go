@@ -30,6 +30,7 @@ func (me *ReconciliationStateComputator) Compute(
 		Actions: make([]*reconciliation.StateAction, 0),
 	}
 
+	computedActions := make([]*reconciliation.StateAction, 0)
 	for _, userPolicy := range policy.User {
 		userId := userPolicy.Id
 
@@ -42,8 +43,57 @@ func (me *ReconciliationStateComputator) Compute(
 			userPolicy,
 		)
 
-		reconciliationState.Actions = append(reconciliationState.Actions, actions...)
+		computedActions = append(computedActions, actions...)
 	}
+
+	// Group all set power actions for each room
+	groupedActions := make([]*reconciliation.StateAction, 0)
+
+	setPowerActionsByRoomId := make(map[string]*reconciliation.StateAction)
+
+	for _, action := range computedActions {
+		if action.Type != reconciliation.ActionRoomUserSetPowerLevel {
+			groupedActions = append(groupedActions, action)
+			continue
+		}
+
+		roomId, err := action.GetStringPayloadDataByKey("roomId")
+		if err != nil {
+			return nil, err
+		}
+
+		powerLevel, err := action.GetIntPayloadDataByKey("powerLevel")
+		if err != nil {
+			return nil, err
+		}
+
+		userId, err := action.GetStringPayloadDataByKey("userId")
+		if err != nil {
+			return nil, err
+		}
+
+		setPowerAction, exists := setPowerActionsByRoomId[roomId]
+		if !exists {
+			userPowerByRoom := make(map[string]int)
+			userPowerByRoom[userId] = powerLevel
+			newAction := &reconciliation.StateAction{
+				Type: reconciliation.ActionRoomUsersSetPowerLevels,
+				Payload: map[string]interface{}{
+					"roomPowerForUserId": userPowerByRoom,
+					"roomId":             roomId,
+				},
+			}
+			setPowerActionsByRoomId[roomId] = newAction
+		} else {
+			roomPowerPayload := setPowerAction.Payload["roomPowerForUserId"].(map[string]int)
+			roomPowerPayload[userId] = powerLevel
+		}
+	}
+
+	for _, action := range setPowerActionsByRoomId {
+		groupedActions = append(groupedActions, action)
+	}
+	reconciliationState.Actions = groupedActions
 
 	return reconciliationState, nil
 }
@@ -270,37 +320,76 @@ func (me *ReconciliationStateComputator) computeUserRoomChanges(
 ) []*reconciliation.StateAction {
 	var actions []*reconciliation.StateAction
 
-	for _, roomId := range userPolicy.JoinedRoomIds {
-		if !util.IsStringInArray(roomId, managedRoomIds) {
+	for _, room := range userPolicy.JoinedRooms {
+		if !util.IsStringInArray(room.RoomId, managedRoomIds) {
 			me.logger.Warnf(
 				"User %s is supposed to be joined to the %s room, but that room is not managed",
 				userPolicy.Id,
-				roomId,
+				room.RoomId,
 			)
 			continue
 		}
 
-		if currentUserState != nil && util.IsStringInArray(roomId, currentUserState.JoinedRoomIds) {
-			continue
+		var currentRoomPowerFound *int = nil
+		if currentUserState != nil {
+			for _, currentRoom := range currentUserState.JoinedRooms {
+				if currentRoom.RoomId == room.RoomId {
+					currentRoomPowerFound = &currentRoom.PowerLevel
+					break
+				}
+			}
 		}
 
-		actions = append(actions, &reconciliation.StateAction{
-			Type: reconciliation.ActionRoomJoin,
-			Payload: map[string]interface{}{
-				"userId": userId,
-				"roomId": roomId,
-			},
-		})
+		if currentRoomPowerFound == nil {
+			// If the user is not a member of the room, join it
+			actions = append(actions, &reconciliation.StateAction{
+				Type: reconciliation.ActionRoomJoin,
+				Payload: map[string]interface{}{
+					"userId": userId,
+					"roomId": room.RoomId,
+				},
+			})
+			actions = append(actions, &reconciliation.StateAction{
+				Type: reconciliation.ActionRoomUserSetPowerLevel,
+				Payload: map[string]interface{}{
+					"userId":     userId,
+					"roomId":     room.RoomId,
+					"powerLevel": room.PowerLevel,
+				},
+			})
+
+		} else if *currentRoomPowerFound != room.PowerLevel {
+			// If the user is a member of the room but has a different power level, change it
+
+			userPowerByRoom := make(map[string]int)
+			userPowerByRoom[userId] = room.PowerLevel
+			actions = append(actions, &reconciliation.StateAction{
+				Type: reconciliation.ActionRoomUserSetPowerLevel,
+				Payload: map[string]interface{}{
+					"userId":     userId,
+					"roomId":     room.RoomId,
+					"powerLevel": room.PowerLevel,
+				},
+			})
+		}
 	}
 
 	if currentUserState != nil {
-		for _, roomId := range currentUserState.JoinedRoomIds {
-			if !util.IsStringInArray(roomId, managedRoomIds) {
+		for _, room := range currentUserState.JoinedRooms {
+			if !util.IsStringInArray(room.RoomId, managedRoomIds) {
 				//We rightfully ignore rooms we don't care about.
 				continue
 			}
 
-			if util.IsStringInArray(roomId, userPolicy.JoinedRoomIds) {
+			isInPolicyJoinedRooms := false
+			for _, policyRoom := range userPolicy.JoinedRooms {
+				if room.RoomId == policyRoom.RoomId {
+					isInPolicyJoinedRooms = true
+					break
+				}
+			}
+
+			if isInPolicyJoinedRooms {
 				continue
 			}
 
@@ -308,7 +397,7 @@ func (me *ReconciliationStateComputator) computeUserRoomChanges(
 				Type: reconciliation.ActionRoomLeave,
 				Payload: map[string]interface{}{
 					"userId": userId,
-					"roomId": roomId,
+					"roomId": room.RoomId,
 				},
 			})
 		}

@@ -1,0 +1,119 @@
+{
+    "currentState": {
+        "users": [
+            {
+                "id": "@a:host",
+                "active": true,
+                "joinedRooms": [
+                    {
+                        "roomId": "!a:host",
+                        "powerLevel": 0
+                    },
+                    {
+                        "roomId": "!b:host",
+                        "powerLevel": 0
+                    }
+                ]
+            },
+            {
+                "id": "@b:host",
+                "active": true,
+                "joinedRooms": [
+                    {
+                        "roomId": "!a:host",
+                        "powerLevel": 0
+                    },
+                    {
+                        "roomId": "!c:host",
+                        "powerLevel": 0
+                    }
+                ]
+            },
+            {
+                "id": "@c:host",
+                "active": true,
+                "joinedRooms": [
+                    {
+                        "roomId": "!c:host",
+                        "powerLevel": 0
+                    }
+                ]
+            }
+        ]
+    },
+
+    "policy": {
+        "schemaVersion": 1,
+
+        "flags": {
+            "allowCustomUserDisplayNames": true,
+            "allowCustomUserAvatars": true
+        },
+
+        "managedRoomIds": [
+            "!a:host",
+            "!b:host",
+            "!c:host"
+        ],
+
+        "users": [
+            {
+                "id": "@a:host",
+                "active": true,
+                "joinedRooms": [
+                    {
+                        "roomId": "!a:host",
+                        "powerLevel": 10
+                    },
+                    {
+                        "roomId": "!b:host",
+                        "powerLevel": 0
+                    }
+                ]
+            },
+            {
+                "id": "@b:host",
+                "active": true,
+                "joinedRooms": [
+                    {
+                        "roomId": "!a:host",
+                        "powerLevel": 42
+                    },
+                    {
+                        "roomId": "!c:host",
+                        "powerLevel": 0
+                    }
+                ]
+            },
+            {
+                "id": "@c:host",
+                "active": true,
+                "joinedRooms": [
+                    {
+                        "roomId": "!c:host",
+                        "powerLevel": 60
+                    }
+                ]
+            }
+        ]
+    },
+
+    "reconciliationState": {
+        "actions": [
+            {
+                "type": "room.users_set_power_levels",
+                "payload": {
+                    "roomId": "!a:host",
+                    "roomPowerForUserId": "map[@a:host:10 @b:host:42]"
+                }
+            },
+            {
+                "type": "room.users_set_power_levels",
+                "payload": {
+                    "roomId": "!c:host",
+                    "roomPowerForUserId": "map[@c:host:60]"
+                }
+            }
+        ]
+    }
+}
