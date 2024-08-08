@@ -87,7 +87,10 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 			"authCredential": "PaSSw0rD",
 			"displayName": "John",
 			"avatarUri": "https://example.com/john.jpg",
-			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+			"joinedRooms": [
+				{"roomId": "!roomA:example.com", "powerLevel": 0},
+				{"roomId": "!roomB:example.com", "powerLevel": 50}
+			]
 		},
 		{
 			"id": "@peter:example.com",
@@ -96,7 +99,9 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 			"authCredential": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
 			"displayName": "Just Peter",
 			"avatarUri": "",
-			"joinedRoomIds": ["!roomB:example.com"]
+			"joinedRooms": [
+				{"roomId": "!roomB:example.com", "powerLevel": 0}
+			]
 		},
 		{
 			"id": "@george:example.com",
@@ -105,7 +110,10 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 			"authCredential": "https://intranet.example.com/_matrix-internal/identity/v1/check_credentials",
 			"displayName": "Georgey",
 			"avatarUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-			"joinedRoomIds": ["!roomA:example.com", "!roomB:example.com"]
+			"joinedRooms": [
+				{"roomId": "!roomA:example.com", "powerLevel": 25},
+				{"roomId": "!roomB:example.com", "powerLevel": 50}
+			]
 		}
 	]
 }
