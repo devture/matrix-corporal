@@ -4,23 +4,22 @@ variables:
   - &repo 'docker.io/devture/matrix-corporal'
   - &dockerfile 'etc/docker/Dockerfile'
   - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
+  - &builder_image woodpeckerci/plugin-docker-buildx:4.2.0
 
 services:
   docker:
-    image: docker:24.0.7-dind
+    image: docker:27.1.1-dind
     commands:
       - dockerd --tls=false --host=tcp://0.0.0.0:2376
     privileged: true
 
 steps:
-  build-and-push-for-branch:
+  - name: build-and-push-for-branch
     when:
       - event: push
         branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: manual
-    image: woodpeckerci/plugin-docker-buildx:2.2.1
-    environment:
-      - DOCKER_HOST=tcp://docker:2376
+    image: *builder_image
     secrets: [docker_username, docker_password]
     settings:
       repo: *repo
@@ -28,12 +27,10 @@ steps:
       dockerfile: *dockerfile
       platforms: *platforms
 
-  build-and-push-for-tag:
+  - name: build-and-push-for-tag
     when:
       - event: tag
-    image: woodpeckerci/plugin-docker-buildx:2.2.1
-    environment:
-      - DOCKER_HOST=tcp://docker:2376
+    image: *builder_image
     secrets: [docker_username, docker_password]
     settings:
       repo: *repo
