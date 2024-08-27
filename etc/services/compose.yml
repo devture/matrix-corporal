@@ -21,7 +21,7 @@ services:
     restart: on-failure
     ports:
     # This server does not federate, so we don't expose any more ports.
-    - "41408:8008"
+    - "127.0.0.1:41408:8008"
     links:
     - postgres:postgres
     volumes:
@@ -34,7 +34,7 @@ services:
     image: docker.io/vectorim/element-web:v1.11.73
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
-    - "41465:8080"
+    - "127.0.0.1:41465:8080"
     volumes:
     - ../etc/services/matrix-element-web/nginx.conf:/etc/nginx/nginx.conf:ro
     - /dev/null:/etc/nginx/conf.d/default.conf:ro
@@ -43,7 +43,7 @@ services:
   hook-rest-service:
     image: docker.io/php:8.3.10-cli-alpine3.20
     ports:
-    - "41466:8080"
+    - "127.0.0.1:41466:8080"
     volumes:
     - ../etc/services/hook-rest-service:/work:ro
     command: "/usr/local/bin/php -S 0.0.0.0:8080 /work/index.php"
@@ -53,7 +53,7 @@ services:
   rest-password-auth-service:
     image: docker.io/php:8.3.10-cli-alpine3.20
     ports:
-    - "41467:8080"
+    - "127.0.0.1:41467:8080"
     volumes:
     - ../etc/services/rest-password-auth-service:/work:ro
     command: "/usr/local/bin/php -S 0.0.0.0:8080 /work/index.php"
