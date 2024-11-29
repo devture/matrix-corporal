@@ -339,8 +339,18 @@ func (me *ApiConnector) getPowerLevelByRoomIdAndUserId(
 
 	userPowerLevel, ok := jsonObj.Search("users", userId).Data().(float64)
 	if !ok {
-		// Most likely no power level defined for the user, which means the default applies.
-		defaultVal := jsonObj.Search("users_default").Data().(float64)
+		// Most likely no power level defined for the user, which means the default applies (if there is one).
+
+		logger := me.logger.WithField("roomId", roomId).WithField("userId", userId)
+
+		logger.Warn("Failed to determine user's power level")
+
+		defaultVal, ok := jsonObj.Search("users_default").Data().(float64)
+		if !ok {
+			logger.Warn("Failed to determine default room power level")
+			return 0, nil
+		}
+
 		return int(defaultVal), nil
 	}
 
