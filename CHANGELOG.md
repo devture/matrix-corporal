@@ -1,3 +1,8 @@
+# Version 3.1.0 (2024-11-29)
+
+- Improved resiliency when dealing with user power levels (introduced in [version 3.0.0](#version-300-2024-08-08)).
+- Internal compiler and dependency upgrades.
+
 # Version 3.0.0 (2024-08-08)
 
 This release brings support for **power-level management** (thanks to [this PR](https://github.com/devture/matrix-corporal/pull/32)). You will need to adapt your [policy](docs/policy.md) configuration or matrix-corporal will refuse to work with your existing policy.
