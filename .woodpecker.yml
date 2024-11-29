@@ -4,7 +4,7 @@ variables:
   - &repo 'docker.io/devture/matrix-corporal'
   - &dockerfile 'etc/docker/Dockerfile'
   - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
-  - &builder_image woodpeckerci/plugin-docker-buildx:4.2.0
+  - &builder_image woodpeckerci/plugin-docker-buildx:5.0.0
 
 services:
   docker:
@@ -20,9 +20,12 @@ steps:
         branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: manual
     image: *builder_image
-    secrets: [docker_username, docker_password]
     settings:
       repo: *repo
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
       tag: latest
       dockerfile: *dockerfile
       platforms: *platforms
@@ -31,9 +34,12 @@ steps:
     when:
       - event: tag
     image: *builder_image
-    secrets: [docker_username, docker_password]
     settings:
       repo: *repo
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
       tag: ${CI_COMMIT_TAG}
       dockerfile: *dockerfile
       platforms: *platforms
