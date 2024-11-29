@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/matrix-org/gomatrix"
 )
 
@@ -332,10 +332,7 @@ func (me *ApiConnector) getPowerLevelByRoomIdAndUserId(
 		return 0, err
 	}
 
-	jsonObj, err := gabs.Consume(content)
-	if err != nil {
-		return 0, err
-	}
+	jsonObj := gabs.Wrap(content)
 
 	userPowerLevel, ok := jsonObj.Search("users", userId).Data().(float64)
 	if !ok {
@@ -478,10 +475,7 @@ func (me *ApiConnector) DemoteUserInRoom(
 		return err
 	}
 
-	jsonObj, err := gabs.Consume(powerLevels)
-	if err != nil {
-		return err
-	}
+	jsonObj := gabs.Wrap(powerLevels)
 
 	userPowerLevel, ok := jsonObj.Search("users", userId).Data().(float64)
 	if !ok {
@@ -564,10 +558,7 @@ func (me *ApiConnector) UpdateRoomUserPowerLevel(
 		return err
 	}
 
-	jsonObj, err := gabs.Consume(content)
-	if err != nil {
-		return err
-	}
+	jsonObj := gabs.Wrap(content)
 
 	for userId, powerLevel := range roomPowerForUserId {
 		_, err = jsonObj.Set(powerLevel, "users", userId)

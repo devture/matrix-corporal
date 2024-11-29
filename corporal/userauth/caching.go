@@ -6,7 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 )
 
 // CacheFallbackAuthenticator is a user authenticator which wraps another authenticator for resilience.
@@ -20,14 +20,14 @@ import (
 type CacheFallbackAuthenticator struct {
 	authType string
 	other    Authenticator
-	cache    *lru.Cache
+	cache    *lru.Cache[string, bool]
 	logger   *logrus.Logger
 }
 
 func NewCacheFallackAuthenticator(
 	authType string,
 	other Authenticator,
-	cache *lru.Cache,
+	cache *lru.Cache[string, bool],
 	logger *logrus.Logger,
 ) *CacheFallbackAuthenticator {
 	return &CacheFallbackAuthenticator{
@@ -69,5 +69,5 @@ func (me *CacheFallbackAuthenticator) Authenticate(userId, givenPassword, authCr
 		errUpstream,
 	)
 
-	return cacheResult.(bool), nil
+	return cacheResult, nil
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 
 	"github.com/matrix-org/gomatrix"
 	"github.com/sirupsen/logrus"
@@ -14,14 +14,14 @@ import (
 // This value is never returned. It's just used internally for caching.
 const userIdUnknownToken = "."
 
-type accessTokenResolvingResult struct {
+type AccessTokenResolvingResult struct {
 	matrixUserID       string
 	expiresAtTimestamp int64
 }
 
 type UserMappingResolver struct {
 	logger                      *logrus.Logger
-	accessTokenToUserIdCacheMap *lru.TwoQueueCache
+	accessTokenToUserIdCacheMap *lru.TwoQueueCache[string, AccessTokenResolvingResult]
 	homeserverApiEndpoint       string
 	expirationTimeMilliseconds  int64
 }
@@ -29,7 +29,7 @@ type UserMappingResolver struct {
 func NewUserMappingResolver(
 	logger *logrus.Logger,
 	homeserverApiEndpoint string,
-	cache *lru.TwoQueueCache,
+	cache *lru.TwoQueueCache[string, AccessTokenResolvingResult],
 	expirationTimeMilliseconds int64,
 ) *UserMappingResolver {
 	return &UserMappingResolver{
@@ -43,14 +43,12 @@ func NewUserMappingResolver(
 func (me *UserMappingResolver) ResolveByAccessToken(accessToken string) (string, error) {
 	me.logger.Debugf("Resolve request for token %s", accessToken)
 
-	cachedResultInterface, exists := me.accessTokenToUserIdCacheMap.Get(accessToken)
+	cachedResult, exists := me.accessTokenToUserIdCacheMap.Get(accessToken)
 	if exists {
-		cachedResult := cachedResultInterface.(accessTokenResolvingResult)
-
 		if int64(cachedResult.expiresAtTimestamp) > time.Now().Unix() {
 			if cachedResult.matrixUserID == userIdUnknownToken {
 				me.logger.Debugf("Unknown token, from cache")
-				return "", fmt.Errorf("Unknown token (cached)")
+				return "", fmt.Errorf("unknown token (cached)")
 			}
 
 			me.logger.Debugf("Resolved to %s from cache", cachedResult.matrixUserID)
@@ -69,18 +67,18 @@ func (me *UserMappingResolver) ResolveByAccessToken(accessToken string) (string,
 		// Certain common and expected errors (M_UNKNOWN_TOKEN), we try to interpret and possibly cache.
 		// Others, we just return blindly, without caching.
 		if IsErrorWithCode(err, ErrorUnknownToken) {
-			go me.accessTokenToUserIdCacheMap.Add(accessToken, accessTokenResolvingResult{
+			go me.accessTokenToUserIdCacheMap.Add(accessToken, AccessTokenResolvingResult{
 				matrixUserID:       userIdUnknownToken,
 				expiresAtTimestamp: time.Now().Add(time.Duration(me.expirationTimeMilliseconds) * time.Millisecond).Unix(),
 			})
 
-			return "", fmt.Errorf("Unknown token")
+			return "", fmt.Errorf("unknown token")
 		}
 
 		return "", err
 	}
 
-	result := accessTokenResolvingResult{
+	result := AccessTokenResolvingResult{
 		matrixUserID:       resp.UserId,
 		expiresAtTimestamp: time.Now().Add(time.Duration(me.expirationTimeMilliseconds) * time.Millisecond).Unix(),
 	}

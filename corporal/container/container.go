@@ -23,7 +23,7 @@ import (
 	"net/url"
 	"time"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 
 	"github.com/euskadi31/go-service"
 	"github.com/sirupsen/logrus"
@@ -55,7 +55,7 @@ func BuildContainer(
 	})
 
 	container.Set("matrix.user_mapping_resolver.cache", func(c service.Container) interface{} {
-		cache, err := lru.New2Q(configuration.HttpGateway.UserMappingResolver.CacheSize)
+		cache, err := lru.New2Q[string, matrix.AccessTokenResolvingResult](configuration.HttpGateway.UserMappingResolver.CacheSize)
 		if err != nil {
 			panic(err)
 		}
@@ -66,7 +66,7 @@ func BuildContainer(
 		return matrix.NewUserMappingResolver(
 			logger,
 			configuration.Matrix.HomeserverApiEndpoint,
-			container.Get("matrix.user_mapping_resolver.cache").(*lru.TwoQueueCache),
+			container.Get("matrix.user_mapping_resolver.cache").(*lru.TwoQueueCache[string, matrix.AccessTokenResolvingResult]),
 			configuration.HttpGateway.UserMappingResolver.ExpirationTimeMilliseconds,
 		)
 	})
@@ -256,7 +256,7 @@ func BuildContainer(
 	})
 
 	container.Set("matrix.userauth.rest_cache", func(c service.Container) interface{} {
-		cache, err := lru.New(1000)
+		cache, err := lru.New[string, bool](1000)
 		if err != nil {
 			panic(err)
 		}
@@ -278,7 +278,7 @@ func BuildContainer(
 		instance.RegisterAuthenticator(userauth.NewCacheFallackAuthenticator(
 			"rest-with-cache-fallback",
 			restAuthenticator,
-			container.Get("matrix.userauth.rest_cache").(*lru.Cache),
+			container.Get("matrix.userauth.rest_cache").(*lru.Cache[string, bool]),
 			logger,
 		))
 
