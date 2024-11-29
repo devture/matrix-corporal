@@ -1,7 +1,12 @@
+# Version 3.1.1 (2024-11-29)
+
+CI pipeline fixes.
+
 # Version 3.1.0 (2024-11-29)
 
 - Improved resiliency when dealing with user power levels (introduced in [version 3.0.0](#version-300-2024-08-08)).
 - Internal compiler and dependency upgrades.
+
 
 # Version 3.0.0 (2024-08-08)
 
