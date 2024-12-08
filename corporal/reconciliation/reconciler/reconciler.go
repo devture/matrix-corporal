@@ -87,14 +87,14 @@ func (me *Reconciler) Reconcile(policy *policy.Policy) error {
 		handlerFunc, exists := me.handlers[action.Type]
 		if !exists {
 			err = fmt.Errorf("Missing reconciliation handler")
-			logger.Errorf(err.Error())
+			logger.Error(err.Error())
 			return err
 		}
 
 		err = handlerFunc(ctx, action)
 		if err != nil {
 			err = fmt.Errorf("Failed reconciliation handler: %s", err)
-			logger.Errorf(err.Error())
+			logger.Error(err.Error())
 			return err
 		}
 
