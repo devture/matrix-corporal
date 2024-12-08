@@ -1,6 +1,12 @@
+# Version 3.1.2 (2024-12-08)
+
+Internal compiler and dependency upgrades.
+
+
 # Version 3.1.1 (2024-11-29)
 
 CI pipeline fixes.
+
 
 # Version 3.1.0 (2024-11-29)
 
