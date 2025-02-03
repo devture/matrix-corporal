@@ -10,10 +10,11 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/matrix-org/gomatrix v0.0.0-20220926102614-ceba4d9f7530
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/crypto v0.30.0
+	golang.org/x/crypto v0.32.0
 )
 
 require (
-	golang.org/x/sys v0.28.0 // indirect
+	github.com/ahmetb/govvv v0.3.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
