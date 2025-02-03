@@ -4,11 +4,11 @@ variables:
   - &repo 'docker.io/devture/matrix-corporal'
   - &dockerfile 'etc/docker/Dockerfile'
   - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
-  - &builder_image woodpeckerci/plugin-docker-buildx:5.0.0
+  - &builder_image woodpeckerci/plugin-docker-buildx:5.2.0
 
 services:
   docker:
-    image: docker:27.1.1-dind
+    image: docker:27.5.1-dind
     commands:
       - dockerd --tls=false --host=tcp://0.0.0.0:2376
     privileged: true
