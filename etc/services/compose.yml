@@ -31,7 +31,7 @@ services:
     - ./matrix-synapse-media-store:/media_store
 
   element-web:
-    image: docker.io/vectorim/element-web:v1.11.92
+    image: docker.io/vectorim/element-web:v1.11.93
     user: ${CURRENT_USER_UID}:${CURRENT_USER_GID}
     ports:
     - "127.0.0.1:41465:8080"
