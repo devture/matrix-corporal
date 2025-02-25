@@ -1,3 +1,9 @@
+# Version 3.1.4 (2025-02-25)
+
+- Internal compiler and dependency upgrades.
+- Switched from a [Woodpecker CI](https://woodpecker-ci.org/)-powered build pipeline to one powered by [Github Actions](https://github.com/features/actions)
+- Switched where prebuilt container images are published from [Docker Hub](https://hub.docker.com/) (`docker.io/devture/matrix-corporal`) to [Github Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (`ghcr.io/devture/matrix-corporal`). You can find hte new container images [here](https://github.com/devture/matrix-corporal/pkgs/container/matrix-corporal)
+
 # Version 3.1.3 (2025-02-03)
 
 Internal compiler and dependency upgrades.
