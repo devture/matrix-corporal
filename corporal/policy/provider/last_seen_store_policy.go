@@ -5,7 +5,7 @@ import (
 	"devture-matrix-corporal/corporal/policy"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"sync"
 
@@ -89,7 +89,7 @@ func (me *LastSeenStorePolicyProvider) load() error {
 	}
 	defer file.Close()
 
-	bytes, err := ioutil.ReadAll(file)
+	bytes, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}

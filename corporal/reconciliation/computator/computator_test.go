@@ -6,7 +6,7 @@ import (
 	"devture-matrix-corporal/corporal/reconciliation"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +28,7 @@ func TestReconciliationStateComputation(t *testing.T) {
 	}
 
 	logger := logrus.New()
-	logger.Out = ioutil.Discard
+	logger.Out = io.Discard
 
 	reconciliationComputator := NewReconciliationStateComputator(logger)
 
@@ -47,7 +47,7 @@ func TestReconciliationStateComputation(t *testing.T) {
 			}
 			defer f.Close()
 
-			bytes, err := ioutil.ReadAll(f)
+			bytes, err := io.ReadAll(f)
 			if err != nil {
 				t.Errorf("Failed reading from file: %s: %s", testPath, err)
 				return

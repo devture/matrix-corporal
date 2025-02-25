@@ -9,7 +9,7 @@ import (
 	"devture-matrix-corporal/corporal/util"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -182,7 +182,7 @@ func (me *LoginInterceptor) Intercept(r *http.Request) InterceptorResponse {
 		return createInterceptorErrorResponse(loggingContextFields, matrix.ErrorUnknown, "Internal error")
 	}
 
-	r.Body = ioutil.NopCloser(bytes.NewReader(newBodyBytes))
+	r.Body = io.NopCloser(bytes.NewReader(newBodyBytes))
 	r.ContentLength = int64(len(newBodyBytes))
 
 	return InterceptorResponse{

@@ -5,7 +5,7 @@ import (
 	"devture-matrix-corporal/corporal/policy"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"sync"
@@ -199,7 +199,7 @@ func (me *HttpProvider) loadPolicyFromRemote() (*policy.Policy, error) {
 		return nil, fmt.Errorf("non-200 response fetching from URL: %d", resp.StatusCode)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed reading HTTP response body: %s", err)
 	}
@@ -218,7 +218,7 @@ func (me *HttpProvider) loadPolicyFromCache() (*policy.Policy, error) {
 	}
 	defer file.Close()
 
-	bytes, err := ioutil.ReadAll(file)
+	bytes, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}

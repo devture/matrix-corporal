@@ -4,7 +4,7 @@ import (
 	"devture-matrix-corporal/corporal/configuration"
 	"devture-matrix-corporal/corporal/policy"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"sync"
 	"time"
@@ -91,7 +91,7 @@ func (me *StaticFileProvider) load() error {
 	}
 	defer file.Close()
 
-	bytes, err := ioutil.ReadAll(file)
+	bytes, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package policy
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +45,7 @@ func TestPolicyPermissionAssertment(t *testing.T) {
 			}
 			defer f.Close()
 
-			bytes, err := ioutil.ReadAll(f)
+			bytes, err := io.ReadAll(f)
 			if err != nil {
 				t.Errorf("Failed reading from file: %s: %s", testPath, err)
 				return

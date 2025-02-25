@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -31,7 +30,7 @@ func (me *AvatarReader) Read(avatarUri string) (*Avatar, error) {
 	}
 
 	if avatarUri == "" {
-		avatar.Body = ioutil.NopCloser(bytes.NewReader([]byte{}))
+		avatar.Body = io.NopCloser(bytes.NewReader([]byte{}))
 		return avatar, nil
 	}
 
@@ -58,7 +57,7 @@ func (me *AvatarReader) Read(avatarUri string) (*Avatar, error) {
 		}
 
 		avatar.ContentLength = int64(len(dataBytes))
-		avatar.Body = ioutil.NopCloser(bytes.NewReader(dataBytes))
+		avatar.Body = io.NopCloser(bytes.NewReader(dataBytes))
 
 		return avatar, nil
 	}
@@ -75,14 +74,14 @@ func (me *AvatarReader) Read(avatarUri string) (*Avatar, error) {
 		return nil, fmt.Errorf("Non-200 response fetching from URL: %d", resp.StatusCode)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Failed reading HTTP response body: %s", err)
 	}
 
 	avatar.ContentType = resp.Header.Get("Content-Type")
 	avatar.ContentLength = int64(len(bodyBytes))
-	avatar.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes))
+	avatar.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 
 	return avatar, nil
 }

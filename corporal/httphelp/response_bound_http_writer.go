@@ -2,7 +2,7 @@ package httphelp
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -50,13 +50,13 @@ func (me ResponseBoundHttpWriter) WriteHeader(statusCode int) {
 // While other things (headers, status code) are bound immediately, the response payload
 // is buffered and will only get bound when you call this.
 func (me ResponseBoundHttpWriter) Commit() {
-	b, err := ioutil.ReadAll(me.responseBytes)
+	b, err := io.ReadAll(me.responseBytes)
 	if err != nil {
 		panic(err)
 	}
 
 	if len(b) > 0 {
-		me.response.Body = ioutil.NopCloser(bytes.NewReader(b))
+		me.response.Body = io.NopCloser(bytes.NewReader(b))
 	}
 }
 

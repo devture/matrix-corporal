@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/gorilla/mux"
 )
@@ -15,11 +14,11 @@ type HandlerRegistrator interface {
 
 func readBytesAndRecreateReader(source io.ReadCloser) ([]byte, io.ReadCloser, error) {
 	// Reading an unlimited amount of data might be dangerous.
-	sourceBytes, err := ioutil.ReadAll(source)
+	sourceBytes, err := io.ReadAll(source)
 	source.Close()
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot read bytes from source reader")
 	}
 
-	return sourceBytes, ioutil.NopCloser(bytes.NewReader(sourceBytes)), nil
+	return sourceBytes, io.NopCloser(bytes.NewReader(sourceBytes)), nil
 }

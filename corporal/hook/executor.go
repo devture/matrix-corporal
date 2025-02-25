@@ -6,7 +6,7 @@ import (
 	"devture-matrix-corporal/corporal/matrix"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -133,7 +133,7 @@ func (me *Executor) executeAfterHook(
 		logger.Debugln("In after-hook response modifier")
 
 		if len(requestBodyBytes) > 0 {
-			request.Body = ioutil.NopCloser(bytes.NewReader(requestBodyBytes))
+			request.Body = io.NopCloser(bytes.NewReader(requestBodyBytes))
 
 			logger.Debugf(
 				"Restored %d bytes of request payload so the hook can use it\n",
@@ -398,7 +398,7 @@ func executePassModifiedRequest(hookObj *Hook, w http.ResponseWriter, request *h
 		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Failed to serialize modified response payload as JSON: %s", err))
 	}
 
-	request.Body = ioutil.NopCloser(bytes.NewReader(newRequestBytes))
+	request.Body = io.NopCloser(bytes.NewReader(newRequestBytes))
 	request.ContentLength = int64(len(newRequestBytes))
 
 	if hookObj.InjectHeadersIntoRequest != nil {
@@ -454,7 +454,7 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 			return true, err
 		}
 
-		response.Body = ioutil.NopCloser(bytes.NewReader(newResponseBytes))
+		response.Body = io.NopCloser(bytes.NewReader(newResponseBytes))
 		response.ContentLength = int64(len(newResponseBytes))
 
 		if hookObj.InjectHeadersIntoResponse != nil {

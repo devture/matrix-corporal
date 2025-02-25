@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -52,7 +52,7 @@ func (me *RestAuthenticator) Authenticate(userId, givenPassword, authCredential 
 		return false, fmt.Errorf("Non-OK HTTP response for %s: %d", restAuthApiUrl, response.StatusCode)
 	}
 
-	responseBytes, err := ioutil.ReadAll(response.Body)
+	responseBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return false, err
 	}

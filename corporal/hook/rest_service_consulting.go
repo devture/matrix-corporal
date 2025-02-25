@@ -6,7 +6,7 @@ import (
 	"devture-matrix-corporal/corporal/httphelp"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -189,7 +189,7 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(
 			continue
 		}
 
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			// This is probably an error on our side, so retrying may be silly.
 			restError = fmt.Errorf("Failed reading HTTP response body: %s", err)
