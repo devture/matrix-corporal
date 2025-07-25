@@ -43,7 +43,7 @@ It's probably best explained with an example. Here's a [policy](docs/policy.md) 
 
 ```json
 {
-	"schemaVersion": 1,
+	"schemaVersion": 2,
 
 	"flags": {
 		"allowCustomUserDisplayNames": false,
