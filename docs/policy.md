@@ -11,7 +11,7 @@ The policy is a JSON document that looks like this:
 
 ```json
 {
-	"schemaVersion": 1,
+	"schemaVersion": 2,
 
 	"identificationStamp": null,
 

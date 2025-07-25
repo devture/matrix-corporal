@@ -11,7 +11,7 @@
 	},
 
 	"policy": {
-		"schemaVersion": 1,
+		"schemaVersion": 2,
 
 		"flags": {
 			"allowCustomUserDisplayNames": false,
