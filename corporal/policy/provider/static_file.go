@@ -68,7 +68,10 @@ func (me *StaticFileProvider) Start() error {
 func (me *StaticFileProvider) Stop() {
 	me.logger.Infof("Stopping policy provider: %s", me.Type())
 
-	me.watcher.Close()
+	err := me.watcher.Close()
+	if err != nil {
+		me.logger.Errorf("failed closing inotify watcher: %s", err)
+	}
 }
 
 func (me *StaticFileProvider) Reload() {
@@ -89,7 +92,7 @@ func (me *StaticFileProvider) load() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {

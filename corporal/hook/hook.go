@@ -173,7 +173,7 @@ func (me Hook) Validate() error {
 	for idx, matchRule := range me.MatchRules {
 		err := matchRule.validate()
 		if err != nil {
-			return fmt.Errorf("Error when validating hook #%s's match rule #%d: %s", me.ID, idx, err)
+			return fmt.Errorf("error when validating hook #%s's match rule #%d: %s", me.ID, idx, err)
 		}
 	}
 

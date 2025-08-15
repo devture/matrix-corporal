@@ -72,7 +72,7 @@ func (me *Reconciler) Reconcile(policy *policy.Policy) error {
 
 	currentState, err := me.connector.DetermineCurrentState(ctx, policy.GetManagedUserIds(), me.reconciliatorUserId)
 	if err != nil {
-		return fmt.Errorf("Failure determining current state: %s", err)
+		return fmt.Errorf("failed determining current state: %s", err)
 	}
 
 	reconciliationState, err := me.computator.Compute(currentState, policy)
@@ -86,14 +86,14 @@ func (me *Reconciler) Reconcile(policy *policy.Policy) error {
 
 		handlerFunc, exists := me.handlers[action.Type]
 		if !exists {
-			err = fmt.Errorf("Missing reconciliation handler")
+			err = fmt.Errorf("missing reconciliation handler")
 			logger.Error(err.Error())
 			return err
 		}
 
 		err = handlerFunc(ctx, action)
 		if err != nil {
-			err = fmt.Errorf("Failed reconciliation handler: %s", err)
+			err = fmt.Errorf("failed reconciliation handler: %s", err)
 			logger.Error(err.Error())
 			return err
 		}
@@ -117,7 +117,7 @@ func (me *Reconciler) reconcileForActionUserCreate(ctx *connector.AccessTokenCon
 
 	err = me.connector.EnsureUserAccountExists(userId, password)
 	if err != nil {
-		return fmt.Errorf("Failed ensuring %s is created: %s", userId, err)
+		return fmt.Errorf("failed ensuring %s is created: %s", userId, err)
 	}
 
 	return nil
@@ -136,7 +136,7 @@ func (me *Reconciler) reconcileForActionUserSetDisplayName(ctx *connector.Access
 
 	err = me.connector.SetUserDisplayName(ctx, userId, displayName)
 	if err != nil {
-		return fmt.Errorf("Failed setting user display name (%s) for %s: %s", displayName, userId, err)
+		return fmt.Errorf("failed setting user display name (%s) for %s: %s", displayName, userId, err)
 	}
 
 	return nil
@@ -155,12 +155,12 @@ func (me *Reconciler) reconcileForActionUserSetAvatar(ctx *connector.AccessToken
 
 	avatar, err := me.avatarReader.Read(avatarUri)
 	if err != nil {
-		return fmt.Errorf("Failed reading user avatar from %s: %s", avatarUri, err)
+		return fmt.Errorf("failed reading user avatar from %s: %s", avatarUri, err)
 	}
 
 	err = me.connector.SetUserAvatar(ctx, userId, avatar)
 	if err != nil {
-		return fmt.Errorf("Failed setting user avatar for %s: %s", userId, err)
+		return fmt.Errorf("failed setting user avatar for %s: %s", userId, err)
 	}
 
 	return nil
@@ -174,7 +174,7 @@ func (me *Reconciler) reconcileForActionUserActivate(ctx *connector.AccessTokenC
 
 	userProfile, err := me.connector.GetUserProfileByUserId(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("Failed retrieving user profile: %s", err)
+		return fmt.Errorf("failed retrieving user profile: %s", err)
 	}
 
 	if !matrix.IsUserDeactivatedAccordingToDisplayName(userProfile.DisplayName) {
@@ -186,7 +186,7 @@ func (me *Reconciler) reconcileForActionUserActivate(ctx *connector.AccessTokenC
 
 	err = me.connector.SetUserDisplayName(ctx, userId, newDisplayName)
 	if err != nil {
-		return fmt.Errorf("Failed setting display name (%s) for %s: %s", newDisplayName, userId, err)
+		return fmt.Errorf("failed setting display name (%s) for %s: %s", newDisplayName, userId, err)
 	}
 
 	return nil
@@ -200,12 +200,12 @@ func (me *Reconciler) reconcileForActionUserDeactivate(ctx *connector.AccessToke
 
 	userProfile, err := me.connector.GetUserProfileByUserId(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("Failed retrieving user profile: %s", err)
+		return fmt.Errorf("failed retrieving user profile: %s", err)
 	}
 
 	err = me.connector.LogoutAllAccessTokensForUser(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("Failed logging out all access tokens: %s", err)
+		return fmt.Errorf("failed logging out all access tokens: %s", err)
 	}
 
 	if !matrix.IsUserDeactivatedAccordingToDisplayName(userProfile.DisplayName) {
@@ -216,7 +216,7 @@ func (me *Reconciler) reconcileForActionUserDeactivate(ctx *connector.AccessToke
 		)
 		err = me.connector.SetUserDisplayName(ctx, userId, newDisplayName)
 		if err != nil {
-			return fmt.Errorf("Failed setting display name (%s) for %s: %s", newDisplayName, userId, err)
+			return fmt.Errorf("failed setting display name (%s) for %s: %s", newDisplayName, userId, err)
 		}
 	}
 

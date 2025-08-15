@@ -193,7 +193,7 @@ func (me *HttpProvider) loadPolicyFromRemote() (*policy.Policy, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("non-200 response fetching from URL: %d", resp.StatusCode)
@@ -216,7 +216,7 @@ func (me *HttpProvider) loadPolicyFromCache() (*policy.Policy, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {
@@ -240,7 +240,7 @@ func (me *HttpProvider) storePolicyInCache(policy *policy.Policy) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	_, err = file.Write(jsonBytes)
 	if err != nil {

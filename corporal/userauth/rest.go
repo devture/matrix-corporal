@@ -49,7 +49,7 @@ func (me *RestAuthenticator) Authenticate(userId, givenPassword, authCredential 
 	}
 
 	if response.StatusCode != 200 {
-		return false, fmt.Errorf("Non-OK HTTP response for %s: %d", restAuthApiUrl, response.StatusCode)
+		return false, fmt.Errorf("non-OK HTTP response for %s: %d", restAuthApiUrl, response.StatusCode)
 	}
 
 	responseBytes, err := io.ReadAll(response.Body)
@@ -60,7 +60,7 @@ func (me *RestAuthenticator) Authenticate(userId, givenPassword, authCredential 
 	var authResult RestAuthResponse
 	err = json.Unmarshal(responseBytes, &authResult)
 	if err != nil {
-		return false, fmt.Errorf("Failed to decode JSON (%s) for %s: %s", err, restAuthApiUrl, responseBytes)
+		return false, fmt.Errorf("failed to decode JSON (%s) for %s: %s", err, restAuthApiUrl, responseBytes)
 	}
 
 	return authResult.Auth.Success, nil

@@ -176,15 +176,15 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(
 
 		resp, err := me.httpClient.Do(requestToSend)
 		if err != nil {
-			restError = fmt.Errorf("Error fetching from URL: %s", err)
+			restError = fmt.Errorf("error fetching from URL: %s", err)
 			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
 			continue
 		}
 
-		defer resp.Body.Close()
+		defer resp.Body.Close() //nolint:errcheck
 
 		if resp.StatusCode != 200 {
-			restError = fmt.Errorf("Non-200 response: %d", resp.StatusCode)
+			restError = fmt.Errorf("non-200 response: %d", resp.StatusCode)
 			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
 			continue
 		}
@@ -192,7 +192,7 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			// This is probably an error on our side, so retrying may be silly.
-			restError = fmt.Errorf("Failed reading HTTP response body: %s", err)
+			restError = fmt.Errorf("failed reading HTTP response body: %s", err)
 			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
 			continue
 		}
@@ -200,7 +200,7 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(
 		var responseHook Hook
 		err = json.Unmarshal(bodyBytes, &responseHook)
 		if err != nil {
-			restError = fmt.Errorf("Failed parsing JSON out of response: %s", err)
+			restError = fmt.Errorf("failed parsing JSON out of response: %s", err)
 			logger.Warnf("RESTServiceConsultor: failed: %s", restError)
 			continue
 		}
@@ -209,7 +209,7 @@ func (me *RESTServiceConsultor) callRestServiceWithRetries(
 	}
 
 	err := fmt.Errorf(
-		"Failed after trying %d times. Last error: %s",
+		"failed after trying %d times. last error: %s",
 		attemptsCount,
 		restError,
 	)
@@ -295,7 +295,7 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 
 	payloadBytes, err := httphelp.GetRequestBody(request)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading request body: %s", err)
+		return nil, fmt.Errorf("failed reading request body: %s", err)
 	}
 	consultingRequest.Request.Payload = string(payloadBytes)
 
@@ -318,7 +318,7 @@ func prepareConsultingHTTPRequestPayload(request *http.Request, response *http.R
 
 		responseBytes, err := httphelp.GetResponseBody(response)
 		if err != nil {
-			return nil, fmt.Errorf("Failed reading response body: %s", err)
+			return nil, fmt.Errorf("failed reading response body: %s", err)
 		}
 
 		consultingRequest.Response.Payload = string(responseBytes)

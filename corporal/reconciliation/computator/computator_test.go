@@ -42,21 +42,21 @@ func TestReconciliationStateComputation(t *testing.T) {
 
 			f, err := os.Open(testPath)
 			if err != nil {
-				t.Errorf("Failed to open file: %s: %s", testPath, err)
+				t.Errorf("failed to open file: %s: %s", testPath, err)
 				return
 			}
-			defer f.Close()
+			defer f.Close() //nolint:errcheck
 
 			bytes, err := io.ReadAll(f)
 			if err != nil {
-				t.Errorf("Failed reading from file: %s: %s", testPath, err)
+				t.Errorf("failed reading from file: %s: %s", testPath, err)
 				return
 			}
 
 			var testData TestData
 			err = json.Unmarshal(bytes, &testData)
 			if err != nil {
-				t.Errorf("Failed to decode JSON from file: %s: %s", testPath, err)
+				t.Errorf("failed to decode JSON from file: %s: %s", testPath, err)
 				return
 			}
 
@@ -65,14 +65,14 @@ func TestReconciliationStateComputation(t *testing.T) {
 				&testData.Policy,
 			)
 			if err != nil {
-				t.Errorf("Failed to compute reconciliation state for file: %s: %s", testPath, err)
+				t.Errorf("failed to compute reconciliation state for file: %s: %s", testPath, err)
 				return
 			}
 
 			err = determineReconciliationStateMismatchError(&testData.ReconciliationState, computedReconciliationState)
 			if err != nil {
 				t.Errorf(
-					"Unexpected reconciliation state for: %s: %s. \nExpected:\n%#v\n\nComputed:\n%#v",
+					"unexpected reconciliation state for %s: %s. \nExpected:\n%#v\n\nComputed:\n%#v",
 					testPath,
 					err,
 					testData.ReconciliationState.Actions,

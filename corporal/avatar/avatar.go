@@ -40,20 +40,20 @@ func (me *AvatarReader) Read(avatarUri string) (*Avatar, error) {
 
 		semiColon := strings.Index(dataContent, ";")
 		if semiColon == -1 {
-			return nil, fmt.Errorf("Malformed data URI, cannot find semicolon")
+			return nil, fmt.Errorf("malformed data URI, cannot find semicolon")
 		}
 		avatar.ContentType = dataContent[:semiColon]
 
 		commaPos := strings.Index(dataContent, ",")
 		if commaPos == -1 {
-			return nil, fmt.Errorf("Malformed data URI, cannot find comma")
+			return nil, fmt.Errorf("malformed data URI, cannot find comma")
 		}
 
 		dataBase64 := dataContent[commaPos+1:]
 
 		dataBytes, err := base64.StdEncoding.DecodeString(dataBase64)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to base64-decode data: %s", err)
+			return nil, fmt.Errorf("failed to base64-decode data: %s", err)
 		}
 
 		avatar.ContentLength = int64(len(dataBytes))
@@ -68,15 +68,15 @@ func (me *AvatarReader) Read(avatarUri string) (*Avatar, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Non-200 response fetching from URL: %d", resp.StatusCode)
+		return nil, fmt.Errorf("non-200 response fetching from URL: %d", resp.StatusCode)
 	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Failed reading HTTP response body: %s", err)
+		return nil, fmt.Errorf("failed reading HTTP response body: %s", err)
 	}
 
 	avatar.ContentType = resp.Header.Get("Content-Type")

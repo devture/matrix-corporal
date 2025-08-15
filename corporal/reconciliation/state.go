@@ -19,7 +19,7 @@ func (me *StateAction) GetStringPayloadDataByKey(key string) (string, error) {
 
 	dataCasted, castOk := data.(string)
 	if !castOk {
-		return "", fmt.Errorf("Failed casting payload data for: %s", key)
+		return "", fmt.Errorf("failed casting payload data for: %s", key)
 	}
 	return dataCasted, nil
 }
@@ -32,7 +32,7 @@ func (me *StateAction) GetIntPayloadDataByKey(key string) (int, error) {
 
 	dataCasted, castOk := data.(int)
 	if !castOk {
-		return 0, fmt.Errorf("Failed casting payload data for: %s", key)
+		return 0, fmt.Errorf("failed casting payload data for: %s", key)
 	}
 	return dataCasted, nil
 }
@@ -40,7 +40,7 @@ func (me *StateAction) GetIntPayloadDataByKey(key string) (int, error) {
 func (me *StateAction) GetPayloadDataByKey(key string) (interface{}, error) {
 	data, exists := me.Payload[key]
 	if !exists {
-		return nil, fmt.Errorf("Missing %s payload data", key)
+		return nil, fmt.Errorf("missing %s payload data", key)
 	}
 	return data, nil
 }

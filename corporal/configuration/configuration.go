@@ -72,21 +72,22 @@ type PolicyProvider map[string]interface{}
 func LoadConfiguration(filePath string, logger *logrus.Logger) (*Configuration, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to read configuration from %s: %s", filePath, err)
+		return nil, fmt.Errorf("failed to read configuration from %s: %s", filePath, err)
 	}
+	defer file.Close() //nolint:errcheck
 
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
 	err = decoder.Decode(&configuration)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to decode JSON: %s", err)
+		return nil, fmt.Errorf("failed to decode JSON: %s", err)
 	}
 
 	setConfigurationDefaults(&configuration)
 
 	err = validateConfiguration(&configuration, logger)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to validate configuration: %s", err)
+		return nil, fmt.Errorf("failed to validate configuration: %s", err)
 	}
 
 	return &configuration, nil

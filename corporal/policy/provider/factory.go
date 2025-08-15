@@ -15,7 +15,7 @@ func CreateProviderByConfig(
 ) (Provider, error) {
 	providerType, exists := config["Type"]
 	if !exists {
-		return nil, fmt.Errorf("Provider configuration is missing a type: %#v", config)
+		return nil, fmt.Errorf("provider configuration is missing a type: %#v", config)
 	}
 
 	if providerType == "static_file" {
@@ -30,5 +30,5 @@ func CreateProviderByConfig(
 		return NewLastSeenStorePolicyProvider(config, store, logger)
 	}
 
-	return nil, fmt.Errorf("Unknown provider type: %s", providerType)
+	return nil, fmt.Errorf("unknown provider type: %s", providerType)
 }

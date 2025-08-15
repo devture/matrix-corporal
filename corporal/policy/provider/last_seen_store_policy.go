@@ -36,7 +36,7 @@ func NewLastSeenStorePolicyProvider(
 ) (*LastSeenStorePolicyProvider, error) {
 	cachePath, exists := config["CachePath"]
 	if !exists {
-		return nil, fmt.Errorf("Last Seen Store Policy provider requires a CachePath")
+		return nil, fmt.Errorf("last seen store policy provider requires a cache path")
 	}
 
 	return &LastSeenStorePolicyProvider{
@@ -87,7 +87,7 @@ func (me *LastSeenStorePolicyProvider) load() error {
 
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {
@@ -96,12 +96,12 @@ func (me *LastSeenStorePolicyProvider) load() error {
 
 	policy, err := createPolicyFromJsonBytes(bytes)
 	if err != nil {
-		return fmt.Errorf("Policy load error: %s", err)
+		return fmt.Errorf("policy load error: %s", err)
 	}
 
 	err = me.store.Set(policy)
 	if err != nil {
-		return fmt.Errorf("Policy set error: %s", err)
+		return fmt.Errorf("policy set error: %s", err)
 	}
 
 	return nil
@@ -139,7 +139,7 @@ func (me *LastSeenStorePolicyProvider) storePolicyInCache(policy *policy.Policy)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	_, err = file.Write(jsonBytes)
 	if err != nil {

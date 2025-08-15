@@ -21,7 +21,7 @@ type ExecutionResult struct {
 }
 
 func (me ExecutionResult) NextHooksInChainCanRun() bool {
-	return !(me.SkipNextHooksInChain || me.ResponseSent || me.ProcessingError != nil)
+	return !me.SkipNextHooksInChain && !me.ResponseSent && me.ProcessingError == nil
 }
 
 func createProcessingErrorExecutionResult(hook *Hook, err error) ExecutionResult {

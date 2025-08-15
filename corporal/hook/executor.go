@@ -41,7 +41,7 @@ func NewExecutor(restServiceConsultor *RESTServiceConsultor) *Executor {
 func (me *Executor) Execute(hookObj *Hook, w http.ResponseWriter, request *http.Request, logger *logrus.Entry) ExecutionResult {
 	handler, exists := me.actionToHandlerMap[hookObj.Action]
 	if !exists {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Missing handler for hook action = %s", hookObj.Action))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("missing handler for hook action = %s", hookObj.Action))
 	}
 
 	if strings.HasPrefix(hookObj.EventType, "before") {
@@ -118,7 +118,7 @@ func (me *Executor) executeAfterHook(
 
 		requestBodyBytes, err = httphelp.GetRequestBody(request)
 		if err != nil {
-			return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Could not get request body needed for %s after hook", hookObj.Action))
+			return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("could not get request body needed for %s after hook", hookObj.Action))
 		}
 	}
 
@@ -233,7 +233,7 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 
 	// RESTServiceConsultor should also be doing this sanity check, but let's do it here as well, for consistency.
 	if hookObj.RESTServiceURL == nil {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("A RESTServiceURL is required"))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("a RESTServiceURL is required"))
 	}
 
 	newHookObj, err := me.restServiceConsultor.Consult(request, response, *hookObj, logger)
@@ -268,7 +268,7 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 
 	if hookObj.IsAfterHook() && newHookObj.Action == ActionPassModifiedRequest {
 		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf(
-			"An after hook (%s) yielded a request-modification hook: %s. It makes no sense - it's already too late to modify the request",
+			"an after hook (%s) yielded a request-modification hook: %s. It makes no sense - it's already too late to modify the request",
 			hookObj,
 			newHookObj,
 		))
@@ -276,7 +276,7 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 
 	exportedHookJSON, err := json.Marshal(newHookObj)
 	if err != nil {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Failed exporting hook: %s", err))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("failed exporting hook: %s", err))
 	}
 
 	// It's important to be able to debug these network-related hook results easily,
@@ -291,10 +291,10 @@ func (me *Executor) executeActionConsultRESTServiceURL(hookObj *Hook, w http.Res
 
 func executeActionReject(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
 	if hookObj.RejectionErrorCode == nil {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("A rejection error code is required"))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("a rejection error code is required"))
 	}
 	if hookObj.RejectionErrorMessage == nil {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("A rejection error message is required"))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("a rejection error message is required"))
 	}
 
 	responseStatusCode := http.StatusForbidden
@@ -319,7 +319,7 @@ func executeActionReject(hookObj *Hook, w http.ResponseWriter, request *http.Req
 
 func executeActionRespond(hookObj *Hook, w http.ResponseWriter, request *http.Request, response *http.Response, logger *logrus.Entry) ExecutionResult {
 	if hookObj.ResponseStatusCode == nil {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("A response status code is required"))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("a response status code is required"))
 	}
 
 	contentType := "application/json"
@@ -332,7 +332,7 @@ func executeActionRespond(hookObj *Hook, w http.ResponseWriter, request *http.Re
 	if contentType != "application/json" || hookObj.ResponseSkipPayloadJSONSerialization {
 		payloadString, ok := hookObj.ResponsePayload.(string)
 		if !ok {
-			return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Could not interpret payload as string"))
+			return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("could not interpret payload as string"))
 		}
 
 		payloadBytes = []byte(payloadString)
@@ -341,7 +341,7 @@ func executeActionRespond(hookObj *Hook, w http.ResponseWriter, request *http.Re
 
 		serialized, err := json.Marshal(hookObj.ResponsePayload)
 		if err != nil {
-			return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Could not JSON-serialize payload"))
+			return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("could not JSON-serialize payload"))
 		}
 
 		payloadBytes = serialized
@@ -385,7 +385,7 @@ func executePassModifiedRequest(hookObj *Hook, w http.ResponseWriter, request *h
 	var requestPayload map[string]interface{}
 	err := httphelp.GetJsonFromRequestBody(request, &requestPayload)
 	if err != nil {
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Failed to interpret original response body as JSON: %s", err))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("failed to interpret original response body as JSON: %s", err))
 	}
 
 	for k, v := range *hookObj.InjectJSONIntoRequest {
@@ -395,7 +395,7 @@ func executePassModifiedRequest(hookObj *Hook, w http.ResponseWriter, request *h
 	newRequestBytes, err := json.Marshal(requestPayload)
 	if err != nil {
 		// We don't expect this to happen, but..
-		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("Failed to serialize modified response payload as JSON: %s", err))
+		return createProcessingErrorExecutionResult(hookObj, fmt.Errorf("failed to serialize modified response payload as JSON: %s", err))
 	}
 
 	request.Body = io.NopCloser(bytes.NewReader(newRequestBytes))
@@ -432,7 +432,7 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 		var responsePayload map[string]interface{}
 		err := httphelp.GetJsonFromResponseBody(response, &responsePayload)
 		if err != nil {
-			logger.Errorf("Failed to interpret original response body as JSON: %s", err)
+			logger.Errorf("failed to interpret original response body as JSON: %s", err)
 
 			// Returning the error to the HTTP reverse proxy will make this become a "bad gateway" response.
 			// We're making the design decision to fail like that, instead of silently respond with the correct data,
@@ -449,7 +449,7 @@ func executePassModifiedResponse(hookObj *Hook, w http.ResponseWriter, request *
 		newResponseBytes, err := json.Marshal(responsePayload)
 		if err != nil {
 			// We don't expect this to happen, but..
-			logger.Errorf("Failed to serialize modified response payload as JSON: %s", err)
+			logger.Errorf("failed to serialize modified response payload as JSON: %s", err)
 
 			return true, err
 		}

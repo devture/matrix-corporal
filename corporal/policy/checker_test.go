@@ -43,7 +43,7 @@ func TestPolicyPermissionAssertment(t *testing.T) {
 				t.Errorf("Failed to open file: %s: %s", testPath, err)
 				return
 			}
-			defer f.Close()
+			defer f.Close() //nolint:errcheck
 
 			bytes, err := io.ReadAll(f)
 			if err != nil {

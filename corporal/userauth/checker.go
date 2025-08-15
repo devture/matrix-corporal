@@ -19,7 +19,7 @@ func (me *Checker) RegisterAuthenticator(entity Authenticator) {
 func (me *Checker) Check(userId, givenPassword, authType, authCredential string) (bool, error) {
 	authenticator, ok := me.authenticators[authType]
 	if !ok {
-		return false, fmt.Errorf("Unsupported authenticator: %s", authType)
+		return false, fmt.Errorf("unsupported authenticator: %s", authType)
 	}
 
 	return authenticator.Authenticate(userId, givenPassword, authCredential)

@@ -20,7 +20,7 @@ func (me *BcryptAuthenticator) Type() string {
 func (me *BcryptAuthenticator) Authenticate(userId, givenPassword, authCredential string) (bool, error) {
 	if len(givenPassword) > 4096 {
 		// To avoid a DoS, avoid dealing with too long inputs.
-		return false, fmt.Errorf("Rejecting long password (%d)", len(givenPassword))
+		return false, fmt.Errorf("rejecting long password (%d)", len(givenPassword))
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(authCredential), []byte(givenPassword))
