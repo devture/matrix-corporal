@@ -1,8 +1,16 @@
+# Version 3.1.5 (2025-08-15)
+
+Internal compiler and dependency upgrades.
+
+This version has been tested and is confirmed to work with Matrix Rooms v12 (see [Project Hydra: Improving state resolution in Matrix](https://matrix.org/blog/2025/08/project-hydra-improving-state-res/)). While v12-specific power levels are not currently handled correctly (the room creators having infinite power levels with no possibility for demotion), regular usage works.
+
+
 # Version 3.1.4 (2025-02-25)
 
 - Internal compiler and dependency upgrades.
 - Switched from a [Woodpecker CI](https://woodpecker-ci.org/)-powered build pipeline to one powered by [Github Actions](https://github.com/features/actions)
-- Switched where prebuilt container images are published from [Docker Hub](https://hub.docker.com/) (`docker.io/devture/matrix-corporal`) to [Github Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (`ghcr.io/devture/matrix-corporal`). You can find hte new container images [here](https://github.com/devture/matrix-corporal/pkgs/container/matrix-corporal)
+- Switched where prebuilt container images are published from [Docker Hub](https://hub.docker.com/) (`docker.io/devture/matrix-corporal`) to [Github Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (`ghcr.io/devture/matrix-corporal`). You can find the new container images [here](https://github.com/devture/matrix-corporal/pkgs/container/matrix-corporal)
+
 
 # Version 3.1.3 (2025-02-03)
 
