@@ -19,7 +19,7 @@ For all other setup cases, see below.
 
 Building the program can be done manually (see the [development](development.md) guide).
 
-Alternatively, you can pull the [devture/matrix-corporal](https://hub.docker.com/r/devture/matrix-corporal) Docker image.
+Alternatively, you can pull the [ghcr.io/devture/matrix-corporal](https://github.com/devture/matrix-corporal/pkgs/container/matrix-corporal) container image image.
 
 
 ## Configuring Matrix Corporal
